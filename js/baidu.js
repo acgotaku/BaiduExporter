@@ -33,18 +33,18 @@ var baidu = function(cookies) {
                 return addheader;
             }
         };
-        var auth=null;
-        var rpc_url = localStorage.getItem("rpc_url");
-        var url = "http://localhost:6800/jsonrpc" + "?tm=" + (new Date().getTime().toString());
-        if (rpc_url) {
-            url = rpc_url + "?tm=" + (new Date().getTime().toString());
-        }
+        var auth = null;
+        var File = require("common:widget/data-center/data-center.js");
+        var file_list = [];
+        var url = (localStorage.getItem("rpc_url")||"http://localhost:6800/jsonrpc") + "?tm=" + (new Date().getTime().toString());
+        var func = "aria2_data";
         return {
             init: function() {
                 var self = this;
                 var aria2_btn = $("<span>").addClass("icon-btn-device").append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").appendTo(aria2_btn);
-                var aria2_export = $("<a>").text("RPC导出").appendTo(list);
+                var aria2_export = $("<a>").text("ARIA2 RPC").appendTo(list);
+                var aria2_download = $("<a>").text("ARIA2导出").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").appendTo(list);
                 $(".icon-btn-device").after(aria2_btn);
                 aria2_btn.mouseover(function() {
@@ -54,17 +54,33 @@ var baidu = function(cookies) {
                             list.hide();
                         });
                 aria2_export.click(function() {
+                    func = "aria2_rpc";
                     self.get_dlink();
                 });
                 self.set_config_ui();
+                self.aria2_download();
                 config.click(function() {
                     $("#setting_div").show();
                 });
                 SetMessage("初始化成功!", "MODE_SUCCESS");
             },
-            get_info: function() {
-                var File = require("common:widget/data-center/data-center.js");
-                return File.get("selectedList");
+            get_info: function(data) {
+                var self = this;
+                var Filename = File.get("selectedItemList");
+                var obj = $.parseJSON(data);
+                var name = null;
+                var length = obj.dlink.length;
+                file_list.length = 0;
+                for (var i = 0; i < length; i++) {
+                    for (var j = 0; j < length; j++) {
+                        if (obj.dlink[i].fs_id == Filename[j].attr("data-id")) {
+                            name = Filename[j].children().eq(0).children().eq(2).attr("title");
+                            break;
+                        }
+                    }
+                    file_list.push({"name": name, "link": obj.dlink[i].dlink});
+                }
+                self[func]();
             },
             set_config_ui: function() {
                 var self = this;
@@ -176,28 +192,51 @@ var baidu = function(cookies) {
                 });
                 $("#rpc_distinguish").click(function() {
                     if ($(this).attr("checked")) {
-                        $("#rpc_user").removeAttr("disabled").css("background-color","#FFF");
-                        $("#rpc_pass").removeAttr("disabled").css("background-color","#FFF");
+                        $("#rpc_user").removeAttr("disabled").css("background-color", "#FFF");
+                        $("#rpc_pass").removeAttr("disabled").css("background-color", "#FFF");
                     } else {
-                        $("#rpc_user").attr({"disabled": "disabled"}).css("background-color","#eee");
-                        $("#rpc_pass").attr({"disabled": "disabled"}).css("background-color","#eee");
+                        $("#rpc_user").attr({"disabled": "disabled"}).css("background-color", "#eee");
+                        $("#rpc_pass").attr({"disabled": "disabled"}).css("background-color", "#eee");
                     }
                 })
-                var rpc_url = localStorage.getItem("rpc_url");
-                if (rpc_url) {
-                    $("#rpc_input").val(rpc_url);
-                } else {
-                    $("#rpc_input").val("http://localhost:6800/jsonrpc");
-                }
-                if(localStorage.getItem("auth")=="true"){
-                    var rpc_user=localStorage.getItem("rpc_user");
-                    var rpc_pass=localStorage.getItem("rpc_pass");
+
+                    $("#rpc_input").val((localStorage.getItem("rpc_url")||"http://localhost:6800/jsonrpc"));
+
+                if (localStorage.getItem("auth") == "true") {
+                    var rpc_user = localStorage.getItem("rpc_user");
+                    var rpc_pass = localStorage.getItem("rpc_pass");
                     $("#rpc_user").val(rpc_user);
                     $("#rpc_pass").val(rpc_pass);
-                    $("#rpc_distinguish").attr("checked","checked");
-                    $("#rpc_user").removeAttr("disabled").css("background-color","#FFF");
-                    $("#rpc_pass").removeAttr("disabled").css("background-color","#FFF");
-                    auth="Basic "+ btoa(rpc_user+":"+rpc_pass);
+                    $("#rpc_distinguish").attr("checked", "checked");
+                    $("#rpc_user").removeAttr("disabled").css("background-color", "#FFF");
+                    $("#rpc_pass").removeAttr("disabled").css("background-color", "#FFF");
+                    auth = "Basic " + btoa(rpc_user + ":" + rpc_pass);
+                }
+            },
+            aria2_download: function() {
+                var download_ui = $("<div>").attr("id", "download_ui").addClass("b-panel b-dialog add-yun-device-dialog common-dialog").append('<div class="dlg-hd b-rlv"><span class="dlg-cnr dlg-cnr-l"></span><a href="javascript:;" title="关闭" id="aria2_download_close" class="dlg-cnr dlg-cnr-r"></a><h3><em></em>ARIA2导出</h3></div>');
+                var content_ui = $("<div>").addClass("dlg-bd global-clearfix __dlgBd").attr("id", "content_ui").appendTo(download_ui);
+                download_ui.appendTo($("body"));
+                var self = this;
+                $("#aria2_download").click(function() {
+                    func = "aria2_data";
+                    self.get_dlink();
+                });
+                $("#aria2_download_close").click(function() {
+                    download_ui.hide();
+                });
+            },
+            aria2_data: function() {
+                var files = [];
+                if (file_list.length > 0) {
+                    var length = file_list.length;
+                    for (var i = 0; i < length; i++) {
+                        files.push("aria2c -c -s10 -x10 -o " + JSON.stringify(file_list[i].name) + " --header " + JSON.stringify(combination.header(cookies)[1]) + " " + JSON.stringify(file_list[i].link));
+                    }
+                    $("#content_ui").empty();
+                    var download_link = $("<textarea>").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"}).val(files.join("\n"));
+                    download_link.appendTo($("#content_ui"));
+                    $("#download_ui").show();
                 }
 
             },
@@ -207,21 +246,21 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_url", rpc_url);
                     url = rpc_url + "?tm=" + (new Date().getTime().toString());
                 }
-                if($("#rpc_distinguish").attr("checked")){
-                    localStorage.setItem("rpc_user",$("#rpc_user").attr("value"));
-                    localStorage.setItem("rpc_pass",$("#rpc_pass").attr("value"));
+                if ($("#rpc_distinguish").attr("checked")) {
+                    localStorage.setItem("rpc_user", $("#rpc_user").attr("value"));
+                    localStorage.setItem("rpc_pass", $("#rpc_pass").attr("value"));
                     localStorage.setItem("auth", true);
-                    auth= "Basic "+ btoa($("#rpc_user").attr("value") + ":" + $("#rpc_pass").attr("value"));
-              }else{
-                localStorage.setItem("auth", false);
-                localStorage.setItem("rpc_user",null);
-                localStorage.setItem("rpc_pass",null);
-              }
+                    auth = "Basic " + btoa($("#rpc_user").attr("value") + ":" + $("#rpc_pass").attr("value"));
+                } else {
+                    localStorage.setItem("auth", false);
+                    localStorage.setItem("rpc_user", null);
+                    localStorage.setItem("rpc_pass", null);
+                }
             },
-            get_dlink: function() {
+            get_dlink: function(func) {
                 var self = this;
                 var Service = require("common:widget/commonService/commonService.js");
-                Service.getDlink(JSON.stringify(self.get_info()), "dlink", self.aria2_rpc.bind(self));
+                Service.getDlink(JSON.stringify(File.get("selectedList")), "dlink", self.get_info.bind(self));
             },
             get_version: function() {
                 var parameter = [{
@@ -229,9 +268,8 @@ var baidu = function(cookies) {
                         "method": "aria2.getVersion",
                         "id": 1
                     }];
-                $.ajax({'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(parameter),'headers': { 'Authorization': auth }})
+                $.ajax({'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(parameter), 'headers': {'Authorization': auth}})
                         .done(function(xml, textStatus, jqXHR) {
-                            console.log(xml);
                             $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + xml[0].result.version);
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -239,36 +277,27 @@ var baidu = function(cookies) {
                         });
 
             },
-            aria2_rpc: function(data) {
-
+            aria2_rpc: function() {
                 var self = this;
-                var File = require("common:widget/data-center/data-center.js");
-                var Filename = File.get("selectedItemList");
-                var obj = $.parseJSON(data);
-                var name = null;
-                var length = obj.dlink.length;
-                for (var i = 0; i < length; i++) {
-                    for (var j = 0; j < length; j++) {
-                        if (obj.dlink[i].fs_id == Filename[j].attr("data-id")) {
-                            name = Filename[j].children().eq(0).children().eq(2).attr("title");
-                            break;
-                        }
+                if (file_list.length > 0) {
+                    var length = file_list.length;
+                    for (var i = 0; i < length; i++) {
+                        var rpc_data = [{
+                                "jsonrpc": "2.0",
+                                "method": "aria2.addUri",
+                                "id": new Date().getTime(),
+                                "params": [[file_list[i].link], {
+                                        "out": file_list[i].name,
+                                        "header": combination.header(cookies)
+                                    }
+                                ]
+                            }];
+                        self.aria2send_data(rpc_data);
                     }
-                    var rpc_data = [{
-                            "jsonrpc": "2.0",
-                            "method": "aria2.addUri",
-                            "id": new Date().getTime(),
-                            "params": [[obj.dlink[i].dlink], {
-                                    "out": name,
-                                    "header": combination.header(cookies)
-                                }
-                            ]
-                        }];
-                    self.aria2send_data(rpc_data);
                 }
             },
             aria2send_data: function(data) {
-                $.ajax({'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(data),'headers': { 'Authorization': auth }})
+                $.ajax({'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}})
                         .done(function(xml, textStatus, jqXHR) {
                             SetMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
                         })
@@ -291,7 +320,7 @@ chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
     if (response) {
         var cookies = response.cookie;
     } else {
-        // location.reload(true);
+        location.reload(true);
     }
     onload(function() {
         var script = document.createElement('script');
