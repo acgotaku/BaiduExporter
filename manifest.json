@@ -5,20 +5,21 @@
    },
    "content_scripts": [ {
       "js": [ "js/baidu.js" ],
-      "matches": ["*://*.baidu.com/*"]
+      "matches": ["*://pan.baidu.com/*"]
    } ],
    "default_locale": "en",
    "description": "__MSG_description__",
    "icons": {
       "32": "images/logo32.png",
       "16": "images/logo16.png",
-      "48": "images/logo48.png"
+      "48": "images/logo48.png",
+      "128": "images/logo128.png"
    },
    "externally_connectable": {
       "matches": ["*://*.baidu.com/*"]
    },
    "manifest_version": 2,
-   "permissions": [ "cookies", "tabs", "http://*/*", "https://*/*" ],
+   "permissions": [ "cookies", "tabs", "*://*.baidu.com/*"],
    "name": "__MSG_appName__",
    "update_url": "https://clients2.google.com/service/update2/crx",
    "version": "0.0.1"
