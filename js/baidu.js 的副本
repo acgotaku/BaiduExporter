@@ -85,7 +85,6 @@ var baidu = function(cookies) {
                 var UA = "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
                 addheader.push("User-Agent: " + UA);
                 addheader.push("Cookie: " + cookies);
-                addheader.push("Referer: " + "http://pan.baidu.com/disk/home");
                 return addheader;
             }
         };
@@ -120,7 +119,6 @@ var baidu = function(cookies) {
                 self.aria2_download();
                 config.click(function() {
                     $("#setting_div").show();
-                    self.set_config();
                 });
                 SetMessage("初始化成功!", "MODE_SUCCESS");
             },
@@ -143,7 +141,7 @@ var baidu = function(cookies) {
 
                 self[func]();
             },
-            //获取文件夹下载的信息 暂时不能使用
+            //获取文件夹下载的信息
             get_dir:function(data){
                 var self = this;
                 var obj = $.parseJSON(data);
@@ -151,7 +149,6 @@ var baidu = function(cookies) {
                 console.log(file_list);
                 self[func]();
             },
-            //设置界面的UI
             set_config_ui: function() {
                 var self = this;
                 var setting_div = document.createElement("div");
@@ -260,8 +257,8 @@ var baidu = function(cookies) {
                         $("#setting_div_more_settings_but a").html("返回");
                     }
                 });
-                $("#rpc_distinguish").change(function() {
-                    if ($(this).is(":checked")) {
+                $("#rpc_distinguish").click(function() {
+                    if ($(this).attr("checked")) {
                         $("#rpc_user").removeAttr("disabled").css("background-color", "#FFF");
                         $("#rpc_pass").removeAttr("disabled").css("background-color", "#FFF");
                     } else {
@@ -270,9 +267,19 @@ var baidu = function(cookies) {
                     }
                 })
 
+                $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
 
+                if (localStorage.getItem("auth") == "true") {
+                    var rpc_user = localStorage.getItem("rpc_user");
+                    var rpc_pass = localStorage.getItem("rpc_pass");
+                    $("#rpc_user").val(rpc_user);
+                    $("#rpc_pass").val(rpc_pass);
+                    $("#rpc_distinguish").attr("checked", "checked");
+                    $("#rpc_user").removeAttr("disabled").css("background-color", "#FFF");
+                    $("#rpc_pass").removeAttr("disabled").css("background-color", "#FFF");
+                    auth = "Basic " + btoa(rpc_user + ":" + rpc_pass);
+                }
             },
-            //aria2导出下载界面以及事件绑定
             aria2_download: function() {
                 var download_ui = $("<div>").attr("id", "download_ui").addClass("b-panel b-dialog add-yun-device-dialog common-dialog").append('<div class="dlg-hd b-rlv"><span class="dlg-cnr dlg-cnr-l"></span><a href="javascript:;" title="关闭" id="aria2_download_close" class="dlg-cnr dlg-cnr-r"></a><h3><em></em>ARIA2导出</h3></div>');
                 var content_ui = $("<div>").addClass("dlg-bd global-clearfix __dlgBd").attr("id", "content_ui").appendTo(download_ui);
@@ -286,7 +293,6 @@ var baidu = function(cookies) {
                     download_ui.hide();
                 });
             },
-            //导出填充数据和显示数据
             aria2_data: function() {
                 var files = [];
                 if (file_list.length > 0) {
@@ -301,30 +307,13 @@ var baidu = function(cookies) {
                 }
 
             },
-            //填充已经设置的配置数据
-            set_config:function(){
-                 $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
-                if (localStorage.getItem("auth") == "true") {
-                    var rpc_user = localStorage.getItem("rpc_user");
-                    var rpc_pass = localStorage.getItem("rpc_pass");
-                    $("#rpc_user").val(rpc_user);
-                    $("#rpc_pass").val(rpc_pass);
-                    $("#rpc_distinguish").prop('checked',true).trigger("change");
-                    auth = "Basic " + btoa(rpc_user + ":" + rpc_pass);
-                }
-                else{
-                    $("#rpc_user").val("");
-                    $("#rpc_pass").val("");
-                }
-            },
-            //保存配置数据
             get_config: function() {
                 var rpc_url = $("#rpc_input").val();
-                if (rpc_url!="") {
+                if (rpc_url) {
                     localStorage.setItem("rpc_url", rpc_url);
                     url = rpc_url + "?tm=" + (new Date().getTime().toString());
                 }
-                if ($("#rpc_distinguish").prop('checked')==true) {
+                if ($("#rpc_distinguish").attr("checked")) {
                     localStorage.setItem("rpc_user", $("#rpc_user").attr("value"));
                     localStorage.setItem("rpc_pass", $("#rpc_pass").attr("value"));
                     localStorage.setItem("auth", true);
@@ -335,7 +324,6 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_pass", null);
                 }
             },
-            //获取选中文件的下载链接
             get_dlink: function(func) {
                 var self = this;
                 var Service = require("common:widget/commonService/commonService.js");
@@ -350,7 +338,6 @@ var baidu = function(cookies) {
                 }
                 Service.getDlink(JSON.stringify(File.get("selectedList")), "dlink", self.get_info.bind(self));
             },
-            //获取aria2c的版本号用来测试通信
             get_version: function() {
                 var data = [{
                         "jsonrpc": "2.0",
@@ -367,7 +354,6 @@ var baidu = function(cookies) {
                             $("#send_test").html(textStatus + "\u9519\u8BEF\uFF0C\u70B9\u51FB\u91CD\u65B0\u6D4B\u8BD5");
                         });
             },
-            //封装rpc要发送的数据
             aria2_rpc: function() {
                 var self = this;
                 if (file_list.length > 0) {
@@ -387,7 +373,6 @@ var baidu = function(cookies) {
                     }
                 }
             },
-            //和aria2c通信
             aria2send_data: function(data) {
                 var parameter={'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
                 HttpSendRead(parameter)
@@ -410,7 +395,6 @@ function onload(func) {
         window.addEventListener('load', func);
     }
 }
-//通过background.js获取到 name 为BDUSS的cookie
 chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
     if (response) {
         var cookies = response.cookie;
@@ -418,7 +402,6 @@ chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
         location.reload(true);
     }
     onload(function() {
-        //把函数注入到页面中
         var script = document.createElement('script');
         script.id = "baidu_script";
         script.appendChild(document.createTextNode('(' + baidu + ')("' + cookies + '");'));

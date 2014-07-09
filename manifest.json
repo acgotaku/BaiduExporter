@@ -22,5 +22,5 @@
    "permissions": [ "cookies", "tabs", "*://*.baidu.com/*"],
    "name": "__MSG_appName__",
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "0.0.3"
+   "version": "0.0.4"
 }
