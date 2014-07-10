@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.0.1
+// @version 0.0.5
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.0.1";
-    var thedate_update = "2014/07/01";
+    var version = "0.0.5";
+    var thedate_update = "2014/07/10";
     var baidupan = (function() {
         //封装的百度的Toast提示消息
         //Type类型有
@@ -58,7 +58,7 @@ var baidu = function(cookies) {
                     }
                     else {
                         clearTimeout(timeId);
-                        deferred.reject(http.status, http, http.statusText);
+                        deferred.reject( http, http.statusText, http.status);
                     }
                 }
             }
@@ -82,10 +82,18 @@ var baidu = function(cookies) {
         var combination = {
             header: function(cookies) {
                 var addheader = [];
-                var UA = "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
+                var UA = $("#setting_aria2_useragent_input").val()||"netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
+                var headers=$("#setting_aria2_headers").val();
+                var referer=$("#setting_aria2_referer_input").val()|| "http://pan.baidu.com/disk/home";
                 addheader.push("User-Agent: " + UA);
                 addheader.push("Cookie: " + cookies);
-                addheader.push("Referer: " + "http://pan.baidu.com/disk/home");
+                addheader.push("Referer: " + referer);
+                if( headers ){
+                    var text = headers.split("\n");
+                    for (var i=0;i<text.length;i++){
+                        addheader.push(text[i]);
+                    }
+                }
                 return addheader;
             }
         };
@@ -103,7 +111,7 @@ var baidu = function(cookies) {
                 var aria2_btn = $("<span>").addClass("icon-btn-device").append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").appendTo(aria2_btn);
                 var aria2_export = $("<a>").text("ARIA2 RPC").appendTo(list);
-                var aria2_download = $("<a>").text("ARIA2导出").attr("id", "aria2_download").appendTo(list);
+                var aria2_download = $("<a>").text("导出下载").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").appendTo(list);
                 $(".icon-btn-device").after(aria2_btn);
                 aria2_btn.mouseover(function() {
@@ -157,85 +165,28 @@ var baidu = function(cookies) {
                 var setting_div = document.createElement("div");
                 setting_div.className = "b-panel b-dialog download-mgr-dialog";
                 setting_div.id = "setting_div";
-                var html_ = [];
-                html_.push('<div class="dlg-hd b-rlv"><div title="\u5173\u95ed" id="setting_div_close" class="dlg-cnr dlg-cnr-r"></div><h3>\u5bfc\u51fa\u8bbe\u7f6e</h3></div></div>');
-                html_.push('<div style="height:420px;">');
-                html_.push('<div id="setting_div_more_settings_but" style="width:60px; border:1px solid #F0F0F0; background-color: #FAFAFA; margin-top: -19px; margin-right: 15px; float:right; text-align:center;"><a href="javascript:;">更多设置</a></div>');
-                html_.push('<div style="margin-left: 15px; margin-right: 15px; margin-top: 25px; margin-bottom: 5px;">');
-                html_.push('<div id="setting_divtopmsg" style="position:absolute; margin-top: -20px; margin-left: 10px; color: #E15F00;"></div>');
-                html_.push('<div style="border:1px solid rgb(240, 240, 240); background-color: rgb(250, 250, 250);">');
-                html_.push('<div id="setting_div_table">');
-                html_.push('<table id="setting_div_table_1" width="100%" border="0"  style="border-collapse:separate; border-spacing:10px; display:table;">');
-                html_.push('<tr>');
-                html_.push('<td width="150"><label for="textfield">ARIA2 RPC\uff1a\u0020</label></td>');
-                html_.push('<td width="320"><input id="rpc_input" type="text" style="width:90%; border: 1px solid #C6C6C6; box-shadow: 0 0 3px #C6C6C6; -webkit-box-shadow: 0 0 3px #C6C6C6;"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td><label for="textfield">RPC\u8bbf\u95ee\u8bbe\u7f6e</label></td>');
-                html_.push('<td><input id="rpc_distinguish" type="checkbox"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td><label for="textfield">RPC \u7528\u6237\u540d\uff1a\u0020</label></td>');
-                html_.push('<td><input type="text" id="rpc_user" disabled="disabled" style="width:150px; background-color:#eee; border: 1px solid #C6C6C6; box-shadow: 0 0 3px #C6C6C6; -webkit-box-shadow: 0 0 3px #C6C6C6;"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td><label for="textfield">RPC \u5bc6\u7801\uff1a\u0020</label></td>');
-                html_.push('<td><input type="text" id="rpc_pass" disabled="disabled" style="width:150px; background-color:#eee; border: 1px solid #C6C6C6; box-shadow: 0 0 3px #C6C6C6; -webkit-box-shadow: 0 0 3px #C6C6C6;"/>');
-                html_.push('<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type=0 href="javascript:;" style="display:inline-block; border:1px solid #D1D1D1; background-color: #F7F7F7; text-align: center; text-decoration: none; color:#1B83EB;">\u6d4b\u8bd5\u8fde\u63a5\uff0c\u6210\u529f\u663e\u793a\u7248\u672c\u53f7\u3002</a></div></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td colspan="2"><div style="color: #656565;">\u76f8\u5173\u8bbe\u7f6e</div><li class="b-list-item separator-1"></li></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td>\u4e0b\u8f7d\u76ee\u5f55\uff1a\u0020</td><td><input id="down_dir" type="text" style="width:280px; border: 1px solid #C6C6C6; box-shadow: 0 0 3px #C6C6C6; -webkit-box-shadow: 0 0 3px #C6C6C6;"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td>\u6839\u636e\u7f51\u76d8\u8def\u5f84\u5b58\u653e\u6587\u4ef6</td><td><input id="web_path_save" type="checkbox"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<!-- <td>增加115网盘支持</td><td><input id="add_115" type="checkbox" style="vertical-align:text-bottom;"/>(现在只有一个导出按钮，还没有设置面板，设置项通用。)</td> -->');
-                html_.push('<td>\u5bf9\u6587\u4ef6\u5939\u4f7f\u7528\u007a\u0069\u0070\u4e0b\u8f7d</td><td><input id="dirzip" type="checkbox" style="vertical-align:text-bottom;"/>\u0028\u53ea\u5bf9\u5206\u4eab\u94fe\u63a5\u6709\u6548\u3002\u0029</td>');
-                html_.push('</tr><tr>');
-                html_.push('<td>\u4f7f\u7528\u8fdc\u7a0b\u7684\u004a\u0053\u811a\u672c</td><td><input id="iswebjs" type="checkbox" style="vertical-align:text-bottom;"/>\u0028\u597d\u5904\u662f\u80fd\u591f\u4fdd\u6301\u6700\u65b0\u7684\u72b6\u6001\u3002\u0029</td>');
-                html_.push('</tr><tr>');
-                html_.push('<td colspan="2"><div style="color: #656565;">\u5bfc\u51fa\u7c7b\u578b\u8bbe\u7f6e</div><li class="b-list-item separator-1"></li></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td colspan="2" id="typeout">');
-                html_.push('<div style="width:80px; float:left; margin-left:30px;"><input id="aria2rpc_checkbox" type="checkbox" disabled="disabled" checked="checked" style="vertical-align:text-bottom;"/><label for="textfield">ARIA2 RPC</label></div>');
-                html_.push('<div style="width:70px; float:left; margin-left:50px;"><input id="aria2_checkbox" type="checkbox" style="vertical-align:text-bottom;"/><label for="textfield">ARIA2</label></div>');
-                html_.push('<div style="width:70px; float:left; margin-left:50px;"><input id="wget_checkbox" type="checkbox" style="vertical-align:text-bottom;"/><label for="textfield">WGET</label></div>');
-                html_.push('<div style="width:70px; float:left; margin-left:50px;"><input id="idm_checkbox" type="checkbox" style="vertical-align:text-bottom;"/><label for="textfield">IDM</label></div>');
-                html_.push('</td></tr><tr>');
-                html_.push('</table>');
-                html_.push('<table id="setting_div_table_2" width="100%" border="0" style="border-collapse:separate; border-spacing:10px; display:none;">');
-                html_.push('<tr>');
-                html_.push('<td width="50"><label for="textfield"></label></td>');
-                html_.push('<td width="320"><label for="textfield"></label></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td colspan="2"><div style="color: #656565;">User-Agent</div><li class="b-list-item separator-1"></li></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td colspan="2" id="setting_aria2_useragent">');
-                html_.push('<a href="javascript:;" onclick=\'javascript:headers_.set_UA("chrome");\'><b>Chrome</b></a>');
-                html_.push('<a href="javascript:;" onclick=\'javascript:headers_.set_UA("firefox");\'><b>Firefox</b></a>');
-                html_.push('<a href="javascript:;" onclick=\'javascript:headers_.set_UA("exe");\'>云管家</a>');
-                html_.push('<a href="javascript:;" onclick=\'javascript:document.getElementById("setting_aria2_useragent_input").removeAttribute("disabled");\'>自定义</a>');
-                html_.push('</td>')
-                html_.push('</tr><tr>');
-                html_.push('<td><label for="textfield">User-Agent :</label></td>');
-                html_.push('<td><input type="text" id="setting_aria2_useragent_input" disabled="disabled" style="width:90%; border: 1px solid #C6C6C6; box-shadow: 0 0 3px #C6C6C6; -webkit-box-shadow: 0 0 3px #C6C6C6;"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td colspan="2"><div style="color: #656565;">Referer</div><li class="b-list-item separator-1"></li></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td><label for="textfield">Referer\u0020\uff1a\u0020</label></td>');
-                html_.push('<td><input type="text" id="setting_aria2_referer_input" style="width:90%; border: 1px solid #C6C6C6; box-shadow: 0 0 3px #C6C6C6; -webkit-box-shadow: 0 0 3px #C6C6C6;"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td><label for="textfield">自动设置</label></td>');
-                html_.push('<td><input id=referer_auto type="checkbox"/></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td colspan="2"><div style="color: #656565;">Headers<label for="textfield" style="margin-left: 35px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td>');
-                html_.push('</tr><tr>');
-                html_.push('<td><label for="textfield">headers\u0020\uff1a\u0020</label></td>');
-                html_.push('<td><textarea id="setting_aria2_headers" style="overflow:auto; resize:none; width:90%; height:80px; border: 1px solid #C6C6C6; box-shadow: 0 0 3px #C6C6C6; -webkit-box-shadow: 0 0 3px #C6C6C6;"></textarea></td>');
-                html_.push('</tr>');
-                html_.push('</table>');
-                html_.push('</div>');
-                html_.push('</div>');
-                html_.push('<div style="margin-top:10px;">');
-                html_.push('<div style="margin-left:77.5%;"><a href="javascript:;" id="apply" style="display:inline-block; width:120px; height:30px; border:1px solid #D1D1D1; background-color: #F7F7F7; text-align: center; text-decoration: none; padding-top:7px; color:#1B83EB;"><b>\u5e94\u7528</b></a></div>');
-                html_.push('</div></div></div>');
+                var html_=[
+                    '<div class="dlg-hd b-rlv"><div title="关闭" id="setting_div_close" class="dlg-cnr dlg-cnr-r"></div><h3>导出设置</h3></div>',
+                    '<div class="dlg-bd clearfix" style=" margin: 20px 10px 10px 10px; ">',
+                    '<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>',
+                    '<table id="setting_div_table" >',
+                        '<tbody>',
+                        '<tr><td width="100"><label>ARIA2 RPC：</label></td><td><input id="rpc_input" type="text" class="input-large"></td></tr>',
+                        '<tr><td><label>RPC访问设置</label></td><td><input id="rpc_distinguish" type="checkbox"></td></tr>',
+                        '<tr><td><label >RPC 用户名：</label></td><td><input type="text" id="rpc_user" disabled="disabled" class="input-small"></td></tr>',
+                        '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"><div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
+                        '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
+                        '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
+                        '<tr><td colspan="2"><div style="color: #656565;">Headers<label style="margin-left: 65px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td></tr>',
+                        '<tr><td><label>headers ：</label></td><td><textarea id="setting_aria2_headers" ></textarea></td></tr>',
+                        '</tbody>',
+                    '</table>',
+                    '<div style="margin-top:10px;">',
+                        '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a> Version:'+version+' <span></span></div>',
+                        '<div style="margin-left:190px; display:inline-block"><a href="javascript:;" id="apply" ><b>应用</b></a></div>',
+                    '</div>',
+                    '</div>'
+                ];
                 setting_div.innerHTML = html_.join("");
                 document.body.appendChild(setting_div);
                 $("#setting_div_close").click(function() {
@@ -243,22 +194,10 @@ var baidu = function(cookies) {
                 });
                 $("#apply").click(function() {
                     self.get_config();
-                    $("#setting_divtopmsg").html("设置已保存,目前只能设置RPC路径和用户名密码.");
+                    $("#setting_divtopmsg").html("设置已保存.");
                 });
                 $("#send_test").click(function() {
                     self.get_version();
-                });
-                $("#setting_div_more_settings_but").click(function() {
-                    if ($("#setting_div_table_2").css("display") != "none") {
-                        $("#setting_div_table_1").css("display", "table");
-                        $("#setting_div_table_2").css("display", "none");
-                        $("#setting_div_more_settings_but a").html("更多设置");
-                    }
-                    else {
-                        $("#setting_div_table_1").css("display", "none");
-                        $("#setting_div_table_2").css("display", "table");
-                        $("#setting_div_more_settings_but a").html("返回");
-                    }
                 });
                 $("#rpc_distinguish").change(function() {
                     if ($(this).is(":checked")) {
@@ -289,21 +228,45 @@ var baidu = function(cookies) {
             //导出填充数据和显示数据
             aria2_data: function() {
                 var files = [];
+                var aria2c_txt=[];
+                var idm_txt=[];
                 if (file_list.length > 0) {
                     var length = file_list.length;
                     for (var i = 0; i < length; i++) {
                         files.push("aria2c -c -s10 -x10 -o " + JSON.stringify(file_list[i].name) + " --header " + JSON.stringify(combination.header(cookies)[1]) + " " + JSON.stringify(file_list[i].link));
+                        aria2c_txt.push([
+                            file_list[i].link,
+                            ' header='+combination.header(cookies)[1],
+                            ' out='+file_list[i].name,
+                            ' continue=true',
+                            ' max-connection-per-server=10',
+                            '  split=10',
+                            '\n'
+                        ].join('\n'));
+                        idm_txt.push([
+                            '<',
+                            file_list[i].link,
+                            ' cookie: '+cookies,
+                            ' out='+file_list[i].name,
+                            ' >'
+                        ].join('\r\n'));
                     }
-                    $("#content_ui").empty();
+                    var content_ui=$("#content_ui");
+                    content_ui.empty();
+                    var download_menu = $("<div>").addClass("module-list-toolbar").css({"display":"block","margin-bottom":"10px"}).appendTo(content_ui);
+                    var aria2c_btn = $("<a>").attr({"href":"data:text/plain;charset=utf-8,"+encodeURIComponent(aria2c_txt.join("")),"download":"aria2c.down","target":"_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
+                    var idm_btn = $("<a>").attr({"href":"data:text/plain;charset=utf-8,"+encodeURIComponent(idm_txt.join("")),"download":"idm.down","target":"_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
                     var download_link = $("<textarea>").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"}).val(files.join("\n"));
-                    download_link.appendTo($("#content_ui"));
+                    download_link.appendTo(content_ui);
                     $("#download_ui").show();
                 }
 
             },
             //填充已经设置的配置数据
             set_config:function(){
-                 $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
+                $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
+                $("#setting_aria2_useragent_input").val(localStorage.getItem("UA")||"netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
+                $("#setting_aria2_referer_input").val(localStorage.getItem("referer")||"http://pan.baidu.com/disk/home");
                 if (localStorage.getItem("auth") == "true") {
                     var rpc_user = localStorage.getItem("rpc_user");
                     var rpc_pass = localStorage.getItem("rpc_pass");
@@ -320,10 +283,11 @@ var baidu = function(cookies) {
             //保存配置数据
             get_config: function() {
                 var rpc_url = $("#rpc_input").val();
-                if (rpc_url!="") {
+                if (rpc_url) {
                     localStorage.setItem("rpc_url", rpc_url);
                     url = rpc_url + "?tm=" + (new Date().getTime().toString());
                 }
+                localStorage.setItem("UA",document.getElementById("setting_aria2_useragent_input").value||"netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 if ($("#rpc_distinguish").prop('checked')==true) {
                     localStorage.setItem("rpc_user", $("#rpc_user").attr("value"));
                     localStorage.setItem("rpc_pass", $("#rpc_pass").attr("value"));
@@ -360,7 +324,6 @@ var baidu = function(cookies) {
                 var parameter={'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
                 HttpSendRead(parameter)
                         .done(function(xml, textStatus, jqXHR) {
-                            console.log(jqXHR);
                             $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + xml[0].result.version);
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -403,6 +366,61 @@ var baidu = function(cookies) {
     })();
     baidupan.init();
 };
+var css=function(){/*
+#setting_div_table input{
+    border: 1px solid #C6C6C6;
+    box-shadow: 0 0 3px #C6C6C6;
+    -webkit-box-shadow: 0 0 3px #C6C6C6;
+}
+.input-large{
+    width:90%;
+}
+.input-small{
+    width:150px;
+}
+#setting_div_table input[disabled]{
+    cursor: not-allowed;
+    background-color: #eee;
+}
+#send_test{
+    display:inline-block;
+    border:1px solid #D1D1D1;
+    background-color: #F7F7F7;
+    text-align: center; text-decoration: none;
+    color:#1B83EB;
+}
+#copyright{
+    display:inline-block;
+}
+#setting_aria2_headers{
+    overflow:auto;
+    resize:none;
+    width:90%;
+    height:80px;
+    border: 1px solid #C6C6C6;
+    box-shadow: 0 0 3px #C6C6C6;
+    -webkit-box-shadow: 0 0 3px #C6C6C6;
+}
+#apply{
+    display:inline-block;
+    width:120px;
+    height:30px;
+    border:1px solid #D1D1D1;
+    background-color: #F7F7F7;
+    text-align: center;
+    text-decoration: none;
+    padding-top:7px;
+    color:#1B83EB;
+}
+#setting_div_table{
+    width:100%;
+    border:0;
+    border-collapse:separate;
+    border-spacing:10px;
+    display:table;
+    background-color: rgb(250, 250, 250);
+}
+*/}.toString().slice(15, -4);
 function onload(func) {
     if (document.readyState === "complete") {
         func();
@@ -423,6 +441,11 @@ chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
         script.id = "baidu_script";
         script.appendChild(document.createTextNode('(' + baidu + ')("' + cookies + '");'));
         (document.body || document.head || document.documentElement).appendChild(script);
+        var style = document.createElement('style');
+        style.setAttribute('type', 'text/css');
+        style.textContent = css;
+        document.head.appendChild(style);
+
     });
 });
 
