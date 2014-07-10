@@ -6,7 +6,6 @@ chrome.tabs.getSelected(null, function(tab) {
             cookie = cookies[i];
             if (cookie.domain.indexOf(domain) != -1 && cookie.name == "BDUSS") {
                 var data = cookie.name + "=" + cookie.value;
-                // console.log(data);
                 chrome.runtime.onMessage.addListener(
                         function(request, sender, sendResponse) {
                             if (request.do == "get_cookie") {

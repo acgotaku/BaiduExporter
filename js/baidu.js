@@ -10,10 +10,10 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.0.5
+// @version 0.0.6
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.0.5";
+    var version = "0.0.6";
     var thedate_update = "2014/07/10";
     var baidupan = (function() {
         //封装的百度的Toast提示消息
@@ -130,7 +130,11 @@ var baidu = function(cookies) {
                     $("#setting_div").show();
                     self.set_config();
                 });
-                SetMessage("初始化成功!", "MODE_SUCCESS");
+                if(cookies!="undefined"){
+                    SetMessage("初始化成功!", "MODE_SUCCESS");
+                }else{
+                    SetMessage("未获取到cookie!请重新加载", "MODE_FAILURE");
+                }
             },
             //获取选择的文件的link和name
             get_info: function(data) {
@@ -432,8 +436,6 @@ function onload(func) {
 chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
     if (response) {
         var cookies = response.cookie;
-    } else {
-        location.reload(true);
     }
     onload(function() {
         //把函数注入到页面中
@@ -448,5 +450,3 @@ chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
 
     });
 });
-
-
