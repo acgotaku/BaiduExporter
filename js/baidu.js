@@ -10,10 +10,10 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.0.7
+// @version 0.0.8
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.0.7";
+    var version = "0.0.8";
     var thedate_update = "2014/07/11";
     var baidupan = (function() {
         //封装的百度的Toast提示消息
@@ -130,27 +130,33 @@ var baidu = function(cookies) {
                 if (typeof FileUtils != "undefined") {
                     aria2_btn.addClass("new-dbtn").append('<em class="icon-download"></em><b>导出下载</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);
+                    aria2_download.remove();
                     aria2_export.click(function() {
+                        func="aria2_rpc";
                         self.get_share_id();
                     });
+                    // aria2_download.click(function() {
+                    //     func = "aria2_data";
+                    //     self.get_share_id();
+                    // });
                     SetMessage("初始化成功!", "MODE_SUCCESS");
 
                 } else {
                     aria2_btn.append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
                     $(".icon-btn-device").after(aria2_btn);
-                    aria2_download.click(function() {
-                        func = "aria2_data";
-                        self.get_dlink();
-                    });
-                    aria2_export.click(function() {
-                        func = "aria2_rpc";
-                        self.get_dlink();
-                    });
                     if (cookies != "undefined") {
                         SetMessage("初始化成功!", "MODE_SUCCESS");
                     } else {
                         SetMessage("未获取到cookie!请重新加载", "MODE_FAILURE");
                     }
+                    aria2_download.click(function() {
+                        func = "aria2_data";
+                        self.get_dlink();
+                    });
+                    aria2_export.click(function() {
+                            func = "aria2_rpc";
+                            self.get_dlink();
+                        });
                 }
                 aria2_btn.mouseover(function() {
                     list.show();
@@ -163,6 +169,7 @@ var baidu = function(cookies) {
                     $("#setting_div").show();
                     self.set_config();
                 });
+
 
             },
             //获取选择的文件的link和name
@@ -256,6 +263,9 @@ var baidu = function(cookies) {
                     download_ui.hide();
                 });
             },
+            set_share_data:function(){
+
+            },
             //导出填充数据和显示数据
             aria2_data: function(file_list) {
                 var files = [];
@@ -334,11 +344,13 @@ var baidu = function(cookies) {
                 var self = this;
                 if (disk.util.ViewShareUtils) {
                     var obj = JSON.parse(disk.util.ViewShareUtils.viewShareData);
+                    // self[func](obj);
                     self.get_share_dlink(obj);
                 } else {
                     var file_info = FileUtils.getListViewCheckedItems();
                     for (var i = 0; i < file_info.length; i++) {
                         self.get_share_dlink(file_info[i]);
+                        // self[func](file_info[i]);
                     }
                 }
             },
@@ -357,7 +369,7 @@ var baidu = function(cookies) {
                             } else {
                                 var file_list=[];
                                 file_list.push({"name": obj.server_filename, "link": json.dlink});
-                                self.aria2_rpc(file_list);
+                                self[func](file_list);
                             }
 
                         })
@@ -366,7 +378,7 @@ var baidu = function(cookies) {
                         });
             },
             //获取选中文件的下载链接
-            get_dlink: function(func) {
+            get_dlink: function() {
                 var self = this;
                 var File = require("common:widget/data-center/data-center.js");
                 var Service = require("common:widget/commonService/commonService.js");
@@ -517,7 +529,7 @@ function onload(func) {
         window.addEventListener('load', func);
     }
 }
-//通过background.js获取到 name 为BDUSS的cookie
+//通过background.js获取到 name 为BDUSS的cookie最近
 chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
     if (response) {
         var cookies = response.cookie;
