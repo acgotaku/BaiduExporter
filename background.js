@@ -1,4 +1,4 @@
-chrome.tabs.getSelected(null, function(tab) {
+chrome.tabs.query({active: true, currentWindow: true}, function(tab) {
     var domain = ".baidu.com"
     chrome.cookies.getAll({}, function(cookies) {
         data = cookies;

@@ -529,13 +529,14 @@ function onload(func) {
         window.addEventListener('load', func);
     }
 }
-//通过background.js获取到 name 为BDUSS的cookie最近
-chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
-    if (response) {
-        var cookies = response.cookie;
-    }
+
     onload(function() {
         //把函数注入到页面中
+        //通过background.js获取到 name 为BDUSS的cookie最近
+    chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
+        if (response) {
+            var cookies = response.cookie;
+        }
         var script = document.createElement('script');
         script.id = "baidu_script";
         script.appendChild(document.createTextNode('(' + baidu + ')("' + cookies + '");'));
