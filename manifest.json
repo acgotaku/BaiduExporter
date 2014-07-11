@@ -5,7 +5,7 @@
    },
    "content_scripts": [ {
       "js": [ "js/baidu.js" ],
-      "matches": ["*://pan.baidu.com/*"]
+      "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*"]
    } ],
    "default_locale": "en",
    "description": "__MSG_description__",
@@ -19,5 +19,5 @@
    "permissions": [ "cookies", "tabs", "*://*.baidu.com/*"],
    "name": "__MSG_appName__",
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "0.0.6"
+   "version": "0.0.7"
 }
