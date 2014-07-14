@@ -258,6 +258,7 @@ var baidu = function(cookies) {
             alert_dialog:function(json,obj){
                 var self=this;
                 var id=json.request_id;
+                obj.request_id=json.request_id;
                 var div=$("<div>").attr("id", "alert_div"+id).addClass("b-panel b-dialog alert-dialog")
                 var html=[
                     '<div class="dlg-hd b-rlv">',
@@ -271,7 +272,9 @@ var baidu = function(cookies) {
                                 '<img id="vcode" class="img-code" alt="验证码获取中"  width="100" height="30">',
                                 '<a href="javascript:;" class="underline" id="change">换一张</a>',
                                 '</div>',
-                                '<div class="verify-error"></div>',
+                                '<div class="verify-error">',
+                                (json.auth ?  "\u9a8c\u8bc1\u7801\u8f93\u5165\u9519\u8bef\uff0c\u8bf7\u91cd\u65b0\u8f93\u5165" : ""),
+                                '</div>',
                             '</div>',
                         '</div>',
                     '</div>',
@@ -442,6 +445,9 @@ var baidu = function(cookies) {
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             if (json.errno == -19) {
+                                if(data.indexOf("input") != -1){
+                                    json.auth=true;
+                                }
                                 self.alert_dialog(json,obj);
                                 SetMessage("请输入验证码,以便继续下载", "MODE_CAUTION");
                             } else if (json.errno == 0){
