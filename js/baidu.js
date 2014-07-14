@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.0.9
+// @version 0.1.0
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.0.9";
-    var update_date = "2014/07/13";
+    var version = "0.1.0";
+    var update_date = "2014/07/14";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
@@ -150,9 +150,9 @@ var baidu = function(cookies) {
                         SetMessage("未获取到cookie!请重新加载", "MODE_FAILURE");
                     }
                     aria2_download.click(function() {
-                        self.aria2_download();
                         func = "aria2_data";
                         self.get_dlink();
+                        self.aria2_download();
                     });
                     aria2_export.click(function() {
                         func = "aria2_rpc";
@@ -254,6 +254,66 @@ var baidu = function(cookies) {
 
 
             },
+            //处理验证码
+            alert_dialog:function(json,obj){
+                var self=this;
+                var id=json.request_id;
+                var div=$("<div>").attr("id", "alert_div"+id).addClass("b-panel b-dialog alert-dialog")
+                var html=[
+                    '<div class="dlg-hd b-rlv">',
+                        '<div title="关闭" id="alert_dialog_close" class="dlg-cnr dlg-cnr-r"></div>',
+                        '<h3>提示</h3>',
+                    '</div>',
+                    '<div class="dlg-bd">',
+                        '<div class="alert-dialog-msg center">',
+                            '<div class="download-verify">',
+                                '<div class="verify-body">请输入验证码：<input id="verification" type="text" class="input-code" maxlength="4">',
+                                '<img id="vcode" class="img-code" alt="验证码获取中"  width="100" height="30">',
+                                '<a href="javascript:;" class="underline" id="change">换一张</a>',
+                                '</div>',
+                                '<div class="verify-error"></div>',
+                            '</div>',
+                        '</div>',
+                    '</div>',
+                    '<div class="dlg-ft b-rlv">',
+                        '<div class="alert-dialog-commands clearfix center">',
+                            '<a href="javascript:;" id="okay" class="sbtn okay"><b>确定</b></a>',
+                            '<a href="javascript:;" id="ignore" class="dbtn cancel"><b>取消</b></a>',
+                        '</div>',
+                    '</div>'
+                ];
+                div.html(html.join(""));
+                div.appendTo($("body"));
+                div.find("*[id]").each(function( index,element ){
+                    $( element ).attr("id",$( element ).attr("id")+id);
+                });
+                div.show();
+                var offset=id.toString().slice(-2);
+                var screenWidth = $(window).width(), screenHeight = $(window).height();
+                var scrolltop = $(document).scrollTop();
+                var divLeft = (screenWidth - div.width())/2+parseInt(offset);
+                var divTop = (screenHeight - div.height())/2 + scrolltop-parseInt(offset);
+                div.css({left: divLeft + "px", top: divTop + "px"});
+                $("#vcode"+id).attr("src",json.img);
+                $("#change"+id).unbind().click(function(){
+                    var url = "http://vcode.baidu.com/genimage";
+                    $("#vcode"+id).attr("src", url+"?"+json.vcode + "&" + new Date().getTime());
+                });
+                $("#okay"+id).unbind().click(function(){
+                    var input_code = $("#verification"+id).attr("value");
+                    var data='fid_list=' + JSON.stringify([obj.fs_id]);
+                    data=data+"&input="+input_code+"&vcode="+json.vcode;
+                    self.get_share_dlink(obj,data);
+                    div.remove();
+                });
+                $("#ignore"+id).unbind().click(function(){
+                    div.remove();
+                    SetMessage("\u5509\u002e\u002e\u002e\u002e\u002e", "MODE_CAUTION");
+                });
+                $("#alert_dialog_close"+id).unbind().click(function(){
+                    div.remove();
+                });
+            },
             //aria2导出下载界面以及事件绑定
             aria2_download: function() {
                 if ($("#download_ui").length == 0) {
@@ -281,7 +341,6 @@ var baidu = function(cookies) {
                     $("#idm_btn").attr("href","data:text/plain;charset=utf-8,");
                     $("#download_link").val("");
                 }
-                $("#download_ui").show();
             },
             //导出填充数据和显示数据
             aria2_data: function(file_list) {
@@ -312,6 +371,7 @@ var baidu = function(cookies) {
                     $("#aria2c_btn").attr("href",$("#aria2c_btn").attr("href")+encodeURIComponent(aria2c_txt.join("")));
                     $("#idm_btn").attr("href",$("#idm_btn").attr("href")+encodeURIComponent(aria2c_txt.join("")));
                     $("#download_link").val($("#download_link").val()+files.join(""));
+                    $("#download_ui").show();
                 }
 
             },
@@ -357,31 +417,40 @@ var baidu = function(cookies) {
                 if (disk.util.ViewShareUtils) {
                     var obj = JSON.parse(disk.util.ViewShareUtils.viewShareData);
                     // self[func](obj);
-                    self.get_share_dlink(obj);
+                    var data='fid_list=' + JSON.stringify([obj.fs_id]);
+                    self.get_share_dlink(obj,data);
                 } else {
                     var file_info = FileUtils.getListViewCheckedItems();
+                    if(file_info.length == 0){
+                        SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
+                        return;
+                    }
                     for (var i = 0; i < file_info.length; i++) {
-                        self.get_share_dlink(file_info[i]);
+                        var data='fid_list=' + JSON.stringify([file_info[i].fs_id]);
+                        self.get_share_dlink(file_info[i],data);
                         // self[func](file_info[i]);
                     }
                 }
             },
-            get_share_dlink: function(obj) {
+            get_share_dlink: function(obj,data) {
                 var self = this;
                 var uk = FileUtils.share_uk;
                 var id = FileUtils.share_id;
                 var download = "http://" + window.location.host + "/share/download?channel=chunlei&clienttype=0&web=1" + "&uk=" + uk + "&shareid=" + id + "&timestamp=" + FileUtils.share_timestamp + "&sign=" + FileUtils.share_sign + "&bdstoken=" + FileUtils.bdstoken;
                 // if( obj.isdir == 0 ){ download = download+"&nozip=1"; }
-                var parameter = {'url': download, 'dataType': 'json', type: 'POST', data: 'fid_list=' + JSON.stringify([obj.fs_id])};
+                var parameter = {'url': download, 'dataType': 'json', type: 'POST', 'data': data};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
-                            if (json.errno != 0) {
-                                SetMessage("百度服务器返回异常 目前还无法处理 QAQ", "MODE_FAILURE");
-                                return;
-                            } else {
+                            if (json.errno == -19) {
+                                self.alert_dialog(json,obj);
+                                SetMessage("请输入验证码,以便继续下载", "MODE_CAUTION");
+                            } else if (json.errno == 0){
                                 var file_list = [];
                                 file_list.push({"name": obj.server_filename, "link": json.dlink});
                                 self[func](file_list);
+                            }else{
+                                console.log(json);
+                                SetMessage("出现异常!", "MODE_FAILURE");
                             }
 
                         })
@@ -396,6 +465,10 @@ var baidu = function(cookies) {
                 var Service = require("common:widget/commonService/commonService.js");
                 var Filename = File.get("selectedItemList");
                 var length = Filename.length;
+                if(length == 0){
+                    SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
+                    return;
+                }
                 for (var i = 0; i < length; i++) {
                     if (Filename[i].attr("data-extname") == "dir") {
                         Service.getDlink(JSON.stringify(File.get("selectedList")), "batch", self.get_dir.bind(self));
