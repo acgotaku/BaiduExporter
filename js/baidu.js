@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.0
+// @version 0.1.1
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.0";
-    var update_date = "2014/07/14";
+    var version = "0.1.1";
+    var update_date = "2014/07/15";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
