@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.1
+// @version 0.1.2
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.1";
-    var update_date = "2014/07/15";
+    var version = "0.1.2";
+    var update_date = "2014/07/22";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
@@ -119,6 +119,7 @@ var baidu = function(cookies) {
                 var self = this;
                 self.set_export_ui();
                 self.set_config_ui();
+                self.set_config();
             },
             set_export_ui: function() {
                 var self = this;
@@ -217,7 +218,8 @@ var baidu = function(cookies) {
                     '<tr><td width="100"><label>ARIA2 RPC：</label></td><td><input id="rpc_input" type="text" class="input-large"></td></tr>',
                     '<tr><td><label>RPC访问设置</label></td><td><input id="rpc_distinguish" type="checkbox"></td></tr>',
                     '<tr><td><label >RPC 用户名：</label></td><td><input type="text" id="rpc_user" disabled="disabled" class="input-small"></td></tr>',
-                    '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"><div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
+                    '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"></td></tr>',
+                    '<tr><td><label>Secret Token：</label></td><td><input type="text" id="rpc_token" class="input-small"><div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
                     '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
                     '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
                     '<tr><td colspan="2"><div style="color: #656565;">Headers<label style="margin-left: 65px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td></tr>',
@@ -381,6 +383,7 @@ var baidu = function(cookies) {
             //填充已经设置的配置数据
             set_config: function() {
                 $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
+                $("#rpc_token").val(localStorage.getItem("rpc_token"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || "http://pan.baidu.com/disk/home");
                 if (localStorage.getItem("auth") == "true") {
@@ -414,6 +417,7 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_user", null);
                     localStorage.setItem("rpc_pass", null);
                 }
+                localStorage.setItem("rpc_token", $("#rpc_token").val());
             },
             get_share_id: function() {
                 var self = this;
@@ -485,15 +489,19 @@ var baidu = function(cookies) {
             },
             //获取aria2c的版本号用来测试通信
             get_version: function() {
-                var data = [{
+                var data = {
                         "jsonrpc": "2.0",
                         "method": "aria2.getVersion",
-                        "id": 1
-                    }];
+                        "id": 1,
+                        "params":[]
+                    };
+                    if($("#rpc_token").val()){
+                        data.params.unshift("token:"+$("#rpc_token").val());
+                    }
                 var parameter = {'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
                 HttpSendRead(parameter)
                         .done(function(xml, textStatus, jqXHR) {
-                            $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + xml[0].result.version);
+                            $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + xml.result.version);
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
                             $("#send_test").html(textStatus + "\u9519\u8BEF\uFF0C\u70B9\u51FB\u91CD\u65B0\u6D4B\u8BD5");
@@ -505,7 +513,7 @@ var baidu = function(cookies) {
                 if (file_list.length > 0) {
                     var length = file_list.length;
                     for (var i = 0; i < length; i++) {
-                        var rpc_data = [{
+                        var rpc_data = {
                                 "jsonrpc": "2.0",
                                 "method": "aria2.addUri",
                                 "id": new Date().getTime(),
@@ -514,7 +522,10 @@ var baidu = function(cookies) {
                                         "header": combination.header(cookies)
                                     }
                                 ]
-                            }];
+                            };
+                            if($("#rpc_token").val()){
+                                rpc_data.params.unshift("token:"+$("#rpc_token").val());
+                            }
                         self.aria2send_data(rpc_data);
                     }
                 }
