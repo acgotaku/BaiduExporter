@@ -342,8 +342,7 @@ var baidu = function(cookies) {
                         download_ui.hide();
                     });
                 }else{
-                    $("#aria2c_btn").attr("href","data:text/plain;charset=utf-8,");
-                    $("#idm_btn").attr("href","data:text/plain;charset=utf-8,");
+                    $("#aria2c_btn, #idm_btn").attr("href","data:text/plain;charset=utf-8,");
                     $("#download_link").val("");
                 }
             },
@@ -395,8 +394,7 @@ var baidu = function(cookies) {
                     auth = "Basic " + btoa(rpc_user + ":" + rpc_pass);
                 }
                 else {
-                    $("#rpc_user").val("");
-                    $("#rpc_pass").val("");
+                    $("#rpc_user, #rpc_pass").val("");
                 }
             },
             //保存配置数据
@@ -639,7 +637,7 @@ function onload(func) {
 
 onload(function() {
     //把函数注入到页面中
-    //通过background.js获取到 name 为BDUSS的cookie最近
+    //通过background.js获取到 name 为BDUSS的cookie
     chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
         if (response) {
             var cookies = response.cookie;
@@ -652,6 +650,5 @@ onload(function() {
         style.setAttribute('type', 'text/css');
         style.textContent = css;
         document.head.appendChild(style);
-
     });
 });
