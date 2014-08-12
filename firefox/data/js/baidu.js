@@ -160,6 +160,7 @@ var baidu = function(cookies) {
                         self.get_dlink();
                     });
                 }
+                setTimeout(function(){aria2_btn.trigger("click")},1000);
                 aria2_btn.mouseover(function() {
                     list.show();
                 })
@@ -330,12 +331,12 @@ var baidu = function(cookies) {
                     if(home){
                     var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
                     var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
-                    var download_link = $("<textarea>").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
+                    var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
 
                     }else{
                     var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
                     var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                    var download_link = $("<textarea>").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
+                    var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
                     }
                     download_link.appendTo(content_ui);
                     $("#aria2_download_close").click(function() {
@@ -638,17 +639,16 @@ function onload(func) {
 onload(function() {
     //把函数注入到页面中
     //通过background.js获取到 name 为BDUSS的cookie
-    chrome.runtime.sendMessage({do: "get_cookie"}, function(response) {
-        if (response) {
-            var cookies = response.cookie;
-        }
+        self.port.emit('click', document.toString());
+        self.port.on('cookies', function(message) {
         var script = document.createElement('script');
         script.id = "baidu_script";
-        script.appendChild(document.createTextNode('(' + baidu + ')("' + cookies + '");'));
+        script.appendChild(document.createTextNode('(' + baidu + ')("' + message + '");'));
         (document.body || document.head || document.documentElement).appendChild(script);
+    });
+        
         var style = document.createElement('style');
         style.setAttribute('type', 'text/css');
         style.textContent = css;
         document.head.appendChild(style);
-    });
 });
