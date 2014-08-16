@@ -362,7 +362,7 @@ var baidu = function(cookies) {
                         download_ui.hide();
                     });
                 }else{
-                    $("#aria2c_btn, #idm_btn").attr("href","data:text/plain;charset=utf-8,");
+                    $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href","data:text/plain;charset=utf-8,");
                     $("#download_link").val("");
                 }
             },
