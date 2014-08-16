@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.3
+// @version 0.1.4
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.3";
-    var update_date = "2014/08/13";
+    var version = "0.1.4";
+    var update_date = "2014/08/16";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
@@ -349,11 +349,12 @@ var baidu = function(cookies) {
                     if(home){
                     var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
                     var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
-                    var download_link = $("<textarea>").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
+                    var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
 
                     }else{
                     var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
                     var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                    var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
                     var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
                     }
                     download_link.appendTo(content_ui);
@@ -370,8 +371,10 @@ var baidu = function(cookies) {
                 var files = [];
                 var aria2c_txt = [];
                 var idm_txt = [];
+                var down_txt=[];
                 if (file_list.length > 0) {
                     var length = file_list.length;
+                    console.log(length);
                     for (var i = 0; i < length; i++) {
                         files.push("aria2c -c -s10 -x10 -o " + JSON.stringify(file_list[i].name) + combination.header(cookies,'aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
@@ -390,9 +393,11 @@ var baidu = function(cookies) {
                             ' out=' + file_list[i].name,
                             ' >'
                         ].join('\r\n'));
+                        down_txt.push([file_list[i].link,' '].join('\n'));
                     }
                     $("#aria2c_btn").attr("href",$("#aria2c_btn").attr("href")+encodeURIComponent(aria2c_txt.join("")));
                     $("#idm_btn").attr("href",$("#idm_btn").attr("href")+encodeURIComponent(idm_txt.join("")));
+                    $("#download_txt_btn").attr("href",$("#download_txt_btn").attr("href")+encodeURIComponent(down_txt.join("")));
                     $("#download_link").val($("#download_link").val()+files.join(""));
                     $("#download_ui").show();
                 }
