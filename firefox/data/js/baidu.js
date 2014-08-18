@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.2
+// @version 0.1.4
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.2";
-    var update_date = "2014/07/22";
+    var version = "0.1.4";
+    var update_date = "2014/08/16";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
@@ -90,7 +90,7 @@ var baidu = function(cookies) {
         };
         //设置aria2c下载设置的Header信息
         var combination = {
-            header: function(cookies) {
+            header: function(cookies,type) {
                 var addheader = [];
                 var UA = $("#setting_aria2_useragent_input").val() || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
                 var headers = $("#setting_aria2_headers").val();
@@ -104,7 +104,26 @@ var baidu = function(cookies) {
                         addheader.push(text[i]);
                     }
                 }
-                return addheader;
+                var header="";
+                if(type=="aria2c_line"){  
+                    for(var i=0;i<addheader.length;i++){
+                        header+=" --header " + JSON.stringify(addheader[i]) + " ";
+                    }
+                    return header;
+                }else if(type=="aria2c_txt"){
+                    for(var i=0;i<addheader.length;i++){
+                        header+=" header=" + (addheader[i]) + " \n";
+                    }
+                    return header;
+                }else if(type=="idm_txt"){
+                    for(var i=0;i<addheader.length;i++){
+                        header+=" header=" + (addheader[i]) + " \n";
+                    }
+                    return header;
+                }else{
+                    return addheader;
+                }
+                
             }
         };
         var auth = null; //是否设置用户名密码验证 设置的话变为auth赋值
@@ -160,7 +179,6 @@ var baidu = function(cookies) {
                         self.get_dlink();
                     });
                 }
-                setTimeout(function(){aria2_btn.trigger("click")},1000);
                 aria2_btn.mouseover(function() {
                     list.show();
                 })
@@ -336,6 +354,7 @@ var baidu = function(cookies) {
                     }else{
                     var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
                     var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                    var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
                     var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
                     }
                     download_link.appendTo(content_ui);
@@ -343,7 +362,7 @@ var baidu = function(cookies) {
                         download_ui.hide();
                     });
                 }else{
-                    $("#aria2c_btn, #idm_btn").attr("href","data:text/plain;charset=utf-8,");
+                    $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href","data:text/plain;charset=utf-8,");
                     $("#download_link").val("");
                 }
             },
@@ -352,13 +371,15 @@ var baidu = function(cookies) {
                 var files = [];
                 var aria2c_txt = [];
                 var idm_txt = [];
+                var down_txt=[];
                 if (file_list.length > 0) {
                     var length = file_list.length;
+                    console.log(length);
                     for (var i = 0; i < length; i++) {
-                        files.push("aria2c -c -s10 -x10 -o " + JSON.stringify(file_list[i].name) + " --header " + JSON.stringify(combination.header(cookies)[1]) + " " + JSON.stringify(file_list[i].link) + "\n");
+                        files.push("aria2c -c -s10 -x10 -o " + JSON.stringify(file_list[i].name) + combination.header(cookies,'aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
                             file_list[i].link,
-                            ' header=' + combination.header(cookies)[1],
+                            combination.header(cookies,"aria2c_txt"),
                             ' out=' + file_list[i].name,
                             ' continue=true',
                             ' max-connection-per-server=10',
@@ -372,9 +393,11 @@ var baidu = function(cookies) {
                             ' out=' + file_list[i].name,
                             ' >'
                         ].join('\r\n'));
+                        down_txt.push([file_list[i].link,' '].join('\n'));
                     }
                     $("#aria2c_btn").attr("href",$("#aria2c_btn").attr("href")+encodeURIComponent(aria2c_txt.join("")));
-                    $("#idm_btn").attr("href",$("#idm_btn").attr("href")+encodeURIComponent(aria2c_txt.join("")));
+                    $("#idm_btn").attr("href",$("#idm_btn").attr("href")+encodeURIComponent(idm_txt.join("")));
+                    $("#download_txt_btn").attr("href",$("#download_txt_btn").attr("href")+encodeURIComponent(down_txt.join("")));
                     $("#download_link").val($("#download_link").val()+files.join(""));
                     $("#download_ui").show();
                 }

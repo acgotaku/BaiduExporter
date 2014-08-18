@@ -5,3 +5,10 @@
 作为chrome扩展安装即可.
 
 Web Store link : https://chrome.google.com/webstore/detail/baiduexporter/mjaenbjdjmgolhoafkohbhhbaiedbkno
+
+Firefox
+
+XPI包安装:
+https://github.com/acgotaku/BaiduExporter/blob/master/firefox/baidu-exporter.xpi
+
+下载XPI包,打开Firefox.Ctrl+O 打开选择文件对话框,选中XPI包即可安装.
