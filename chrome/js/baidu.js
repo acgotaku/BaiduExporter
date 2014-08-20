@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.4
+// @version 0.1.5
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.4";
-    var update_date = "2014/08/16";
+    var version = "0.1.5";
+    var update_date = "2014/08/20";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
@@ -376,7 +376,7 @@ var baidu = function(cookies) {
                     var length = file_list.length;
                     console.log(length);
                     for (var i = 0; i < length; i++) {
-                        files.push("aria2c -c -s10 -x10 -o " + JSON.stringify(file_list[i].name) + combination.header(cookies,'aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
+                        files.push("aria2c -c -s10 -k1M -x10 -o " + JSON.stringify(file_list[i].name) + combination.header(cookies,'aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
                             file_list[i].link,
                             combination.header(cookies,"aria2c_txt"),
