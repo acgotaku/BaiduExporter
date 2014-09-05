@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.6
+// @version 0.1.7
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.6";
-    var update_date = "2014/08/23";
+    var version = "0.1.7";
+    var update_date = "2014/09/05";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
@@ -62,7 +62,7 @@ var baidu = function(cookies) {
                             deferred.resolve(JSON.parse(http.responseText), http.status, http);
                         }
                         else if (info.dataType == "SCRIPT") {
-                            eval(http.responseText);
+                            // eval(http.responseText);
                             deferred.resolve(http.responseText, http.status, http);
                         }
                     }
@@ -248,6 +248,7 @@ var baidu = function(cookies) {
                     '<tr><td><label >RPC 用户名：</label></td><td><input type="text" id="rpc_user" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>Secret Token：</label></td><td><input type="text" id="rpc_token" class="input-small"><div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
+                    '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
                     '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
                     '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
                     '<tr><td colspan="2"><div style="color: #656565;">Headers<label style="margin-left: 65px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td></tr>',
@@ -416,6 +417,7 @@ var baidu = function(cookies) {
             set_config: function() {
                 $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
                 $("#rpc_token").val(localStorage.getItem("rpc_token"));
+                $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || "http://pan.baidu.com/disk/home");
                 if (localStorage.getItem("auth") == "true") {
@@ -449,6 +451,7 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_pass", null);
                 }
                 localStorage.setItem("rpc_token", $("#rpc_token").val());
+                localStorage.setItem("rpc_dir", $("#setting_aria2_dir").val());
             },
             get_share_id: function() {
                 var self = this;
@@ -550,6 +553,7 @@ var baidu = function(cookies) {
                             "id": new Date().getTime(),
                             "params": [[file_list[i].link], {
                                     "out": file_list[i].name,
+                                    "dir":$("#setting_aria2_dir").val()||null,
                                     "header": combination.header()
                                 }
                             ]
@@ -677,7 +681,6 @@ onload(function() {
         if (response) {
             cookies.push(response);
             if(cookies.length==2){
-                console.log(JSON.stringify(cookies));
                 var script = document.createElement('script');
                 script.id = "baidu_script";
                 script.appendChild(document.createTextNode('(' + baidu + ')(\'' +JSON.stringify(cookies) + '\');'));
