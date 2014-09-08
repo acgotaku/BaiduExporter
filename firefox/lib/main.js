@@ -31,15 +31,24 @@ pageMod.PageMod({
 function startListening(worker) {
   worker.port.on('click', function(html) {
 var cookieManager = Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager2);
+var cookies=[];
          for (var e = cookieManager.getCookiesFromHost("pan.baidu.com"); e.hasMoreElements();) {
             var cookie = e.getNext().QueryInterface(Ci.nsICookie2);
             if(cookie.name == ckName){
-               var data = cookie.name + "=" + cookie.value;
-               console.log(data);
-               worker.port.emit('cookies', data);
-               break;
+              var obj = {};
+              obj[cookie.name] = cookie.value;
+              cookies.push(obj);
             }
          }
-    
+         for (var e = cookieManager.getCookiesFromHost("pcs.baidu.com"); e.hasMoreElements();) {
+            var cookie = e.getNext().QueryInterface(Ci.nsICookie2);
+            if(cookie.name == "pcsett"){
+               var obj = {};
+               obj[cookie.name] = cookie.value;
+               cookies.push(obj);
+               worker.port.emit('cookies', cookies);
+               break;
+            }
+         }    
   });
 }

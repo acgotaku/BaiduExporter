@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.4
+// @version 0.1.7
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.4";
-    var update_date = "2014/08/16";
+    var version = "0.1.7";
+    var update_date = "2014/09/05";
     var baidupan = (function() {
         var home = typeof FileUtils == "undefined" ? true : false;
         //封装的百度的Toast提示消息
@@ -62,7 +62,7 @@ var baidu = function(cookies) {
                             deferred.resolve(JSON.parse(http.responseText), http.status, http);
                         }
                         else if (info.dataType == "SCRIPT") {
-                            eval(http.responseText);
+                            // eval(http.responseText);
                             deferred.resolve(http.responseText, http.status, http);
                         }
                     }
@@ -90,13 +90,21 @@ var baidu = function(cookies) {
         };
         //设置aria2c下载设置的Header信息
         var combination = {
-            header: function(cookies,type) {
+            header: function(type) {
                 var addheader = [];
-                var UA = $("#setting_aria2_useragent_input").val() || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
+                var UA = $("#setting_aria2_useragent_input").val() || "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36";
                 var headers = $("#setting_aria2_headers").val();
                 var referer = $("#setting_aria2_referer_input").val() || "http://pan.baidu.com/disk/home";
                 addheader.push("User-Agent: " + UA);
-                addheader.push("Cookie: " + cookies);
+                var baidu_cookies=JSON.parse(cookies);
+                var format_cookies=[];
+                for(var i=0;i<baidu_cookies.length;i++){
+                    for(var key in baidu_cookies[i]){
+                        // addheader.push("Cookie: " + key +"=" +baidu_cookies[i][key]);
+                        format_cookies.push(key +"=" +baidu_cookies[i][key]);
+                    }
+                }
+                addheader.push("Cookie: " + format_cookies.join(";"));
                 addheader.push("Referer: " + referer);
                 if (headers) {
                     var text = headers.split("\n");
@@ -104,26 +112,26 @@ var baidu = function(cookies) {
                         addheader.push(text[i]);
                     }
                 }
-                var header="";
-                if(type=="aria2c_line"){  
-                    for(var i=0;i<addheader.length;i++){
-                        header+=" --header " + JSON.stringify(addheader[i]) + " ";
+                var header = "";
+                if (type == "aria2c_line") {
+                    for (var i = 0; i < addheader.length; i++) {
+                        header += " --header " + JSON.stringify(addheader[i]) + " ";
                     }
                     return header;
-                }else if(type=="aria2c_txt"){
-                    for(var i=0;i<addheader.length;i++){
-                        header+=" header=" + (addheader[i]) + " \n";
+                } else if (type == "aria2c_txt") {
+                    for (var i = 0; i < addheader.length; i++) {
+                        header += " header=" + (addheader[i]) + " \n";
                     }
                     return header;
-                }else if(type=="idm_txt"){
-                    for(var i=0;i<addheader.length;i++){
-                        header+=" header=" + (addheader[i]) + " \n";
+                } else if (type == "idm_txt") {
+                    for (var i = 0; i < addheader.length; i++) {
+                        header += " header=" + (addheader[i]) + " \n";
                     }
                     return header;
-                }else{
+                } else {
                     return addheader;
                 }
-                
+
             }
         };
         var auth = null; //是否设置用户名密码验证 设置的话变为auth赋值
@@ -139,6 +147,7 @@ var baidu = function(cookies) {
                 self.set_export_ui();
                 self.set_config_ui();
                 self.set_config();
+                combination.header();
             },
             set_export_ui: function() {
                 var self = this;
@@ -239,6 +248,7 @@ var baidu = function(cookies) {
                     '<tr><td><label >RPC 用户名：</label></td><td><input type="text" id="rpc_user" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>Secret Token：</label></td><td><input type="text" id="rpc_token" class="input-small"><div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
+                    '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
                     '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
                     '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
                     '<tr><td colspan="2"><div style="color: #656565;">Headers<label style="margin-left: 65px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td></tr>',
@@ -246,7 +256,7 @@ var baidu = function(cookies) {
                     '</tbody>',
                     '</table>',
                     '<div style="margin-top:10px;">',
-                    '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a> Version:' + version +' 更新日期: '+ update_date +' </div>',
+                    '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a> Version:' + version + ' 更新日期: ' + update_date + ' </div>',
                     '<div style="margin-left:70px; display:inline-block"><a href="javascript:;" id="apply" ><b>应用</b></a></div>',
                     '</div>',
                     '</div>'
@@ -276,65 +286,65 @@ var baidu = function(cookies) {
 
             },
             //处理验证码
-            alert_dialog:function(json,obj){
-                var self=this;
-                var id=json.request_id;
-                obj.request_id=json.request_id;
-                var div=$("<div>").attr("id", "alert_div"+id).addClass("b-panel b-dialog alert-dialog")
-                var html=[
+            alert_dialog: function(json, obj) {
+                var self = this;
+                var id = json.request_id;
+                obj.request_id = json.request_id;
+                var div = $("<div>").attr("id", "alert_div" + id).addClass("b-panel b-dialog alert-dialog")
+                var html = [
                     '<div class="dlg-hd b-rlv">',
-                        '<div title="关闭" id="alert_dialog_close" class="dlg-cnr dlg-cnr-r"></div>',
-                        '<h3>提示</h3>',
+                    '<div title="关闭" id="alert_dialog_close" class="dlg-cnr dlg-cnr-r"></div>',
+                    '<h3>提示</h3>',
                     '</div>',
                     '<div class="dlg-bd">',
-                        '<div class="alert-dialog-msg center">',
-                            '<div class="download-verify">',
-                                '<div class="verify-body">请输入验证码：<input id="verification" type="text" class="input-code" maxlength="4">',
-                                '<img id="vcode" class="img-code" alt="验证码获取中"  width="100" height="30">',
-                                '<a href="javascript:;" class="underline" id="change">换一张</a>',
-                                '</div>',
-                                '<div class="verify-error">',
-                                (json.auth ?  "\u9a8c\u8bc1\u7801\u8f93\u5165\u9519\u8bef\uff0c\u8bf7\u91cd\u65b0\u8f93\u5165" : ""),
-                                '</div>',
-                            '</div>',
-                        '</div>',
+                    '<div class="alert-dialog-msg center">',
+                    '<div class="download-verify">',
+                    '<div class="verify-body">请输入验证码：<input id="verification" type="text" class="input-code" maxlength="4">',
+                    '<img id="vcode" class="img-code" alt="验证码获取中"  width="100" height="30">',
+                    '<a href="javascript:;" class="underline" id="change">换一张</a>',
+                    '</div>',
+                    '<div class="verify-error">',
+                    (json.auth ? "\u9a8c\u8bc1\u7801\u8f93\u5165\u9519\u8bef\uff0c\u8bf7\u91cd\u65b0\u8f93\u5165" : ""),
+                    '</div>',
+                    '</div>',
+                    '</div>',
                     '</div>',
                     '<div class="dlg-ft b-rlv">',
-                        '<div class="alert-dialog-commands clearfix center">',
-                            '<a href="javascript:;" id="okay" class="sbtn okay"><b>确定</b></a>',
-                            '<a href="javascript:;" id="ignore" class="dbtn cancel"><b>取消</b></a>',
-                        '</div>',
+                    '<div class="alert-dialog-commands clearfix center">',
+                    '<a href="javascript:;" id="okay" class="sbtn okay"><b>确定</b></a>',
+                    '<a href="javascript:;" id="ignore" class="dbtn cancel"><b>取消</b></a>',
+                    '</div>',
                     '</div>'
                 ];
                 div.html(html.join(""));
                 div.appendTo($("body"));
-                div.find("*[id]").each(function( index,element ){
-                    $( element ).attr("id",$( element ).attr("id")+id);
+                div.find("*[id]").each(function(index, element) {
+                    $(element).attr("id", $(element).attr("id") + id);
                 });
                 div.show();
-                var offset=id.toString().slice(-2);
+                var offset = id.toString().slice(-2);
                 var screenWidth = $(window).width(), screenHeight = $(window).height();
                 var scrolltop = $(document).scrollTop();
-                var divLeft = (screenWidth - div.width())/2+parseInt(offset);
-                var divTop = (screenHeight - div.height())/2 + scrolltop-parseInt(offset);
+                var divLeft = (screenWidth - div.width()) / 2 + parseInt(offset);
+                var divTop = (screenHeight - div.height()) / 2 + scrolltop - parseInt(offset);
                 div.css({left: divLeft + "px", top: divTop + "px"});
-                $("#vcode"+id).attr("src",json.img);
-                $("#change"+id).unbind().click(function(){
+                $("#vcode" + id).attr("src", json.img);
+                $("#change" + id).unbind().click(function() {
                     var url = "http://vcode.baidu.com/genimage";
-                    $("#vcode"+id).attr("src", url+"?"+json.vcode + "&" + new Date().getTime());
+                    $("#vcode" + id).attr("src", url + "?" + json.vcode + "&" + new Date().getTime());
                 });
-                $("#okay"+id).unbind().click(function(){
-                    var input_code = $("#verification"+id).attr("value");
-                    var data='fid_list=' + JSON.stringify([obj.fs_id]);
-                    data=data+"&input="+input_code+"&vcode="+json.vcode;
-                    self.get_share_dlink(obj,data);
+                $("#okay" + id).unbind().click(function() {
+                    var input_code = $("#verification" + id).attr("value");
+                    var data = 'fid_list=' + JSON.stringify([obj.fs_id]);
+                    data = data + "&input=" + input_code + "&vcode=" + json.vcode;
+                    self.get_share_dlink(obj, data);
                     div.remove();
                 });
-                $("#ignore"+id).unbind().click(function(){
+                $("#ignore" + id).unbind().click(function() {
                     div.remove();
                     SetMessage("\u5509\u002e\u002e\u002e\u002e\u002e", "MODE_CAUTION");
                 });
-                $("#alert_dialog_close"+id).unbind().click(function(){
+                $("#alert_dialog_close" + id).unbind().click(function() {
                     div.remove();
                 });
             },
@@ -346,23 +356,23 @@ var baidu = function(cookies) {
                     download_ui.appendTo($("body"));
                     content_ui.empty();
                     var download_menu = $("<div>").addClass("module-list-toolbar").css({"display": "block", "margin-bottom": "10px"}).appendTo(content_ui);
-                    if(home){
-                    var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
-                    var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
-                    var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
+                    if (home) {
+                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
+                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
+                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
 
-                    }else{
-                    var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
-                    var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                    var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
-                    var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
+                    } else {
+                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
+                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
                     }
                     download_link.appendTo(content_ui);
                     $("#aria2_download_close").click(function() {
                         download_ui.hide();
                     });
-                }else{
-                    $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href","data:text/plain;charset=utf-8,");
+                } else {
+                    $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
                     $("#download_link").val("");
                 }
             },
@@ -371,15 +381,15 @@ var baidu = function(cookies) {
                 var files = [];
                 var aria2c_txt = [];
                 var idm_txt = [];
-                var down_txt=[];
+                var down_txt = [];
                 if (file_list.length > 0) {
                     var length = file_list.length;
                     console.log(length);
                     for (var i = 0; i < length; i++) {
-                        files.push("aria2c -c -s10 -x10 -o " + JSON.stringify(file_list[i].name) + combination.header(cookies,'aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
+                        files.push("aria2c -c -s10 -k1M -x10 -o " + JSON.stringify(file_list[i].name) + combination.header('aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
                             file_list[i].link,
-                            combination.header(cookies,"aria2c_txt"),
+                            combination.header("aria2c_txt"),
                             ' out=' + file_list[i].name,
                             ' continue=true',
                             ' max-connection-per-server=10',
@@ -393,12 +403,12 @@ var baidu = function(cookies) {
                             ' out=' + file_list[i].name,
                             ' >'
                         ].join('\r\n'));
-                        down_txt.push([file_list[i].link,' '].join('\n'));
+                        down_txt.push([file_list[i].link, ' '].join('\n'));
                     }
-                    $("#aria2c_btn").attr("href",$("#aria2c_btn").attr("href")+encodeURIComponent(aria2c_txt.join("")));
-                    $("#idm_btn").attr("href",$("#idm_btn").attr("href")+encodeURIComponent(idm_txt.join("")));
-                    $("#download_txt_btn").attr("href",$("#download_txt_btn").attr("href")+encodeURIComponent(down_txt.join("")));
-                    $("#download_link").val($("#download_link").val()+files.join(""));
+                    $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
+                    $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("")));
+                    $("#download_txt_btn").attr("href", $("#download_txt_btn").attr("href") + encodeURIComponent(down_txt.join("")));
+                    $("#download_link").val($("#download_link").val() + files.join(""));
                     $("#download_ui").show();
                 }
 
@@ -407,6 +417,7 @@ var baidu = function(cookies) {
             set_config: function() {
                 $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
                 $("#rpc_token").val(localStorage.getItem("rpc_token"));
+                $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || "http://pan.baidu.com/disk/home");
                 if (localStorage.getItem("auth") == "true") {
@@ -440,28 +451,29 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_pass", null);
                 }
                 localStorage.setItem("rpc_token", $("#rpc_token").val());
+                localStorage.setItem("rpc_dir", $("#setting_aria2_dir").val());
             },
             get_share_id: function() {
                 var self = this;
                 if (disk.util.ViewShareUtils) {
                     var obj = JSON.parse(disk.util.ViewShareUtils.viewShareData);
                     // self[func](obj);
-                    var data='fid_list=' + JSON.stringify([obj.fs_id]);
-                    self.get_share_dlink(obj,data);
+                    var data = 'fid_list=' + JSON.stringify([obj.fs_id]);
+                    self.get_share_dlink(obj, data);
                 } else {
                     var file_info = FileUtils.getListViewCheckedItems();
-                    if(file_info.length == 0){
+                    if (file_info.length == 0) {
                         SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
                         return;
                     }
                     for (var i = 0; i < file_info.length; i++) {
-                        var data='fid_list=' + JSON.stringify([file_info[i].fs_id]);
-                        self.get_share_dlink(file_info[i],data);
+                        var data = 'fid_list=' + JSON.stringify([file_info[i].fs_id]);
+                        self.get_share_dlink(file_info[i], data);
                         // self[func](file_info[i]);
                     }
                 }
             },
-            get_share_dlink: function(obj,data) {
+            get_share_dlink: function(obj, data) {
                 var self = this;
                 var uk = FileUtils.share_uk;
                 var id = FileUtils.share_id;
@@ -471,16 +483,16 @@ var baidu = function(cookies) {
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             if (json.errno == -19) {
-                                if(data.indexOf("input") != -1){
-                                    json.auth=true;
+                                if (data.indexOf("input") != -1) {
+                                    json.auth = true;
                                 }
-                                self.alert_dialog(json,obj);
+                                self.alert_dialog(json, obj);
                                 SetMessage("请输入验证码,以便继续下载", "MODE_CAUTION");
-                            } else if (json.errno == 0){
+                            } else if (json.errno == 0) {
                                 var file_list = [];
                                 file_list.push({"name": obj.server_filename, "link": json.dlink});
                                 self[func](file_list);
-                            }else{
+                            } else {
                                 console.log(json);
                                 SetMessage("出现异常!", "MODE_FAILURE");
                             }
@@ -497,7 +509,7 @@ var baidu = function(cookies) {
                 var Service = require("common:widget/commonService/commonService.js");
                 var Filename = File.get("selectedItemList");
                 var length = Filename.length;
-                if(length == 0){
+                if (length == 0) {
                     SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
                     return;
                 }
@@ -512,14 +524,14 @@ var baidu = function(cookies) {
             //获取aria2c的版本号用来测试通信
             get_version: function() {
                 var data = {
-                        "jsonrpc": "2.0",
-                        "method": "aria2.getVersion",
-                        "id": 1,
-                        "params":[]
-                    };
-                    if($("#rpc_token").val()){
-                        data.params.unshift("token:"+$("#rpc_token").val());
-                    }
+                    "jsonrpc": "2.0",
+                    "method": "aria2.getVersion",
+                    "id": 1,
+                    "params": []
+                };
+                if ($("#rpc_token").val()) {
+                    data.params.unshift("token:" + $("#rpc_token").val());
+                }
                 var parameter = {'url': url, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
                 HttpSendRead(parameter)
                         .done(function(xml, textStatus, jqXHR) {
@@ -536,18 +548,19 @@ var baidu = function(cookies) {
                     var length = file_list.length;
                     for (var i = 0; i < length; i++) {
                         var rpc_data = {
-                                "jsonrpc": "2.0",
-                                "method": "aria2.addUri",
-                                "id": new Date().getTime(),
-                                "params": [[file_list[i].link], {
-                                        "out": file_list[i].name,
-                                        "header": combination.header(cookies)
-                                    }
-                                ]
-                            };
-                            if($("#rpc_token").val()){
-                                rpc_data.params.unshift("token:"+$("#rpc_token").val());
-                            }
+                            "jsonrpc": "2.0",
+                            "method": "aria2.addUri",
+                            "id": new Date().getTime(),
+                            "params": [[file_list[i].link], {
+                                    "out": file_list[i].name,
+                                    "dir":$("#setting_aria2_dir").val()||null,
+                                    "header": combination.header()
+                                }
+                            ]
+                        };
+                        if ($("#rpc_token").val()) {
+                            rpc_data.params.unshift("token:" + $("#rpc_token").val());
+                        }
                         self.aria2send_data(rpc_data);
                     }
                 }
@@ -636,11 +649,11 @@ var css = function() {/*
  cursor: pointer;
  text-decoration: none;
  }
-.download-mgr-dialog .content {
-padding: 10px 20px;
-height:auto;
-overflow: hidden;
-}
+ .download-mgr-dialog .content {
+ padding: 10px 20px;
+ height:auto;
+ overflow: hidden;
+ }
  #setting_div_table{
  width:100%;
  border:0;
@@ -666,7 +679,7 @@ onload(function() {
         self.port.on('cookies', function(message) {
         var script = document.createElement('script');
         script.id = "baidu_script";
-        script.appendChild(document.createTextNode('(' + baidu + ')("' + message + '");'));
+        script.appendChild(document.createTextNode('(' + baidu + ')(\'' +JSON.stringify(message) + '\');'));
         (document.body || document.head || document.documentElement).appendChild(script);
     });
         
