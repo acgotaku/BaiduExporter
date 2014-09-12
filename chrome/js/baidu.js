@@ -10,32 +10,23 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.7
+// @version 0.1.8
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.7";
-    var update_date = "2014/09/05";
+    var version = "0.1.8";
+    var update_date = "2014/09/12";
     var baidupan = (function() {
-        var home = typeof FileUtils == "undefined" ? true : false;
+        var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
         //Type类型有
         //MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
-        var SetMessage = function(msg, type) {
-            if (!home) {
-                Utilities.useToast({
-                    toastMode: disk.ui.Toast[type],
-                    msg: msg,
-                    sticky: false
-                });
-
-            } else {
-                var Toast = require("common:widget/toast/toast.js");
-                Toast.obtain.useToast({
-                    toastMode: Toast.obtain[type],
-                    msg: msg,
-                    sticky: false
-                });
-            }
+        var SetMessage = function(msg, type) {   
+            var Toast = require("common:widget/toast/toast.js");
+            Toast.obtain.useToast({
+                toastMode: Toast.obtain[type],
+                msg: msg,
+                sticky: false
+            });
         };
         //重新封装的XMLHttpRequest 用来代替$.ajax 因为百度网盘的$.ajax已经被修改了
         var HttpSendRead = function(info) {
@@ -157,7 +148,7 @@ var baidu = function(cookies) {
                 var aria2_download = $("<a>").text("导出下载").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").appendTo(list);
                 if (!home) {
-                    aria2_btn.addClass("new-dbtn").append('<em class="icon-download"></em><b>导出下载</b>');
+                    aria2_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);
                     aria2_export.click(function() {
                         func = "aria2_rpc";
@@ -286,11 +277,10 @@ var baidu = function(cookies) {
 
             },
             //处理验证码
-            alert_dialog: function(json, obj) {
+            alert_dialog: function(json, params) {
                 var self = this;
                 var id = json.request_id;
-                obj.request_id = json.request_id;
-                var div = $("<div>").attr("id", "alert_div" + id).addClass("b-panel b-dialog alert-dialog")
+                var div = $("<div>").attr("id", "alert_div" + id).addClass("b-panel b-dialog alert-dialog");
                 var html = [
                     '<div class="dlg-hd b-rlv">',
                     '<div title="关闭" id="alert_dialog_close" class="dlg-cnr dlg-cnr-r"></div>',
@@ -322,22 +312,21 @@ var baidu = function(cookies) {
                     $(element).attr("id", $(element).attr("id") + id);
                 });
                 div.show();
-                var offset = id.toString().slice(-2);
+                var offset = new Date().getTime().toString().slice(-2);
                 var screenWidth = $(window).width(), screenHeight = $(window).height();
                 var scrolltop = $(document).scrollTop();
                 var divLeft = (screenWidth - div.width()) / 2 + parseInt(offset);
                 var divTop = (screenHeight - div.height()) / 2 + scrolltop - parseInt(offset);
-                div.css({left: divLeft + "px", top: divTop + "px"});
-                $("#vcode" + id).attr("src", json.img);
+                div.css({left: divLeft + "px", top: divTop + "px", "z-index": 2000});
+                $("#vcode" + id).attr("src", json.vcode_img);
                 $("#change" + id).unbind().click(function() {
                     var url = "http://vcode.baidu.com/genimage";
-                    $("#vcode" + id).attr("src", url + "?" + json.vcode + "&" + new Date().getTime());
+                    $("#vcode" + id).attr("src", url + "?" + json.vcode_str + "&" + new Date().getTime());
                 });
                 $("#okay" + id).unbind().click(function() {
                     var input_code = $("#verification" + id).attr("value");
-                    var data = 'fid_list=' + JSON.stringify([obj.fs_id]);
-                    data = data + "&input=" + input_code + "&vcode=" + json.vcode;
-                    self.get_share_dlink(obj, data);
+                    var data = params + "&vcode_input=" + input_code + "&vcode_str=" + json.vcode_str;
+                    self.get_share_dlink(yunData, data);
                     div.remove();
                 });
                 $("#ignore" + id).unbind().click(function() {
@@ -362,9 +351,9 @@ var baidu = function(cookies) {
                         var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
 
                     } else {
-                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
-                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
+                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
                         var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
                     }
                     download_link.appendTo(content_ui);
@@ -455,42 +444,50 @@ var baidu = function(cookies) {
             },
             get_share_id: function() {
                 var self = this;
-                if (disk.util.ViewShareUtils) {
-                    var obj = JSON.parse(disk.util.ViewShareUtils.viewShareData);
-                    // self[func](obj);
-                    var data = 'fid_list=' + JSON.stringify([obj.fs_id]);
-                    self.get_share_dlink(obj, data);
+                if (yunData.SHAREPAGETYPE=="single_file_page") {
+                    var fid_list = 'fid_list=' + JSON.stringify([yunData.FS_ID]);
+                    self.get_share_dlink(yunData, fid_list);
                 } else {
-                    var file_info = FileUtils.getListViewCheckedItems();
+                    var File = require("common:widget/data-center/data-center.js");
+                    var file_info = File.get("selectedList");
                     if (file_info.length == 0) {
                         SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
                         return;
                     }
                     for (var i = 0; i < file_info.length; i++) {
-                        var data = 'fid_list=' + JSON.stringify([file_info[i].fs_id]);
-                        self.get_share_dlink(file_info[i], data);
-                        // self[func](file_info[i]);
+                        var fid_list = 'fid_list=' + JSON.stringify([file_info[i]]);
+                        self.get_share_dlink(yunData, fid_list);
                     }
                 }
             },
-            get_share_dlink: function(obj, data) {
+            get_share_dlink: function(obj, fid_list) {
                 var self = this;
-                var uk = FileUtils.share_uk;
-                var id = FileUtils.share_id;
-                var download = "http://" + window.location.host + "/share/download?channel=chunlei&clienttype=0&web=1" + "&uk=" + uk + "&shareid=" + id + "&timestamp=" + FileUtils.share_timestamp + "&sign=" + FileUtils.share_sign + "&bdstoken=" + FileUtils.bdstoken;
+                var data = "encrypt=0&product=share&uk="+yunData.SHARE_UK+"&primaryid="+yunData.SHARE_ID+"&"+fid_list;
+                var download = "http://" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
                 // if( obj.isdir == 0 ){ download = download+"&nozip=1"; }
+                var pic="http://" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken="+yunData.MYBDSTOKEN+"&app_id="+yunData.FILEINFO[0].app_id;
                 var parameter = {'url': download, 'dataType': 'json', type: 'POST', 'data': data};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
-                            if (json.errno == -19) {
+                            if (json.errno == -20) {
                                 if (data.indexOf("input") != -1) {
                                     json.auth = true;
                                 }
-                                self.alert_dialog(json, obj);
-                                SetMessage("请输入验证码,以便继续下载", "MODE_CAUTION");
+                                HttpSendRead({'url':pic,'dataType': 'json',type: 'GET'})
+                                .done(function(json, textStatus, jqXHR){
+                                    self.alert_dialog(json, data);
+                                    SetMessage("请输入验证码,以便继续下载", "MODE_CAUTION");
+                                })
+                                .fail(function(json, textStatus, jqXHR){
+                                    SetMessage("获取验证码失败?", "MODE_FAILURE");
+                                });
+                               
                             } else if (json.errno == 0) {
                                 var file_list = [];
-                                file_list.push({"name": obj.server_filename, "link": json.dlink});
+                                for(var i=0;i<json.list.length;i++){
+                                    var list=json.list[i];
+                                    file_list.push({"name": list.server_filename, "link": list.dlink});
+                                }
                                 self[func](file_list);
                             } else {
                                 console.log(json);
