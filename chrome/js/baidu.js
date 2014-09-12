@@ -214,12 +214,18 @@ var baidu = function(cookies) {
 
                 self[func](file_list);
             },
-            //获取文件夹下载的信息 暂时不能使用
+            //获取文件夹下载的信息
             get_dir: function(data) {
                 var self = this;
                 var obj = $.parseJSON(data);
+                var File = require("common:widget/data-center/data-center.js");
+                var Filename = File.get("selectedItemList");
+                var name=[];
+                for(var i=0;i<Filename.length;i++){
+                    name.push(Filename[i].children().eq(0).children().eq(2).attr("title"));
+                }
                 var file_list = [];
-                file_list.push({"name": "pack.zip", "link": obj.dlink});
+                file_list.push({"name": name.join("_")+".zip", "link": obj.dlink});
                 self[func](file_list);
             },
             //设置界面的UI
@@ -449,13 +455,23 @@ var baidu = function(cookies) {
                     self.get_share_dlink(yunData, fid_list);
                 } else {
                     var File = require("common:widget/data-center/data-center.js");
+                    var Filename = File.get("selectedItemList");
                     var file_info = File.get("selectedList");
                     if (file_info.length == 0) {
                         SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
                         return;
                     }
+                    for (var i = 0; i < Filename.length; i++) {
+                        if (Filename[i].attr("data-extname") == "dir") {
+                            var fid_list = 'fid_list=' + JSON.stringify(File.get("selectedList"));
+                            yunData["isdir"]=1;
+                            self.get_share_dlink(yunData, fid_list);
+                            return;
+                        }
+                    }
                     for (var i = 0; i < file_info.length; i++) {
                         var fid_list = 'fid_list=' + JSON.stringify([file_info[i]]);
+                        yunData["isdir"]=0;
                         self.get_share_dlink(yunData, fid_list);
                     }
                 }
@@ -464,7 +480,7 @@ var baidu = function(cookies) {
                 var self = this;
                 var data = "encrypt=0&product=share&uk="+yunData.SHARE_UK+"&primaryid="+yunData.SHARE_ID+"&"+fid_list;
                 var download = "http://" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
-                // if( obj.isdir == 0 ){ download = download+"&nozip=1"; }
+                if( obj.isdir == 1 ){ data = data+"&type=batch"; }
                 var pic="http://" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken="+yunData.MYBDSTOKEN+"&app_id="+yunData.FILEINFO[0].app_id;
                 var parameter = {'url': download, 'dataType': 'json', type: 'POST', 'data': data};
                 HttpSendRead(parameter)
@@ -483,10 +499,16 @@ var baidu = function(cookies) {
                                 });
                                
                             } else if (json.errno == 0) {
+
                                 var file_list = [];
-                                for(var i=0;i<json.list.length;i++){
+                                if(obj.isdir == 1){
+                                   self.get_dir(JSON.stringify(json));
+                                   return;
+                                }else{
+                                    for(var i=0;i<json.list.length;i++){
                                     var list=json.list[i];
                                     file_list.push({"name": list.server_filename, "link": list.dlink});
+                                    }
                                 }
                                 self[func](file_list);
                             } else {
