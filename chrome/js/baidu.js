@@ -486,11 +486,11 @@ var baidu = function(cookies) {
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             if (json.errno == -20) {
-                                if (data.indexOf("input") != -1) {
-                                    json.auth = true;
-                                }
                                 HttpSendRead({'url':pic,'dataType': 'json',type: 'GET'})
                                 .done(function(json, textStatus, jqXHR){
+                                    if (data.indexOf("input") != -1) {
+                                        json.auth = true;
+                                    }
                                     self.alert_dialog(json, data);
                                     SetMessage("请输入验证码,以便继续下载", "MODE_CAUTION");
                                 })
