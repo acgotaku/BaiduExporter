@@ -10,11 +10,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.8
+// @version 0.1.9
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.8";
-    var update_date = "2014/09/12";
+    var version = "0.1.9";
+    var update_date = "2014/09/18";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -452,7 +452,7 @@ var baidu = function(cookies) {
                 var self = this;
                 if (yunData.SHAREPAGETYPE=="single_file_page") {
                     var fid_list = 'fid_list=' + JSON.stringify([yunData.FS_ID]);
-                    self.get_share_dlink(yunData, fid_list);
+                    self.set_share_data(yunData, fid_list);
                 } else {
                     var File = require("common:widget/data-center/data-center.js");
                     var Filename = File.get("selectedItemList");
@@ -465,22 +465,30 @@ var baidu = function(cookies) {
                         if (Filename[i].attr("data-extname") == "dir") {
                             var fid_list = 'fid_list=' + JSON.stringify(File.get("selectedList"));
                             yunData["isdir"]=1;
-                            self.get_share_dlink(yunData, fid_list);
+                            self.set_share_data(yunData, fid_list);
                             return;
                         }
                     }
                     for (var i = 0; i < file_info.length; i++) {
                         var fid_list = 'fid_list=' + JSON.stringify([file_info[i]]);
                         yunData["isdir"]=0;
-                        self.get_share_dlink(yunData, fid_list);
+                        self.set_share_data(yunData, fid_list);
                     }
                 }
             },
-            get_share_dlink: function(obj, fid_list) {
-                var self = this;
+            set_share_data:function(obj,fid_list){
+                var self = this; 
                 var data = "encrypt=0&product=share&uk="+yunData.SHARE_UK+"&primaryid="+yunData.SHARE_ID+"&"+fid_list;
-                var download = "http://" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
+                if(yunData.SHARE_PUBLIC == 0){
+                    var Service = require("common:widget/commonService/commonService.js");
+                    data = data+"&extra="+encodeURIComponent(JSON.stringify({sekey:Service.getCookie("BDCLND")}));
+                }
                 if( obj.isdir == 1 ){ data = data+"&type=batch"; }
+                self.get_share_dlink(obj, data);
+            },
+            get_share_dlink: function(obj, data) {
+                var self = this;  
+                var download = "http://" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
                 var pic="http://" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken="+yunData.MYBDSTOKEN+"&app_id="+yunData.FILEINFO[0].app_id;
                 var parameter = {'url': download, 'dataType': 'json', type: 'POST', 'data': data};
                 HttpSendRead(parameter)
