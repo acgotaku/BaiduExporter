@@ -1,5 +1,7 @@
 #BaiduExporter
 
+##必须用插件方式才可以使用,不是单纯的UserScript
+
 可以方便的把百度网盘的下载地址导出到aria2/aria2-rpc，支持YAAW。
 
 作为chrome扩展安装即可.
