@@ -1,4 +1,5 @@
 // ==UserScript==
+//单纯的JS是无法运行的,必须使用扩展才行.
 // @name            百度网盘aria2导出工具
 // @author          acgotaku311
 // @description 一个方便吧百度网盘的Aria2rpc导出的脚本。
@@ -10,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.1.9
+// @version 0.2.0
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.1.9";
-    var update_date = "2014/09/18";
+    var version = "0.2.0";
+    var update_date = "2014/10/15";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -205,7 +206,7 @@ var baidu = function(cookies) {
                 for (var i = 0; i < length; i++) {
                     for (var j = 0; j < length; j++) {
                         if (obj.dlink[i].fs_id == Filename[j].attr("data-id")) {
-                            name = Filename[j].children().eq(0).children().eq(2).attr("title");
+                            name = Filename[j].children().eq(0).children().eq(2).attr("title")||Filename[j].children().eq(0).attr("title");
                             break;
                         }
                     }
