@@ -543,11 +543,58 @@ var baidu = function(cookies) {
                 }
                 for (var i = 0; i < length; i++) {
                     if (Filename[i].attr("data-extname") == "dir") {
-                        Service.getDlink(JSON.stringify(File.get("selectedList")), "batch", self.get_dir.bind(self));
+                        //Service.getDlink(JSON.stringify(File.get("selectedList")), "batch", self.get_dir.bind(self));
+                        self.get_dir(Filename[i].attr("data-id"));
                         return;
                     }
                 }
                 Service.getDlink(JSON.stringify(File.get("selectedList")), "dlink", self.get_info.bind(self));
+            },
+            //递归下载文件夹内容
+            get_dir:function(fs_id){
+                var self=this;
+                var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+                var path=API.get("path");
+                if(path == null){
+                    path="/";
+                }
+                var parameter = {'url': "http://pan.baidu.com/api/list?dir="+path, 'dataType': 'json', type: 'GET'};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            SetMessage("获取列表成功!", "MODE_SUCCESS");
+                            var array=json.list;
+                            for(var i=0;i<array.length;i++){
+                                if(array[i].fs_id == fs_id){
+                                    console.log(array[i].path);
+                                    self.get_list(array[i].path);
+                                }
+                            }
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取List失败!", "MODE_FAILURE");
+                            console.log(textStatus);
+                        });                
+
+            },
+            //获取列表的所有文件信息
+            get_list:function(path){
+                var parameter = {'url': "http://pan.baidu.com/api/list?dir="+path, 'dataType': 'json', type: 'GET'};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            SetMessage("获取列表成功!", "MODE_SUCCESS");
+                            var array=json.list;
+                            for(var i=0;i<array.length;i++){
+                                
+                            }
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取List失败!", "MODE_FAILURE");
+                            console.log(textStatus);
+                        });   
+            },
+            //根据文件路径获取文件的信息
+            get_filemetas:function(){
+
             },
             //获取aria2c的版本号用来测试通信
             get_version: function() {
