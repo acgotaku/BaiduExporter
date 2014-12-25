@@ -189,31 +189,14 @@ var baidu = function(cookies) {
 
                 config.click(function() {
                     $("#setting_div").show();
-                    self.set_config();
+                    var screenWidth = $(window).width(), screenHeight = $(window).height();
+                    var scrolltop = $(document).scrollTop();
+                    var objLeft = (screenWidth - $("#setting_div").width())/2 ;
+                    var objTop = (screenHeight - $("#setting_div").height())/2 + scrolltop;
+                    $("#setting_div").css({left: objLeft + 'px', top: objTop + 'px'});
                 });
 
 
-            },
-            //获取选择的文件的link和name
-            get_info: function(data) {
-                var self = this;
-                var file_list = [];//储存选中的文件信息包含link和name
-                var File = require("common:widget/data-center/data-center.js");
-                var Filename = File.get("selectedItemList");
-                var obj = $.parseJSON(data);
-                var name = null;
-                var length = obj.dlink.length;
-                for (var i = 0; i < length; i++) {
-                    for (var j = 0; j < length; j++) {
-                        if (obj.dlink[i].fs_id == Filename[j].attr("data-id")) {
-                            name = Filename[j].children().eq(0).children().eq(2).attr("title")||Filename[j].children().eq(0).attr("title");
-                            break;
-                        }
-                    }
-                    file_list.push({"name": name, "link": obj.dlink[i].dlink});
-                }
-
-                self[func](file_list);
             },
             //获取文件夹下载的信息
             get_dir: function(data) {
@@ -242,6 +225,7 @@ var baidu = function(cookies) {
                     '<table id="setting_div_table" >',
                     '<tbody>',
                     '<tr><td width="100"><label>ARIA2 RPC：</label></td><td><input id="rpc_input" type="text" class="input-large"></td></tr>',
+                    '<tr><td><label>文件夹打包下载:</label></td><td><input id="rpc_zip" type="checkbox"></td></tr>',
                     '<tr><td><label>RPC访问设置</label></td><td><input id="rpc_distinguish" type="checkbox"></td></tr>',
                     '<tr><td><label >RPC 用户名：</label></td><td><input type="text" id="rpc_user" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"></td></tr>',
@@ -416,6 +400,7 @@ var baidu = function(cookies) {
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || "http://pan.baidu.com/disk/home");
+                $("#setting_aria2_headers").val(localStorage.getItem("rpc_headers"));
                 if (localStorage.getItem("auth") == "true") {
                     var rpc_user = localStorage.getItem("rpc_user");
                     var rpc_pass = localStorage.getItem("rpc_pass");
@@ -426,6 +411,9 @@ var baidu = function(cookies) {
                 }
                 else {
                     $("#rpc_user, #rpc_pass").val("");
+                }
+                if(localStorage.getItem("rpc_zip") == "true"){
+                    $("#rpc_zip").prop('checked', true);
                 }
             },
             //保存配置数据
@@ -446,8 +434,14 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_user", null);
                     localStorage.setItem("rpc_pass", null);
                 }
+                if($("#rpc_zip").prop('checked') == true){
+                    localStorage.setItem("rpc_zip", true);
+                }else{
+                    localStorage.setItem("rpc_zip", null);
+                }
                 localStorage.setItem("rpc_token", $("#rpc_token").val());
                 localStorage.setItem("rpc_dir", $("#setting_aria2_dir").val());
+                localStorage.setItem("rpc_headers", $("#setting_aria2_headers").val());
             },
             get_share_id: function() {
                 var self = this;
@@ -543,12 +537,14 @@ var baidu = function(cookies) {
                 }
                 for (var i = 0; i < length; i++) {
                     if (Filename[i].attr("data-extname") == "dir") {
-                        //Service.getDlink(JSON.stringify(File.get("selectedList")), "batch", self.get_dir.bind(self));
-                        self.get_dir(Filename[i].attr("data-id"));
-                        return;
+                        if($("#rpc_zip").prop('checked') == true){
+                            Service.getDlink(JSON.stringify(File.get("selectedList")), "batch", self.get_dir.bind(self));
+                            return;
+                        }
                     }
+                    self.get_dir(Filename[i].attr("data-id"));
                 }
-                Service.getDlink(JSON.stringify(File.get("selectedList")), "dlink", self.get_info.bind(self));
+                //Service.getDlink(JSON.stringify(File.get("selectedList")), "dlink", self.get_info.bind(self));
             },
             //递归下载文件夹内容
             get_dir:function(fs_id){
@@ -565,8 +561,11 @@ var baidu = function(cookies) {
                             var array=json.list;
                             for(var i=0;i<array.length;i++){
                                 if(array[i].fs_id == fs_id){
-                                    console.log(array[i].path);
-                                    self.get_list(array[i].path);
+                                    if(array[i].isdir == 1){
+                                        self.get_list(array[i].path);
+                                    }else{
+                                        self.get_filemetas(array[i].path);
+                                    }
                                 }
                             }
                         })
@@ -578,23 +577,59 @@ var baidu = function(cookies) {
             },
             //获取列表的所有文件信息
             get_list:function(path){
+                var self=this;
+                var i=0;
                 var parameter = {'url': "http://pan.baidu.com/api/list?dir="+path, 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
-                            SetMessage("获取列表成功!", "MODE_SUCCESS");
                             var array=json.list;
                             for(var i=0;i<array.length;i++){
-                                
+                                var path=array[i].path;
+                                if(array[i].isdir == 1){
+                                    delayLoopList(path);
+                                }else{
+                                    delayLoopFile(path);  
+                                    //self.get_filemetas(array[i].path);
+                                }
                             }
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
                             SetMessage("获取List失败!", "MODE_FAILURE");
                             console.log(textStatus);
-                        });   
+                        });  
+                function delayLoopList(path){
+                    setTimeout(function(){
+                        self.get_list(path);
+                    },200+i);
+                    i=i+200;
+                } 
+                function delayLoopFile(path){
+                    setTimeout(function(){
+                        self.get_filemetas(path);
+                        console.log(new Date().getTime());
+                    },200+i);
+                    i=i+200;
+                } 
             },
             //根据文件路径获取文件的信息
-            get_filemetas:function(){
-
+            get_filemetas:function(target){
+                var self=this;
+                var parameter = {'url': "http://pan.baidu.com/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            SetMessage("获取文件信息成功!", "MODE_SUCCESS");
+                            var file=json.info;
+                            var file_list = [];
+                            for(var i=0;i<file.length;i++){
+                                file_list.push({"name": file[i].path, "link": file[i].dlink});
+                            }
+                            console.log(file_list);
+                            self[func](file_list);
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取List失败!", "MODE_FAILURE");
+                            console.log(textStatus);
+                        });
             },
             //获取aria2c的版本号用来测试通信
             get_version: function() {
