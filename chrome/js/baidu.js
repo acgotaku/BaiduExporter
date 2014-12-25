@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.2.0
+// @version 0.2.1
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.2.0";
-    var update_date = "2014/10/15";
+    var version = "0.2.1";
+    var update_date = "2014/12/25";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -579,10 +579,12 @@ var baidu = function(cookies) {
             get_list:function(path){
                 var self=this;
                 var i=0;
+                var fold=0;
                 var parameter = {'url': "http://pan.baidu.com/api/list?dir="+path, 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             var array=json.list;
+                            console.log(json);
                             for(var i=0;i<array.length;i++){
                                 var path=array[i].path;
                                 if(array[i].isdir == 1){
@@ -598,17 +600,18 @@ var baidu = function(cookies) {
                             console.log(textStatus);
                         });  
                 function delayLoopList(path){
+                    fold++;
+                    console.log(fold);
                     setTimeout(function(){
                         self.get_list(path);
-                    },200+i);
-                    i=i+200;
+                    },300+i);
+                    i=i+300;
                 } 
                 function delayLoopFile(path){
                     setTimeout(function(){
                         self.get_filemetas(path);
-                        console.log(new Date().getTime());
-                    },200+i);
-                    i=i+200;
+                    },300+i);
+                    i=i+300;
                 } 
             },
             //根据文件路径获取文件的信息
