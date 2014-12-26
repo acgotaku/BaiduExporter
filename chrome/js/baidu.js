@@ -457,19 +457,35 @@ var baidu = function(cookies) {
                         return;
                     }
                     for (var i = 0; i < Filename.length; i++) {
-                        if (Filename[i].attr("data-extname") == "dir") {
-                            var fid_list = 'fid_list=' + JSON.stringify(File.get("selectedList"));
-                            yunData["isdir"]=1;
-                            self.set_share_data(yunData, fid_list);
-                            return;
-                        }
-                    }
-                    for (var i = 0; i < file_info.length; i++) {
-                        var fid_list = 'fid_list=' + JSON.stringify([file_info[i]]);
-                        yunData["isdir"]=0;
-                        self.set_share_data(yunData, fid_list);
+                        self.get_share_dir(Filename[i].attr("data-id"));
                     }
                 }
+            },
+            get_share_dir:function(fs_id){
+                var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+                var path=API.get("path");
+                if(path == "/"){
+                    path=yunData.PATH;
+                }     
+                var parameter = {'url': "http://pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            SetMessage("获取共享列表成功!", "MODE_SUCCESS");
+                            var array=json.list;
+                            for(var i=0;i<array.length;i++){
+                                if(array[i].fs_id == fs_id){
+                                    if(array[i].isdir == 1){
+                                        self.get_list(array[i].path);
+                                    }else{
+                                        self.get_filemetas(array[i].path);
+                                    }
+                                }
+                            }
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取List失败!", "MODE_FAILURE");
+                            console.log(textStatus);
+                        });          
             },
             set_share_data:function(obj,fid_list){
                 var self = this; 
