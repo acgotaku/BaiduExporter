@@ -189,14 +189,17 @@ var baidu = function(cookies) {
 
                 config.click(function() {
                     $("#setting_div").show();
-                    var screenWidth = $(window).width(), screenHeight = $(window).height();
-                    var scrolltop = $(document).scrollTop();
-                    var objLeft = (screenWidth - $("#setting_div").width())/2 ;
-                    var objTop = (screenHeight - $("#setting_div").height())/2 + scrolltop;
-                    $("#setting_div").css({left: objLeft + 'px', top: objTop + 'px'});
+                    self.set_center($("#setting_div"));
                 });
 
 
+            },
+            set_center:function(obj){
+                    var screenWidth = $(window).width(), screenHeight = $(window).height();
+                    var scrolltop = $(document).scrollTop();
+                    var objLeft = (screenWidth - obj.width())/2 ;
+                    var objTop = (screenHeight - obj.height())/2 + scrolltop;
+                    obj.css({left: objLeft + 'px', top: objTop + 'px'});
             },
             //获取文件夹下载的信息
             get_dir: function(data) {
@@ -390,6 +393,7 @@ var baidu = function(cookies) {
                     $("#download_txt_btn").attr("href", $("#download_txt_btn").attr("href") + encodeURIComponent(down_txt.join("")));
                     $("#download_link").val($("#download_link").val() + files.join(""));
                     $("#download_ui").show();
+                    this.set_center($("#download_ui"));
                 }
 
             },
@@ -456,28 +460,47 @@ var baidu = function(cookies) {
                         SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
                         return;
                     }
+                    if($("#rpc_zip").prop('checked') == true){
+                        for (var i = 0; i < Filename.length; i++) {
+                            if (Filename[i].attr("data-extname") == "dir") {
+                                var fid_list = 'fid_list=' + JSON.stringify(File.get("selectedList"));
+                                yunData["isdir"]=1;
+                                self.set_share_data(yunData, fid_list);
+                                return;
+                            }
+                        }
+                    }
                     for (var i = 0; i < Filename.length; i++) {
                         self.get_share_dir(Filename[i].attr("data-id"));
                     }
                 }
             },
             get_share_dir:function(fs_id){
+                var self=this;
                 var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+                var path_head=yunData.PATH.slice(0,yunData.PATH.lastIndexOf("/"));
                 var path=API.get("path");
-                if(path == "/"){
+                if(path == "/"|| path == null){
                     path=yunData.PATH;
-                }     
+                }else{
+                    path=path_head+path;
+                }
+                console.log(path);
                 var parameter = {'url': "http://pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             SetMessage("获取共享列表成功!", "MODE_SUCCESS");
                             var array=json.list;
+                            console.log(json);
                             for(var i=0;i<array.length;i++){
-                                if(array[i].fs_id == fs_id){
+                                if(array[i].fs_id == fs_id ||API.get("path")=="/" || API.get("path") == null){
+                                    console.log(array[i]);
                                     if(array[i].isdir == 1){
-                                        self.get_list(array[i].path);
+                                        self.get_share_list(array[i].path);
                                     }else{
-                                        self.get_filemetas(array[i].path);
+                                        var fid_list = 'fid_list=' + JSON.stringify([array[i].fs_id]);
+                                        yunData["isdir"]=0;
+                                        self.set_share_data(yunData, fid_list);
                                     }
                                 }
                             }
@@ -487,6 +510,42 @@ var baidu = function(cookies) {
                             console.log(textStatus);
                         });          
             },
+            get_share_list:function(path){
+                var self=this;
+                var i=0;
+                var parameter = {'url': "http://pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            var array=json.list;
+                            console.log(json);
+                            for(var i=0;i<array.length;i++){
+                                if(array[i].isdir == 1){
+                                    delayLoopList(array[i].path);
+                                }else{
+                                    delayLoopFile(array[i].fs_id);  
+                                    //self.get_filemetas(array[i].path);
+                                }
+                            }
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取List失败!", "MODE_FAILURE");
+                            console.log(textStatus);
+                        });  
+                function delayLoopList(path){
+                    setTimeout(function(){
+                        self.get_share_list(path);
+                    },300+i);
+                    i=i+300;
+                } 
+                function delayLoopFile(fs_id){
+                    setTimeout(function(){
+                        var fid_list = 'fid_list=' + JSON.stringify([fs_id]);
+                        yunData["isdir"]=0;
+                        self.set_share_data(yunData, fid_list);
+                    },300+i);
+                    i=i+300;
+                } 
+            },
             set_share_data:function(obj,fid_list){
                 var self = this; 
                 var data = "encrypt=0&product=share&uk="+yunData.SHARE_UK+"&primaryid="+yunData.SHARE_ID+"&"+fid_list;
@@ -494,7 +553,7 @@ var baidu = function(cookies) {
                     var Service = require("common:widget/commonService/commonService.js");
                     data = data+"&extra="+encodeURIComponent(JSON.stringify({sekey:Service.getCookie("BDCLND")}));
                 }
-                if( obj.isdir == 1 ){ data = data+"&type=batch"; }
+                //if( obj.isdir == 1 ){ data = data+"&type=batch"; }
                 self.get_share_dlink(obj, data);
             },
             get_share_dlink: function(obj, data) {
@@ -526,7 +585,7 @@ var baidu = function(cookies) {
                                 }else{
                                     for(var i=0;i<json.list.length;i++){
                                     var list=json.list[i];
-                                    file_list.push({"name": list.server_filename, "link": list.dlink});
+                                    file_list.push({"name": list.path, "link": list.dlink});
                                     }
                                 }
                                 self[func](file_list);
