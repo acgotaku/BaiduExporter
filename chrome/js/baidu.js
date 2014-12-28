@@ -553,7 +553,7 @@ var baidu = function(cookies) {
                     var Service = require("common:widget/commonService/commonService.js");
                     data = data+"&extra="+encodeURIComponent(JSON.stringify({sekey:Service.getCookie("BDCLND")}));
                 }
-                //if( obj.isdir == 1 ){ data = data+"&type=batch"; }
+                if( obj.isdir == 1 ){ data = data+"&type=batch"; }
                 self.get_share_dlink(obj, data);
             },
             get_share_dlink: function(obj, data) {
@@ -585,7 +585,7 @@ var baidu = function(cookies) {
                                 }else{
                                     for(var i=0;i<json.list.length;i++){
                                     var list=json.list[i];
-                                    file_list.push({"name": list.path, "link": list.dlink});
+                                    file_list.push({"name": list.path.slice(yunData.PATH.lastIndexOf("/"),list.path.length), "link": list.dlink});
                                     }
                                 }
                                 self[func](file_list);
@@ -617,12 +617,12 @@ var baidu = function(cookies) {
                             return;
                         }
                     }
-                    self.get_dir(Filename[i].attr("data-id"));
+                    self.get_all_dir(Filename[i].attr("data-id"));
                 }
                 //Service.getDlink(JSON.stringify(File.get("selectedList")), "dlink", self.get_info.bind(self));
             },
             //递归下载文件夹内容
-            get_dir:function(fs_id){
+            get_all_dir:function(fs_id){
                 var self=this;
                 var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
                 var path=API.get("path");
@@ -692,6 +692,8 @@ var baidu = function(cookies) {
             //根据文件路径获取文件的信息
             get_filemetas:function(target){
                 var self=this;
+                var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+                var path=API.get("path");
                 var parameter = {'url': "http://pan.baidu.com/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
@@ -699,7 +701,7 @@ var baidu = function(cookies) {
                             var file=json.info;
                             var file_list = [];
                             for(var i=0;i<file.length;i++){
-                                file_list.push({"name": file[i].path, "link": file[i].dlink});
+                                file_list.push({"name": file[i].path.slice(path.length,file[i].path.length), "link": file[i].dlink});
                             }
                             console.log(file_list);
                             self[func](file_list);
