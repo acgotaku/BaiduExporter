@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.2.1
+// @version 0.2.2
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.2.1";
-    var update_date = "2014/12/25";
+    var version = "0.2.2";
+    var update_date = "2014/12/28";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -701,7 +701,7 @@ var baidu = function(cookies) {
                             var file=json.info;
                             var file_list = [];
                             for(var i=0;i<file.length;i++){
-                                file_list.push({"name": file[i].path.slice(path.length,file[i].path.length), "link": file[i].dlink});
+                                file_list.push({"name": file[i].path.slice(path.length+1,file[i].path.length), "link": file[i].dlink});
                             }
                             console.log(file_list);
                             self[func](file_list);
