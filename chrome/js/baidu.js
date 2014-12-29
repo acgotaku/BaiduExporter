@@ -654,7 +654,6 @@ var baidu = function(cookies) {
             get_list:function(path){
                 var self=this;
                 var i=0;
-                var fold=0;
                 var parameter = {'url': "http://pan.baidu.com/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
@@ -675,8 +674,6 @@ var baidu = function(cookies) {
                             console.log(textStatus);
                         });  
                 function delayLoopList(path){
-                    fold++;
-                    console.log(fold);
                     setTimeout(function(){
                         self.get_list(path);
                     },300+i);
