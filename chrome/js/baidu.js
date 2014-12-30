@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.2.4
+// @version 0.2.5
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.2.4";
-    var update_date = "2014/12/30";
+    var version = "0.2.5";
+    var update_date = "2014/12/31";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -696,7 +696,7 @@ var baidu = function(cookies) {
                 var self=this;
                 var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
                 var path=API.get("path");
-                if(path == null){
+                if(path == null || path =="/"){
                     path="";
                 }
                 var parameter = {'url': "http://pan.baidu.com/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
