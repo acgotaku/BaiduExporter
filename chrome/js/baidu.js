@@ -232,6 +232,7 @@ var baidu = function(cookies) {
                     '<tr><td><label>RPC访问设置</label></td><td><input id="rpc_distinguish" type="checkbox"></td></tr>',
                     '<tr><td><label >RPC 用户名：</label></td><td><input type="text" id="rpc_user" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"></td></tr>',
+                    '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)</td></tr>',
                     '<tr><td><label>Secret Token：</label></td><td><input type="text" id="rpc_token" class="input-small"><div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
                     '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
                     '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
@@ -367,7 +368,6 @@ var baidu = function(cookies) {
                 var down_txt = [];
                 if (file_list.length > 0) {
                     var length = file_list.length;
-                    console.log(length);
                     for (var i = 0; i < length; i++) {
                         files.push("aria2c -c -s10 -k1M -x10 -o " + JSON.stringify(file_list[i].name) + combination.header('aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
@@ -400,6 +400,7 @@ var baidu = function(cookies) {
             //填充已经设置的配置数据
             set_config: function() {
                 $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
+                $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
                 $("#rpc_token").val(localStorage.getItem("rpc_token"));
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
@@ -443,6 +444,7 @@ var baidu = function(cookies) {
                 }else{
                     localStorage.setItem("rpc_zip", null);
                 }
+                localStorage.setItem("rpc_delay", $("#rpc_delay").val());
                 localStorage.setItem("rpc_token", $("#rpc_token").val());
                 localStorage.setItem("rpc_dir", $("#setting_aria2_dir").val());
                 localStorage.setItem("rpc_headers", $("#setting_aria2_headers").val());
@@ -512,17 +514,19 @@ var baidu = function(cookies) {
             },
             get_share_list:function(path){
                 var self=this;
-                var i=0;
+                var time=0;
+                var delay=parseInt($("#rpc_delay").val());
                 var parameter = {'url': "http://pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             var array=json.list;
                             console.log(json);
                             for(var i=0;i<array.length;i++){
+                                time=time+delay;
                                 if(array[i].isdir == 1){
-                                    delayLoopList(array[i].path);
+                                    delayLoopList(array[i].path,time);
                                 }else{
-                                    delayLoopFile(array[i].fs_id);  
+                                    delayLoopFile(array[i].fs_id,time);  
                                     //self.get_filemetas(array[i].path);
                                 }
                             }
@@ -534,16 +538,14 @@ var baidu = function(cookies) {
                 function delayLoopList(path){
                     setTimeout(function(){
                         self.get_share_list(path);
-                    },300+i);
-                    i=i+300;
+                    },time);
                 } 
                 function delayLoopFile(fs_id){
                     setTimeout(function(){
                         var fid_list = 'fid_list=' + JSON.stringify([fs_id]);
                         yunData["isdir"]=0;
                         self.set_share_data(yunData, fid_list);
-                    },300+i);
-                    i=i+300;
+                    },time);
                 } 
             },
             set_share_data:function(obj,fid_list){
@@ -585,7 +587,7 @@ var baidu = function(cookies) {
                                 }else{
                                     for(var i=0;i<json.list.length;i++){
                                     var list=json.list[i];
-                                    file_list.push({"name": list.path.slice(yunData.PATH.lastIndexOf("/"),list.path.length), "link": list.dlink});
+                                    file_list.push({"name": list.path.slice(yunData.PATH.lastIndexOf("/")+1,list.path.length), "link": list.dlink});
                                     }
                                 }
                                 self[func](file_list);
@@ -653,7 +655,8 @@ var baidu = function(cookies) {
             //获取列表的所有文件信息
             get_list:function(path){
                 var self=this;
-                var i=0;
+                var time=0;
+                var delay=parseInt($("#rpc_delay").val());
                 var parameter = {'url': "http://pan.baidu.com/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
@@ -661,10 +664,11 @@ var baidu = function(cookies) {
                             console.log(json);
                             for(var i=0;i<array.length;i++){
                                 var path=array[i].path;
+                                time=time+delay;
                                 if(array[i].isdir == 1){
-                                    delayLoopList(path);
+                                    delayLoopList(path,time);
                                 }else{
-                                    delayLoopFile(path);  
+                                    delayLoopFile(path,time);  
                                     //self.get_filemetas(array[i].path);
                                 }
                             }
@@ -673,17 +677,18 @@ var baidu = function(cookies) {
                             SetMessage("获取List失败!", "MODE_FAILURE");
                             console.log(textStatus);
                         });  
-                function delayLoopList(path){
+                function delayLoopList(path,time){
                     setTimeout(function(){
+                        // console.log(new Date()+"list"+time);
                         self.get_list(path);
-                    },300+i);
-                    i=i+300;
+                    },time);
+                    
                 } 
-                function delayLoopFile(path){
+                function delayLoopFile(path,time){
                     setTimeout(function(){
+                        // console.log(new Date()+"file"+time);
                         self.get_filemetas(path);
-                    },300+i);
-                    i=i+300;
+                    },time);
                 } 
             },
             //根据文件路径获取文件的信息
@@ -691,6 +696,9 @@ var baidu = function(cookies) {
                 var self=this;
                 var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
                 var path=API.get("path");
+                if(path == null){
+                    path="";
+                }
                 var parameter = {'url': "http://pan.baidu.com/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
