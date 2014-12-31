@@ -473,7 +473,13 @@ var baidu = function(cookies) {
                         }
                     }
                     for (var i = 0; i < Filename.length; i++) {
-                        self.get_share_dir(Filename[i].attr("data-id"));
+                            if (Filename[i].attr("data-extname") != "dir") {
+                                var fid_list = 'fid_list=' + JSON.stringify([Filename[i].attr("data-id")]);
+                                yunData["isdir"]=0;
+                                self.set_share_data(yunData, fid_list);
+                            }else{
+                                self.get_share_dir(Filename[i].attr("data-id"));
+                            }
                     }
                 }
             },
