@@ -16,9 +16,10 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                         }
                         chrome.cookies.get(option, function(cookies) {
                             var obj = {};
+                            if(cookies != null){
                             obj[cookies.name] = cookies.value;
-                            port.postMessage(obj);
-                            console.log(obj);
+                            port.postMessage(obj);                                
+                            }
                         });
 
                     }

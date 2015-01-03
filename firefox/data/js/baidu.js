@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.2.5
+// @version 0.2.6
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.2.5";
-    var update_date = "2014/12/31";
+    var version = "0.2.6";
+    var update_date = "2015/01/03";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -200,6 +200,24 @@ var baidu = function(cookies) {
                     var objLeft = (screenWidth - obj.width())/2 ;
                     var objTop = (screenHeight - obj.height())/2 + scrolltop;
                     obj.css({left: objLeft + 'px', top: objTop + 'px'});
+            },
+            //获取选择的文件的link和name
+            get_info: function(data) {
+                var self = this;
+                var file_list = [];//储存选中的文件信息包含link和name
+                var File = require("common:widget/data-center/data-center.js");
+                var Filename = File.get("selectedItemList");
+                var obj = $.parseJSON(data);
+                console.log(obj);
+                var name = null;
+                var length = Filename.length;
+                for (var i = 0; i < length; i++) {
+                    if (obj.dlink[0].fs_id == Filename[i].attr("data-id")) {
+                        name = Filename[i].children().eq(0).children().eq(2).attr("title")||Filename[i].children().eq(0).attr("title");
+                    }  
+                }
+                file_list.push({"name": name, "link": obj.dlink[0].dlink});
+                self[func](file_list);
             },
             //获取文件夹下载的信息
             get_dir: function(data) {
@@ -473,7 +491,13 @@ var baidu = function(cookies) {
                         }
                     }
                     for (var i = 0; i < Filename.length; i++) {
-                        self.get_share_dir(Filename[i].attr("data-id"));
+                            if (Filename[i].attr("data-extname") != "dir") {
+                                var fid_list = 'fid_list=' + JSON.stringify([Filename[i].attr("data-id")]);
+                                yunData["isdir"]=0;
+                                self.set_share_data(yunData, fid_list);
+                            }else{
+                                self.get_share_dir(Filename[i].attr("data-id"));
+                            }
                     }
                 }
             },
@@ -617,9 +641,14 @@ var baidu = function(cookies) {
                         if($("#rpc_zip").prop('checked') == true){
                             Service.getDlink(JSON.stringify(File.get("selectedList")), "batch", self.get_dir.bind(self));
                             return;
+                        }else{
+                            self.get_all_dir(Filename[i].attr("data-id"));
                         }
+                    }else{
+                        Service.getDlink(JSON.stringify([Filename[i].attr("data-id")]), "dlink", self.get_info.bind(self));
                     }
-                    self.get_all_dir(Filename[i].attr("data-id"));
+                    //self.get_all_dir(Filename[i].attr("data-id"));
+                    //console.log(Filename[i].attr("data-extname"));
                 }
                 //Service.getDlink(JSON.stringify(File.get("selectedList")), "dlink", self.get_info.bind(self));
             },
