@@ -903,7 +903,7 @@ onload(function() {
     var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
     var port = chrome.runtime.connect({name: "get_cookie"});
     port.onMessage.addListener(function(response) {
-        if (response) {
+        if (response && home) {
             cookies.push(response);
             if(cookies.length==2){
                 var script = document.createElement('script');
