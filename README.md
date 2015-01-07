@@ -11,6 +11,7 @@ Web Store link : https://chrome.google.com/webstore/detail/baiduexporter/mjaenbj
 Firefox
 
 XPI包安装:
+
 https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/firefox/baidu-exporter.xpi
 
 下载XPI包,打开Firefox.Ctrl+O 打开选择文件对话框,选中XPI包即可安装.
