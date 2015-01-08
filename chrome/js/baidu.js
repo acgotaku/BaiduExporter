@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.2.7
+// @version 0.2.8
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.2.7";
-    var update_date = "2015/01/04";
+    var version = "0.2.8";
+    var update_date = "2015/01/08";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -29,6 +29,7 @@ var baidu = function(cookies) {
                 sticky: false
             });
         };
+		console.log=function() {};
         //重新封装的XMLHttpRequest 用来代替$.ajax 因为百度网盘的$.ajax已经被修改了
         var HttpSendRead = function(info) {
             var http = new XMLHttpRequest();
@@ -899,35 +900,20 @@ function onload(func) {
 onload(function() {
     //把函数注入到页面中
     //通过background.js获取到 name 为BDUSS的cookie
-    var cookies=[];
     var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
     var port = chrome.runtime.connect({name: "get_cookie"});
     port.onMessage.addListener(function(response) {
-        if (response && home) {
-            cookies.push(response);
-            if(cookies.length==2){
+        if (response) {
                 var script = document.createElement('script');
                 script.id = "baidu_script";
-                script.appendChild(document.createTextNode('(' + baidu + ')(\'' +JSON.stringify(cookies) + '\');'));
+                script.appendChild(document.createTextNode('(' + baidu + ')(\'' +JSON.stringify(response) + '\');'));
                 (document.body || document.head || document.documentElement).appendChild(script);
                 var style = document.createElement('style');
                 style.setAttribute('type', 'text/css');
                 style.textContent = css;
                 document.head.appendChild(style);
-            }
         }
         
     });
-    if(!home){
-        var script = document.createElement('script');
-        script.id = "baidu_script";
-        script.appendChild(document.createTextNode('(' + baidu + ')(\'' +JSON.stringify(cookies) + '\');'));
-        (document.body || document.head || document.documentElement).appendChild(script);
-        var style = document.createElement('style');
-        style.setAttribute('type', 'text/css');
-        style.textContent = css;
-        document.head.appendChild(style);        
-    }
-    port.postMessage({"do": "get_cookie", "site": "http://pan.baidu.com/", "name": "BDUSS"});
-    port.postMessage({"do": "get_cookie", "site": "http://pcs.baidu.com/", "name": "pcsett"});
+    port.postMessage([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
 });
