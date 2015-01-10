@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.2.8
+// @version 0.2.9
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.2.8";
-    var update_date = "2015/01/08";
+    var version = "0.2.9";
+    var update_date = "2015/01/10";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -29,7 +29,7 @@ var baidu = function(cookies) {
                 sticky: false
             });
         };
-		console.log=function() {};
+		//console.log=function() {};
         //重新封装的XMLHttpRequest 用来代替$.ajax 因为百度网盘的$.ajax已经被修改了
         var HttpSendRead = function(info) {
             var http = new XMLHttpRequest();
@@ -190,6 +190,7 @@ var baidu = function(cookies) {
 
                 config.click(function() {
                     $("#setting_div").show();
+                    $("#setting_divtopmsg").html("");
                     self.set_center($("#setting_div"));
                 });
 
@@ -210,15 +211,39 @@ var baidu = function(cookies) {
                 var Filename = File.get("selectedItemList");
                 var obj = $.parseJSON(data);
                 console.log(obj);
-                var name = null;
+                var name = self.get_level();
                 var length = Filename.length;
                 for (var i = 0; i < length; i++) {
                     if (obj.dlink[0].fs_id == Filename[i].attr("data-id")) {
-                        name = Filename[i].children().eq(0).children().eq(2).attr("title")||Filename[i].children().eq(0).attr("title");
+                        name = name+ Filename[i].children().eq(0).children().eq(2).attr("title")||Filename[i].children().eq(0).attr("title");
                     }  
                 }
+
                 file_list.push({"name": name, "link": obj.dlink[0].dlink});
                 self[func](file_list);
+            },
+            //获取文件夹层数
+            get_level:function(){
+                var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+                var level=parseInt($("#rpc_fold").val());
+                var path="";
+                var maxlevel=API.get("path").split("/").length-1;
+                if(level>maxlevel){
+                    SetMessage("文件夹层数超过完整路径", "MODE_CAUTION");
+                    level=maxlevel;
+                }
+                if(level == -1){
+                    path=API.get("path")+"/";
+                }else if(level>0){
+                    var num=[];
+                    for(var i=0;i<level;i++){
+                        num.push(".*");
+                    }
+                    var re = new RegExp(".*\/("+num.join("\/")+")$");
+                    console.log(API.get("path").match(re));
+                    path=API.get("path").match(re)[1]+"/";
+                }
+                return path;
             },
             //获取文件夹下载的信息
             get_dir: function(data) {
@@ -252,6 +277,7 @@ var baidu = function(cookies) {
                     '<tr><td><label >RPC 用户名：</label></td><td><input type="text" id="rpc_user" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>RPC 密码：</label></td><td><input type="text" id="rpc_pass" disabled="disabled" class="input-small"></td></tr>',
                     '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)</td></tr>',
+                    '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
                     '<tr><td><label>Secret Token：</label></td><td><input type="text" id="rpc_token" class="input-small"><div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
                     '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
                     '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
@@ -420,6 +446,7 @@ var baidu = function(cookies) {
             set_config: function() {
                 $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
                 $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
+                $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
                 $("#rpc_token").val(localStorage.getItem("rpc_token"));
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
@@ -466,6 +493,7 @@ var baidu = function(cookies) {
                 localStorage.setItem("rpc_delay", $("#rpc_delay").val());
                 localStorage.setItem("rpc_token", $("#rpc_token").val());
                 localStorage.setItem("rpc_dir", $("#setting_aria2_dir").val());
+                localStorage.setItem("rpc_fold", $("#rpc_fold").val());
                 localStorage.setItem("rpc_headers", $("#setting_aria2_headers").val());
             },
             get_share_id: function() {
@@ -736,7 +764,7 @@ var baidu = function(cookies) {
                             var file=json.info;
                             var file_list = [];
                             for(var i=0;i<file.length;i++){
-                                file_list.push({"name": file[i].path.slice(path.length+1,file[i].path.length), "link": file[i].dlink});
+                                file_list.push({"name":self.get_level()+file[i].path.slice(path.length+1,file[i].path.length), "link": file[i].dlink});
                             }
                             console.log(file_list);
                             self[func](file_list);
@@ -763,7 +791,7 @@ var baidu = function(cookies) {
                             $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + xml.result.version);
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
-                            $("#send_test").html(textStatus + "\u9519\u8BEF\uFF0C\u70B9\u51FB\u91CD\u65B0\u6D4B\u8BD5");
+                            $("#send_test").html("错误,请查看是否开启Aria2");
                         });
             },
             //封装rpc要发送的数据
