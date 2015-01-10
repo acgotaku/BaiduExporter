@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.2.9
+// @version 0.3.0
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.2.9";
-    var update_date = "2015/01/10";
+    var version = "0.3.0";
+    var update_date = "2015/01/11";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -215,9 +215,10 @@ var baidu = function(cookies) {
                 var length = Filename.length;
                 for (var i = 0; i < length; i++) {
                     if (obj.dlink[0].fs_id == Filename[i].attr("data-id")) {
-                        name = name+ Filename[i].children().eq(0).children().eq(2).attr("title")||Filename[i].children().eq(0).attr("title");
+                        var temp =Filename[i].children().eq(0).children().eq(2).attr("title")||Filename[i].children().eq(1).children().eq(0).attr("title");
+                        name =name +temp;
                     }  
-                }
+                }//Filename[0].children().eq(1).children().eq(0).attr("title")
 
                 file_list.push({"name": name, "link": obj.dlink[0].dlink});
                 self[func](file_list);
@@ -226,23 +227,30 @@ var baidu = function(cookies) {
             get_level:function(){
                 var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
                 var level=parseInt($("#rpc_fold").val());
-                var path="";
-                var maxlevel=API.get("path").split("/").length-1;
+                var path=API.get("path");
+                var maxlevel=0;
+                if(path == "/"|| path == null){
+                    path="";
+                }else{
+                    maxlevel=path.split("/").length-1;
+                }
                 if(level>maxlevel){
                     SetMessage("文件夹层数超过完整路径", "MODE_CAUTION");
                     level=maxlevel;
                 }
                 if(level == -1){
-                    path=API.get("path")+"/";
+                    path=path+"/";
                 }else if(level>0){
                     var num=[];
                     for(var i=0;i<level;i++){
                         num.push(".*");
                     }
                     var re = new RegExp(".*\/("+num.join("\/")+")$");
-                    console.log(API.get("path").match(re));
-                    path=API.get("path").match(re)[1]+"/";
+                    path=path.match(re)[1]+"/";
+                }else if(level==0){
+                    path="";
                 }
+                console.log(path);
                 return path;
             },
             //获取文件夹下载的信息
