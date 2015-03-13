@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.0
+// @version 0.3.1
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.3.0";
-    var update_date = "2015/01/11";
+    var version = "0.3.1";
+    var update_date = "2015/03/13";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -85,7 +85,7 @@ var baidu = function(cookies) {
         var combination = {
             header: function(type) {
                 var addheader = [];
-                var UA = $("#setting_aria2_useragent_input").val() || "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36";
+                var UA = $("#setting_aria2_useragent_input").val() || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
                 var headers = $("#setting_aria2_headers").val();
                 var referer = $("#setting_aria2_referer_input").val() || "http://pan.baidu.com/disk/home";
                 addheader.push("User-Agent: " + UA);
@@ -138,8 +138,7 @@ var baidu = function(cookies) {
             init: function() {
                 var self = this;
                 self.set_export_ui();
-                self.set_config_ui();
-                self.set_config();
+                self.set_config_ui();               
                 combination.header();
             },
             set_export_ui: function() {
@@ -190,6 +189,7 @@ var baidu = function(cookies) {
 
                 config.click(function() {
                     $("#setting_div").show();
+                    self.set_config();
                     $("#setting_divtopmsg").html("");
                     self.set_center($("#setting_div"));
                 });
@@ -295,9 +295,10 @@ var baidu = function(cookies) {
                     '</tbody>',
                     '</table>',
                     '<div style="margin-top:10px;">',
-                    '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a> Version:' + version + ' 更新日期: ' + update_date + ' </div>',
-                    '<div style="margin-left:70px; display:inline-block"><a href="javascript:;" id="apply" ><b>应用</b></a></div>',
+                    '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a><br/> Version:' + version + ' 更新日期: ' + update_date + ' </div>',
+                    '<div style="margin-left:50px; display:inline-block"><a href="javascript:;" id="apply" class="dbtn cancel"><b>应用</b></a><a href="javascript:;" id="reset" class="dbtn cancel"><b>重置</b></a></div>',
                     '</div>',
+                    '<ul class="dropdown-menu" id="rpc_history"><li><a href="javascript:;">http://token:acgotaku@localhost:6000/jsonrpc</a></li></ul>',
                     '</div>'
                 ];
                 setting_div.innerHTML = html_.join("");
@@ -308,6 +309,19 @@ var baidu = function(cookies) {
                 $("#apply").click(function() {
                     self.get_config();
                     $("#setting_divtopmsg").html("设置已保存.");
+                    self.set_config();
+                });
+                $("#reset").click(function() {
+                    localStorage.clear();
+                    self.set_config();
+                    $("#setting_divtopmsg").html("设置已重置.");
+                });
+                $("#rpc_input").click(function(event){
+                    $(".dropdown-menu").show();
+                    event.stopPropagation();
+                });
+                $("#setting_div").on('click',function(event){
+                    $(".dropdown-menu").hide();
                 });
                 $("#send_test").click(function() {
                     self.get_version();
@@ -320,7 +334,7 @@ var baidu = function(cookies) {
                         $("#rpc_user").attr({"disabled": "disabled"}).css("background-color", "#eee");
                         $("#rpc_pass").attr({"disabled": "disabled"}).css("background-color", "#eee");
                     }
-                })
+                });
 
 
             },
@@ -474,6 +488,18 @@ var baidu = function(cookies) {
                 if(localStorage.getItem("rpc_zip") == "true"){
                     $("#rpc_zip").prop('checked', true);
                 }
+                var rpc_history=JSON.parse(localStorage.getItem("rpc_history")||"[]");
+                $("#rpc_history").empty();
+                for(var i=0;i<rpc_history.length;i++){
+                    $("#rpc_history").append('<li><a href="javascript:;">'+rpc_history[i]+'</a></li>');
+                }
+                $(".dropdown-menu li>a").click(function(event){
+                    $("#rpc_input").val($(this).text());
+                    $(".dropdown-menu").hide();
+                    event.stopPropagation();
+                });                    
+       
+
             },
             //保存配置数据
             get_config: function() {
@@ -499,10 +525,16 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_zip", null);
                 }
                 localStorage.setItem("rpc_delay", $("#rpc_delay").val());
+                localStorage.setItem("referer", $("#setting_aria2_referer_input").val());
                 localStorage.setItem("rpc_token", $("#rpc_token").val());
                 localStorage.setItem("rpc_dir", $("#setting_aria2_dir").val());
                 localStorage.setItem("rpc_fold", $("#rpc_fold").val());
                 localStorage.setItem("rpc_headers", $("#setting_aria2_headers").val());
+                var rpc_history=JSON.parse(localStorage.getItem("rpc_history")|| "[]");
+                if(rpc_history.indexOf(rpc_url) == -1){
+                    rpc_history.unshift(rpc_url);
+                }
+                localStorage.setItem("rpc_history", JSON.stringify(rpc_history));
             },
             get_share_id: function() {
                 var self = this;
@@ -877,16 +909,24 @@ var css = function() {/*
  box-shadow: 0 0 3px #C6C6C6;
  -webkit-box-shadow: 0 0 3px #C6C6C6;
  }
- #apply{
- display:inline-block;
- width:120px;
- height:30px;
- border:1px solid #D1D1D1;
- background-color: #F7F7F7;
- text-align: center;
+ .dropdown-menu{
+ position: absolute;
+ top:93px;
+ left:130px;
+ width:370px;
+ z-index:1000;
+ display:none;
+ background-color: rgb(250, 250, 250);
+ border: 1px solid rgba(0,0,0,0.2);
+ }
+ .dropdown-menu a{
+ color: #333;
+ white-space: nowrap;
+ }
+ .dropdown-menu li>a:hover{
+ color: #fff;
  text-decoration: none;
- padding-top:7px;
- color:#1B83EB;
+ background-color: #1B83EB;
  }
  .new-dbtn .menu{
  position: absolute;
