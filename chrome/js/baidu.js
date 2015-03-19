@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.1
+// @version 0.3.2
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.3.1";
-    var update_date = "2015/03/13";
+    var version = "0.3.2";
+    var update_date = "2015/03/19";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -138,7 +138,8 @@ var baidu = function(cookies) {
             init: function() {
                 var self = this;
                 self.set_export_ui();
-                self.set_config_ui();               
+                self.set_config_ui();
+				self.set_config();				
                 combination.header();
             },
             set_export_ui: function() {
@@ -226,7 +227,7 @@ var baidu = function(cookies) {
             //获取文件夹层数
             get_level:function(){
                 var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
-                var level=parseInt($("#rpc_fold").val());
+                var level=parseInt($("#rpc_fold").val())||0;
                 var path=API.get("path");
                 var maxlevel=0;
                 if(path == "/"|| path == null){
