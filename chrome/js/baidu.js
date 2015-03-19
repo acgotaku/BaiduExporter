@@ -299,7 +299,7 @@ var baidu = function(cookies) {
                     '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a><br/> Version:' + version + ' 更新日期: ' + update_date + ' </div>',
                     '<div style="margin-left:50px; display:inline-block"><a href="javascript:;" id="apply" class="dbtn cancel"><b>应用</b></a><a href="javascript:;" id="reset" class="dbtn cancel"><b>重置</b></a></div>',
                     '</div>',
-                    '<ul class="dropdown-menu" id="rpc_history"><li><a href="javascript:;">http://token:acgotaku@localhost:6000/jsonrpc</a></li></ul>',
+                    '<ul class="dropdown-menu" id="rpc_history"></ul>',
                     '</div>'
                 ];
                 setting_div.innerHTML = html_.join("");

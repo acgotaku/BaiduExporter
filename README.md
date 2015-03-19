@@ -15,3 +15,23 @@ XPI包安装:
 https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/firefox/baidu-exporter.xpi
 
 下载XPI包,打开Firefox.Ctrl+O 打开选择文件对话框,选中XPI包即可安装.
+
+
+License
+-------
+![GPLv3](https://www.gnu.org/graphics/gplv3-127x51.png)
+
+BaiduExporter is licensed under [GNU General Public License](https://www.gnu.org/licenses/gpl.html) Version 3 or later.
+
+BaiduExporter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+BaiduExporter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with SwitchyOmega.  If not, see <http://www.gnu.org/licenses/>.
