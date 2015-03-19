@@ -139,7 +139,7 @@ var baidu = function(cookies) {
                 var self = this;
                 self.set_export_ui();
                 self.set_config_ui();
-				self.set_config();				
+                self.set_config();				
                 combination.header();
             },
             set_export_ui: function() {
