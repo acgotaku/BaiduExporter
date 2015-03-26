@@ -4,6 +4,12 @@
 
 可以方便的把百度网盘的下载地址导出到aria2/aria2-rpc，支持YAAW。
 
+#Usage
+
+Recommend: Set --rpc-secret=<secret> if you are using aria2 1.18.4(or higher) with 'JSON-RPC PATH' like http://token:secret@hostname:port/jsonrpc
+
+Set --rpc-user=<username> --rpc-passwd=<passwd> if you are using aria2 1.15.2(or higher) with 'JSON-RPC PATH' like http://username:passwd@hostname:port/jsonrpc
+
 作为chrome扩展安装即可.
 
 Web Store link : https://chrome.google.com/webstore/detail/baiduexporter/mjaenbjdjmgolhoafkohbhhbaiedbkno
