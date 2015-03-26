@@ -296,10 +296,10 @@ var baidu = function(cookies) {
                     '<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>',
                     '<table id="setting_div_table" >',
                     '<tbody>',
-                    '<tr><td width="100"><label>ARIA2 RPC：</label></td><td><input id="rpc_input" type="text" class="input-large"></td></tr>',
+                    '<tr><td width="100"><label>ARIA2 RPC：</label></td><td><input id="rpc_input" type="text" class="input-large"><a id="add_rpc" href="javascript:;" >ADD RPC</a></td></tr>',
                     '<tr><td><label>文件夹打包下载:</label></td><td><input id="rpc_zip" type="checkbox"></td></tr>',
                     '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
-                    '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
+                    '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
                     '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
                     '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
                     '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
@@ -339,17 +339,11 @@ var baidu = function(cookies) {
                 $("#send_test").click(function() {
                     self.get_version();
                 });
-                $("#rpc_distinguish").change(function() {
-                    if ($(this).is(":checked")) {
-                        $("#rpc_user").removeAttr("disabled").css("background-color", "#FFF");
-                        $("#rpc_pass").removeAttr("disabled").css("background-color", "#FFF");
-                    } else {
-                        $("#rpc_user").attr({"disabled": "disabled"}).css("background-color", "#eee");
-                        $("#rpc_pass").attr({"disabled": "disabled"}).css("background-color", "#eee");
-                    }
+                $("#add_rpc").on('click',function(){
+                    var row='<tr><td width="100"><label>ARIA2 RPC：</label></td><td><input  type="text" class="input-large"></td></tr>';
+                    $(row).insertAfter($("#rpc_input").parent().parent());
+                    self.set_center();
                 });
-
-
             },
             //处理验证码
             alert_dialog: function(json, params) {
@@ -871,7 +865,7 @@ var css = function() {/*
  -webkit-box-shadow: 0 0 3px #C6C6C6;
  }
  .input-large{
- width:90%;
+ width:85%;
  }
  .input-small{
  width:150px;
@@ -886,6 +880,14 @@ var css = function() {/*
  background-color: #F7F7F7;
  text-align: center; text-decoration: none;
  color:#1B83EB;
+ }
+ #add_rpc{
+ display:inline-block;
+ border:1px solid #D1D1D1;
+ background-color: #F7F7F7;
+ text-align: center; text-decoration: none;
+ color:#1B83EB;
+ margin-left:5px;
  }
  #copyright{
  display:inline-block;
