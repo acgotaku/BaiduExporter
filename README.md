@@ -10,6 +10,7 @@ Recommend: Set --rpc-secret=<secret> if you are using aria2 1.18.4(or higher) wi
 
 Set --rpc-user=<username> --rpc-passwd=<passwd> if you are using aria2 1.15.2(or higher) with 'JSON-RPC PATH' like http://username:passwd@hostname:port/jsonrpc
 
+#Install
 作为chrome扩展安装即可.
 
 Web Store link : https://chrome.google.com/webstore/detail/baiduexporter/mjaenbjdjmgolhoafkohbhhbaiedbkno
