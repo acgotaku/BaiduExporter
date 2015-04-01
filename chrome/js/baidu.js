@@ -29,57 +29,24 @@ var baidu = function(cookies) {
                 sticky: false
             });
         };
+        var deferred = jQuery.Deferred();
+        window.addEventListener("message", function(event) {
+            // We only accept messages from ourselves
+            if (event.source !== window)
+              return;
+
+            var d = event.data;
+            if (d.type === "HttpSendRead Success") {
+                deferred.resolve(d.responseText, d.status, null);
+            } else if (d.type === "HttpSendRead Failed") {
+                deferred.reject(null, d.responseText, d.status);
+            }
+        })
         //console.log=function() {};
         //重新封装的XMLHttpRequest 用来代替$.ajax 因为百度网盘的$.ajax已经被修改了
         var HttpSendRead = function(info) {
-            var http = new XMLHttpRequest();
-            var contentType = "\u0061\u0070\u0070\u006c\u0069\u0063\u0061\u0074\u0069\u006f\u006e\u002f\u0078\u002d\u0077\u0077\u0077\u002d\u0066\u006f\u0072\u006d\u002d\u0075\u0072\u006c\u0065\u006e\u0063\u006f\u0064\u0065\u0064\u003b\u0020\u0063\u0068\u0061\u0072\u0073\u0065\u0074\u003d\u0055\u0054\u0046\u002d\u0038";
-            var timeout = 3000;
-            var deferred = jQuery.Deferred();
-            if (info.contentType != null) {
-                contentType = info.contentType;
-            }
-            if (info.timeout != null) {
-                timeout = info.timeout;
-            }
-            var timeId = setTimeout(httpclose, timeout);
-            function httpclose() {
-                http.abort();
-            }
-            deferred.promise(http);
-            http.onreadystatechange = function() {
-                if (http.readyState == 4) {
-                    if ((http.status == 200 && http.status < 300) || http.status == 304) {
-                        clearTimeout(timeId);
-                        if (info.dataType == "json") {
-                            deferred.resolve(JSON.parse(http.responseText), http.status, http);
-                        }
-                        else if (info.dataType == "SCRIPT") {
-                            // eval(http.responseText);
-                            deferred.resolve(http.responseText, http.status, http);
-                        }
-                    }
-                    else {
-                        clearTimeout(timeId);
-                        deferred.reject(http, http.statusText, http.status);
-                    }
-                }
-            }
-
-            http.open(info.type, info.url, true);
-            http.setRequestHeader("Content-type", contentType);
-            for (h in info.headers) {
-                if (info.headers[h]) {
-                    http.setRequestHeader(h, info.headers[h]);
-                }
-            }
-            if (info.type == "POST") {
-                http.send(info.data);
-            }
-            else {
-                http.send();
-            }
-            return http;
+            window.postMessage({ type: "HttpSendRead", info: info }, "*")
+            return deferred.promise();
         };
         //设置aria2c下载设置的Header信息
         var combination = {
@@ -1035,4 +1002,57 @@ onload(function() {
         
     });
     port.postMessage([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
+
+    window.addEventListener("message", function(event) {
+        if (event.data.type && event.data.type == "HttpSendRead") {
+            var info = event.data.info;
+            var http = new XMLHttpRequest();
+            var contentType = "\u0061\u0070\u0070\u006c\u0069\u0063\u0061\u0074\u0069\u006f\u006e\u002f\u0078\u002d\u0077\u0077\u0077\u002d\u0066\u006f\u0072\u006d\u002d\u0075\u0072\u006c\u0065\u006e\u0063\u006f\u0064\u0065\u0064\u003b\u0020\u0063\u0068\u0061\u0072\u0073\u0065\u0074\u003d\u0055\u0054\u0046\u002d\u0038";
+            var timeout = 3000;
+            if (info.contentType != null) {
+                contentType = info.contentType;
+            }
+            if (info.timeout != null) {
+                timeout = info.timeout;
+            }
+            var timeId = setTimeout(httpclose, timeout);
+            function httpclose() {
+                http.abort();
+            }
+            http.onreadystatechange = function() {
+              console.log(http.status, http.responseText, info.dataType)
+                if (http.readyState == 4) {
+                    if ((http.status == 200 && http.status < 300) || http.status == 304) {
+                        clearTimeout(timeId);
+                        if (info.dataType == "json") {
+                            window.postMessage({ type: "HttpSendRead Success", responseText: JSON.parse(http.responseText), status: http.status}, "*")
+                        }
+                        else if (info.dataType == "SCRIPT") {
+                            window.postMessage({ type: "HttpSendRead Success", responseText: http.responseText, status: http.status}, "*")
+                        }
+                    }
+                    else {
+                        clearTimeout(timeId);
+                        window.postMessage({ type: "HttpSendRead Failed", responseText: http.statusText, status: http.status}, "*")
+                    }
+                }
+            }
+
+            http.open(info.type, info.url, true);
+            http.setRequestHeader("Content-type", contentType);
+            for (h in info.headers) {
+                if (info.headers[h]) {
+                    http.setRequestHeader(h, info.headers[h]);
+                }
+            }
+            if (info.type == "POST") {
+                http.send(info.data);
+            }
+            else {
+                http.send();
+            }
+            return http;
+        }
+    })
 });
+

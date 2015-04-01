@@ -16,7 +16,7 @@
       "128": "images/logo128.png"
    },
    "manifest_version": 2,
-   "permissions": [ "cookies", "tabs", "*://*.baidu.com/*"],
+   "permissions": [ "cookies", "tabs", "*://*.baidu.com/*", "http://*/", "https://*/*"],
    "name": "__MSG_appName__",
    "version": "0.3.4"
 }
