@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.3
+// @version 0.3.4
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.3.3";
-    var update_date = "2015/03/26";
+    var version = "0.3.4";
+    var update_date = "2015/04/01";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -146,10 +146,12 @@ var baidu = function(cookies) {
             },
             set_auth:function(){
                 var auth_str = request_auth(url);
-                if (auth_str && auth_str.indexOf('token:') == 0) {
-                    auth= auth_str;
-                }else{
+                if (auth_str) {
+                    if(auth_str.indexOf('token:') == 0){
+                        auth= auth_str;
+                    }else{
                     auth = "Basic " + btoa(auth_str);
+                    }    
                 }
                 url_path=remove_auth(url);
                 function request_auth(url) {
@@ -854,7 +856,7 @@ var baidu = function(cookies) {
                     "id": 1,
                     "params": []
                 };
-                if (auth.indexOf('token:') == 0) {
+                if (auth && auth.indexOf('token:') == 0) {
                     data.params.unshift(auth);
                 }
                 var parameter = {'url': url_path, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
@@ -884,7 +886,7 @@ var baidu = function(cookies) {
                                 }
                             ]
                         };
-                        if (auth.indexOf('token:') == 0) {
+                        if (auth && auth.indexOf('token:') == 0) {
                             rpc_data.params.unshift(auth);
                         }
                         self.aria2send_data(rpc_data);
