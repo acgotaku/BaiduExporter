@@ -52,6 +52,9 @@ var YAAW = (function() {
       $("#add-task-submit").live("click", function() {
    		YAAW.add_task.submit();return false;
       });
+      $("#add-task-clear").live("click", function() {
+   		YAAW.add_task.clean();
+      });
       $("#saveSettings").live("click", function() {
    		YAAW.setting.submit();return false;
       });
@@ -64,6 +67,59 @@ var YAAW = (function() {
       $("#btnUnPause").live("click", function() {
    		YYAAW.tasks.unpause();YAAW.tasks.unSelectAll();
       });
+      $("#btnClearAlert").live("click", function() {
+   		$('#main-alert').hide();
+      });
+      $("#btnSeleceActive").live("click", function() {
+   		YAAW.tasks.selectActive();
+      });
+      $("#btnSelectWaiting").live("click", function() {
+   		YAAW.tasks.selectWaiting();
+      });
+      $("#btnSelectPaused").live("click", function() {
+   		YAAW.tasks.selectPaused();
+      });
+      $("#btnSelectStoped").live("click", function() {
+   		YAAW.tasks.selectStoped();
+      });
+      $("#btnStartAll").live("click", function() {
+		ARIA2.unpause_all();
+      });
+      $("#btnPauseAll").live("click", function() {
+		ARIA2.pause_all();
+      });
+      $("#btnRemoveFinished").live("click", function() {
+   		ARIA2.purge_download_result();
+      });
+      $("#closeAlert").live("click", function() {
+   		$('#add-task-alert').hide();
+      });
+      $("#menuMoveTop").live("click", function() {
+   		YAAW.contextmenu.movetop();
+      });
+      $("#menuMoveUp").live("click", function() {
+   		YAAW.contextmenu.moveup();
+      });
+      $("#menuMoveDown").live("click", function() {
+   		YAAW.contextmenu.movedown();
+      });
+      $("#menuMoveEnd").live("click", function() {
+   		YAAW.contextmenu.moveEnd();
+      });
+      $("#menuRestart").live("click", function() {
+		YAAW.contextmenu.restart();
+      });
+      $("#menuStart").live("click", function() {
+   		YAAW.contextmenu.unpause();
+      });
+      $("#menuPause").live("click", function() {
+   		YAAW.contextmenu.pause();
+      });
+      $("#menuRemove").live("click", function() {
+   		YAAW.contextmenu.remove();
+      });
+      
+      
       $("[rel=tooltip]").tooltip({"placement": "bottom"});
 
       $(".task .select-box").live("click", function() {
