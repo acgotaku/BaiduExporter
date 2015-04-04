@@ -15,7 +15,15 @@
       "48": "images/logo48.png",
       "128": "images/logo128.png"
    },
+	"browser_action": {
+        "default_icon": {
+            "19": "images/logo32.png"
+        },
+        "default_title": "CDHelper",      // 可选，在工具提示中显示
+        "default_popup": "index.html"        // 可选
+    },
    "manifest_version": 2,
+   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
    "permissions": [ "cookies", "tabs", "*://*.baidu.com/*"],
    "name": "__MSG_appName__",
    "version": "0.3.4"
