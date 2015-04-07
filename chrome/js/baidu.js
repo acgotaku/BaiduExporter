@@ -562,7 +562,9 @@ var baidu = function(cookies) {
                 var rpc_list=[];
                 for(var i=0;i<$(".rpc_list").length;i++){
                     var num=i+1;
-                    rpc_list.push($("#rpc_url_"+num).val());
+                    if($("#rpc_url_"+num).val()!= ""){
+                        rpc_list.push($("#rpc_url_"+num).val());
+                    }
                 }
                 localStorage.setItem("rpc_list", JSON.stringify(rpc_list));
                 localStorage.setItem("rpc_history", JSON.stringify(rpc_history));
