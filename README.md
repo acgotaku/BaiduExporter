@@ -1,6 +1,6 @@
 #BaiduExporter
 
-##必须用插件方式才可以使用,不是单纯的UserScript.
+##针对最近下载慢的情况，请先重置下软件设置。
 
 可以方便的把百度网盘的下载地址导出到aria2/aria2-rpc，支持YAAW。
 

@@ -1,4 +1,4 @@
-// ==UserScript==
+/ ==UserScript==
 //单纯的JS是无法运行的,必须使用扩展才行.
 // @name            百度网盘aria2导出工具
 // @author          acgotaku311
@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.4
+// @version 0.3.5
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.3.4";
-    var update_date = "2015/04/01";
+    var version = "0.3.5";
+    var update_date = "2015/04/29";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -85,7 +85,7 @@ var baidu = function(cookies) {
         var combination = {
             header: function(type) {
                 var addheader = [];
-                var UA = $("#setting_aria2_useragent_input").val() || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
+                var UA = $("#setting_aria2_useragent_input").val() || "netdisk;5.2.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
                 var headers = $("#setting_aria2_headers").val();
                 var referer = $("#setting_aria2_referer_input").val() || "http://pan.baidu.com/disk/home";
                 addheader.push("User-Agent: " + UA);
@@ -507,7 +507,7 @@ var baidu = function(cookies) {
                 $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
                 $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
-                $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
+                $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;5.2.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || "http://pan.baidu.com/disk/home");
                 $("#setting_aria2_headers").val(localStorage.getItem("rpc_headers"));
                 if(localStorage.getItem("rpc_zip") == "true"){
@@ -544,7 +544,7 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_url", rpc_url);
                     url = rpc_url + "?tm=" + (new Date().getTime().toString());
                 }
-                localStorage.setItem("UA", document.getElementById("setting_aria2_useragent_input").value || "netdisk;4.4.0.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
+                localStorage.setItem("UA", document.getElementById("setting_aria2_useragent_input").value || "netdisk;5.2.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 if($("#rpc_zip").prop('checked') == true){
                     localStorage.setItem("rpc_zip", true);
                 }else{
