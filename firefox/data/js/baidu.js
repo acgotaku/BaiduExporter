@@ -1,4 +1,4 @@
-/ ==UserScript==
+// ==UserScript==
 //单纯的JS是无法运行的,必须使用扩展才行.
 // @name            百度网盘aria2导出工具
 // @author          acgotaku311
