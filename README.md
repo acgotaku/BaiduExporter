@@ -1,16 +1,16 @@
 #BaiduExporter
 
-##针对最近下载慢的情况，请先重置下软件设置。
-
 可以方便的把百度网盘的下载地址导出到aria2/aria2-rpc，支持YAAW。
 
 #Usage
 
-		Recommend: Set --rpc-secret=<secret> if you are using aria2 1.18.4(or higher) with 'JSON-RPC PATH' like http://token:secret@hostname:port/jsonrpc
+插件的设置必须保存之后才会生效
 
-		Set --rpc-user=<username> --rpc-passwd=<passwd> if you are using aria2 1.15.2(or higher) with 'JSON-RPC PATH' like http://username:passwd@hostname:port/jsonrpc
+Recommend: Set --rpc-secret=<secret> if you are using aria2 1.18.4(or higher) with 'JSON-RPC PATH' like http://token:secret@hostname:port/jsonrpc
 
-已上传Aria2配置文件方便大家使用
+Set --rpc-user=<username> --rpc-passwd=<passwd> if you are using aria2 1.15.2(or higher) with 'JSON-RPC PATH' like http://username:passwd@hostname:port/jsonrpc
+
+已上传Aria2配置文件方便大家使用：[aria2.conf](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/aria2.conf)
 
 Aria2配置参考我的博客：[使用Aria2下载百度网盘和115的资源](https://blog.icehoney.me/posts/2015-1-31-Aria2-download)
 
