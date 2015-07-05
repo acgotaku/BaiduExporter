@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.5
+// @version 0.3.6
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.3.5";
-    var update_date = "2015/04/29";
+    var version = "0.3.6";
+    var update_date = "2015/07/05";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -85,7 +85,7 @@ var baidu = function(cookies) {
         var combination = {
             header: function(type) {
                 var addheader = [];
-                var UA = $("#setting_aria2_useragent_input").val() || "netdisk;5.2.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
+                var UA = $("#setting_aria2_useragent_input").val() || "netdisk;5.2.7;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
                 var headers = $("#setting_aria2_headers").val();
                 var referer = $("#setting_aria2_referer_input").val() || "http://pan.baidu.com/disk/home";
                 addheader.push("User-Agent: " + UA);
@@ -446,13 +446,13 @@ var baidu = function(cookies) {
                     var download_menu = $("<div>").addClass("module-list-toolbar").css({"display": "block", "margin-bottom": "10px"}).appendTo(content_ui);
                     if (home) {
                         var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
-                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
+                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
                         var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
 
                     } else {
                         var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
-                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
                         var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
                     }
                     download_link.appendTo(content_ui);
@@ -507,7 +507,7 @@ var baidu = function(cookies) {
                 $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
                 $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
-                $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;5.2.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
+                $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || "netdisk;5.2.7;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || "http://pan.baidu.com/disk/home");
                 $("#setting_aria2_headers").val(localStorage.getItem("rpc_headers"));
                 if(localStorage.getItem("rpc_zip") == "true"){
@@ -544,7 +544,10 @@ var baidu = function(cookies) {
                     localStorage.setItem("rpc_url", rpc_url);
                     url = rpc_url + "?tm=" + (new Date().getTime().toString());
                 }
-                localStorage.setItem("UA", document.getElementById("setting_aria2_useragent_input").value || "netdisk;5.2.6;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
+                localStorage.setItem("UA", document.getElementById("setting_aria2_useragent_input").value || "netdisk;5.2.7;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
+                if(localStorage.getItem("UA").indexOf("5.2.6") != -1 ){
+                    localStorage.setItem("UA","netdisk;5.2.7;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia"); 
+                }
                 if($("#rpc_zip").prop('checked') == true){
                     localStorage.setItem("rpc_zip", true);
                 }else{
