@@ -17,7 +17,7 @@ var baidu = function(cookies) {
     var version = "0.3.6";
     var update_date = "2015/07/05";
     var baidupan = (function() {
-        var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
+        var home = window.location.href.indexOf("/disk/home") != -1;
         //封装的百度的Toast提示消息
         //Type类型有
         //MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
@@ -64,7 +64,7 @@ var baidu = function(cookies) {
                         deferred.reject(http, http.statusText, http.status);
                     }
                 }
-            }
+            };
 
             http.open(info.type, info.url, true);
             http.setRequestHeader("Content-type", contentType);
@@ -130,7 +130,8 @@ var baidu = function(cookies) {
         var auth = null; //是否设置用户名密码验证 设置的话变为auth赋值
         var url_path=null;
         //设置RPC PATH
-        var url = (localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc") + "?tm=" + (new Date().getTime().toString());
+        var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
+        var url = rpc_list[0]['url'] + "?tm=" + (new Date().getTime().toString());
         //设置将要执行的下载方式
         var func = "aria2_data";
         return {
@@ -165,17 +166,12 @@ var baidu = function(cookies) {
                 var self = this;
                 var aria2_btn = $("<span>").addClass("icon-btn-device").css("float", "none");
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").appendTo(aria2_btn);
-                var aria2_export = $("<a>").text("ARIA2 RPC").appendTo(list);
+                //var aria2_export = $("<a>").text(rpc_list[0]['name']).appendTo(list);
                 var aria2_download = $("<a>").text("导出下载").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").appendTo(list);
                 if (!home) {
                     aria2_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);
-                    aria2_export.click(function() {
-                        func = "aria2_rpc";
-                        url=$("#rpc_input").val();
-                        self.get_share_id();
-                    });
                     aria2_download.click(function() {
                         self.aria2_download();
                         func = "aria2_data";
@@ -196,18 +192,12 @@ var baidu = function(cookies) {
                         self.get_dlink();
                         self.aria2_download();
                     });
-                    aria2_export.click(function() {
-                        func = "aria2_rpc";
-                        url=$("#rpc_input").val();
-                        self.get_dlink();
-                    });
                 }
                 aria2_btn.mouseover(function() {
                     list.show();
-                })
-                        .mouseout(function() {
-                            list.hide();
-                        });
+                }).mouseout(function() {
+                    list.hide();
+                });
 
                 config.click(function() {
                     $("#setting_div").show();
@@ -219,13 +209,10 @@ var baidu = function(cookies) {
             update_export_ui:function(){
                 var self=this;
                 $(".rpc_export_list").remove();
-                var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||"[]");
-                if(rpc_list.length == 0){
-                    return ;
-                }
-                for(var i=0;i<rpc_list.length;i++){
-                    var num=i+1;
-                    $("<a class='rpc_export_list'>").attr('data-id',num).text("ARIA2 RPC "+ num).insertAfter($("#aria2_list").children().eq(i));
+                var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
+                while(rpc_list.length > 0){
+                    var rpcObj = rpc_list.pop();
+                    $("<a class='rpc_export_list'>").attr('data-id',rpc_list.length+1).text(rpcObj.name).prependTo($("#aria2_list"));
                 }
                 $(".rpc_export_list").on('click',function(){
                     var id=$(this).attr('data-id');
@@ -321,7 +308,6 @@ var baidu = function(cookies) {
                     '<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>',
                     '<table id="setting_div_table" >',
                     '<tbody>',
-                    '<tr><td width="100"><label>ARIA2 RPC：</label></td><td><input id="rpc_input" type="text" class="input-large"><a id="add_rpc" href="javascript:;" >ADD RPC</a></td></tr>',
                     '<tr><td><label>文件夹打包下载:</label></td><td><input id="rpc_zip" type="checkbox"></td></tr>',
                     '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
                     '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
@@ -354,7 +340,7 @@ var baidu = function(cookies) {
                     self.set_config();
                     $("#setting_divtopmsg").html("设置已重置.");
                 });
-                $("#rpc_input").click(function(event){
+                $("#setting_div_table").on('click','#rpc_url_1',function(event){
                     $(".dropdown-menu").show();
                     event.stopPropagation();
                 });
@@ -364,13 +350,13 @@ var baidu = function(cookies) {
                 $("#send_test").click(function() {
                     self.get_version();
                 });
-                $("#add_rpc").on('click',function(){
+                $("#setting_div_table").on('click','#add_rpc',function(){
                     var num=$(".rpc_list").length+1;
-                    var row='<tr class="rpc_list"><td width="100"><label>ARIA2 RPC '+num+'：</label></td><td><input id="rpc_url_'+num+'" type="text" class="input-large"></td></tr>';
+                    var row='<tr class="rpc_list"><td width="100"><input id="rpc_name_'+num+'" type="text" value="ARIA2 RPC '+num+'" class="input-medium">：</td><td><input id="rpc_url_'+num+'" type="text" class="input-large"></td></tr>';
                     if($(".rpc_list").length>0){
                         $(row).insertAfter($(".rpc_list").eq(num-2));
                     }else{
-                        $(row).insertAfter($("#rpc_input").parent().parent());
+                        $(row).prependTo($("#setting_div_table>tbody"));
                     }
                     self.set_center($("#setting_div"));
                 });
@@ -503,7 +489,6 @@ var baidu = function(cookies) {
             },
             //填充已经设置的配置数据
             set_config: function() {
-                $("#rpc_input").val((localStorage.getItem("rpc_url") || "http://localhost:6800/jsonrpc"));
                 $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
                 $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
@@ -518,20 +503,20 @@ var baidu = function(cookies) {
                 for(var i=0;i<rpc_history.length;i++){
                     $("#rpc_history").append('<li><a href="javascript:;">'+rpc_history[i]+'</a></li>');
                 }
-                var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||"[]");
+                var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
                 $(".rpc_list").remove();
-                for(var i=0;i<rpc_list.length;i++){
-                    var num= i+1;
-                    var row='<tr class="rpc_list"><td width="100"><label>ARIA2 RPC '+num+'：</label></td><td><input id="rpc_url_'+num+'" type="text" class="input-large"></td></tr>';
+                for(var i in rpc_list){
+                    var num=(+i)+1;
+                    var addBtn=1==num?'<a id="add_rpc" href="javascript:;" >ADD RPC</a>':'';
+                    var row='<tr class="rpc_list"><td width="100"><input id="rpc_name_'+num+'" type="text" value="'+rpc_list[i]['name']+'" class="input-medium">：</td><td><input id="rpc_url_'+num+'" type="text" class="input-large" value="'+rpc_list[i]['url']+'">'+addBtn+'</td></tr>';
                     if($(".rpc_list").length>0){
                         $(row).insertAfter($(".rpc_list").eq(num-2));
                     }else{
-                        $(row).insertAfter($("#rpc_input").parent().parent());
+                        $(row).prependTo($("#setting_div_table>tbody"));
                     }
-                    $("#rpc_url_"+num).val(rpc_list[i]);
                 }
                 $(".dropdown-menu li>a").click(function(event){
-                    $("#rpc_input").val($(this).text());
+                    $("#rpc_url_1").val($(this).text());
                     $(".dropdown-menu").hide();
                     event.stopPropagation();
                 });
@@ -539,9 +524,8 @@ var baidu = function(cookies) {
             //保存配置数据
             get_config: function() {
                 var self=this;
-                var rpc_url = $("#rpc_input").val();
+                var rpc_url = $("#rpc_url_1").val();
                 if (rpc_url) {
-                    localStorage.setItem("rpc_url", rpc_url);
                     url = rpc_url + "?tm=" + (new Date().getTime().toString());
                 }
                 localStorage.setItem("UA", document.getElementById("setting_aria2_useragent_input").value || "netdisk;5.2.7;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia");
@@ -565,8 +549,8 @@ var baidu = function(cookies) {
                 var rpc_list=[];
                 for(var i=0;i<$(".rpc_list").length;i++){
                     var num=i+1;
-                    if($("#rpc_url_"+num).val()!= ""){
-                        rpc_list.push($("#rpc_url_"+num).val());
+                    if($("#rpc_url_"+num).val()!= ""&&$("#rpc_name_"+num).val()!= ""){
+                        rpc_list.push({"name":$("#rpc_name_"+num).val(),"url":$("#rpc_url_"+num).val()});
                     }
                 }
                 localStorage.setItem("rpc_list", JSON.stringify(rpc_list));
@@ -916,12 +900,16 @@ var baidu = function(cookies) {
 };
 var css = function() {/*
  #setting_div_table input{
+ text-indent: 10px;
  border: 1px solid #C6C6C6;
  box-shadow: 0 0 3px #C6C6C6;
  -webkit-box-shadow: 0 0 3px #C6C6C6;
  }
  .input-large{
  width:85%;
+ }
+ .input-medium{
+ width:81%;
  }
  .input-small{
  width:150px;
@@ -1024,7 +1012,7 @@ function onload(func) {
 onload(function() {
     //把函数注入到页面中
     //通过background.js获取到 name 为BDUSS的cookie
-    var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
+    var home = window.location.href.indexOf("/disk/home") != -1;
     var port = chrome.runtime.connect({name: "get_cookie"});
     port.onMessage.addListener(function(response) {
         if (response) {
