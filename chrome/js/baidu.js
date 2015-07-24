@@ -11,10 +11,10 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.7
+// @version 0.3.8
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.3.7";
+    var version = "0.3.8";
     var update_date = "2015/07/24";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
@@ -131,6 +131,10 @@ var baidu = function(cookies) {
         var url_path=null;
         //设置RPC PATH
         var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
+        if(rpc_list == "undefined" || rpc_list.length == 0 || rpc_list[0].hasOwnProperty("url") == false){
+            rpc_list=JSON.parse('[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
+            localStorage.setItem("rpc_list", JSON.stringify(rpc_list));
+        }
         var url = rpc_list[0]['url'] + "?tm=" + (new Date().getTime().toString());
         //设置将要执行的下载方式
         var func = "aria2_data";
