@@ -38,4 +38,18 @@ function get_cookie(site,name){
         });
     });
 }
-
+var manifest = chrome.runtime.getManifest();
+var previousVersion=localStorage.getItem("version");
+if(previousVersion == "" || previousVersion != manifest.version){
+    var opt={
+        type: "basic",
+        title: "更新",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n",
+        iconUrl: "images/icon.jpg"
+    }
+    var notification = chrome.notifications.create(status.toString(),opt,function(notifyId){return notifyId});
+    setTimeout(function(){
+        chrome.notifications.clear(status.toString(),function(){});
+    },5000);
+    localStorage.setItem("version",manifest.version);
+}
