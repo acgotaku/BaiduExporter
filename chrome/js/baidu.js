@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.8
+// @version 0.3.9
 // ==/UserScript==
 var baidu = function(cookies) {
-    var version = "0.3.8";
-    var update_date = "2015/07/24";
+    var version = "0.3.9";
+    var update_date = "2015/08/04";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -427,13 +427,13 @@ var baidu = function(cookies) {
                     if (home) {
                         var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
                         var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
-                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
+                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px"});
 
                     } else {
                         var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
                         var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
                         var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
-                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({"white-space": "nowrap", "width": "100%", "overflow": "scroll", "height": "180px"});
+                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px"});
                     }
                     download_link.appendTo(content_ui);
                     $("#aria2_download_close").click(function() {
@@ -691,6 +691,8 @@ var baidu = function(cookies) {
             //获取选中文件的下载链接
             get_dlink: function() {
                 var self = this;
+                var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+                var path=API.get("path");
                 var File = require("common:widget/data-center/data-center.js");
                 var Service = require("common:widget/commonService/commonService.js");
                 var Filename = File.get("selectedItemList");
@@ -708,7 +710,16 @@ var baidu = function(cookies) {
                             self.get_all_dir(Filename[i].attr("data-id"));
                         }
                     }else{
-                        Service.getDlink(JSON.stringify([Filename[i].attr("data-id")]), "dlink", self.get_info.bind(self));
+                        //Service.getDlink(JSON.stringify([Filename[i].attr("data-id")]), "dlink", self.get_info.bind(self));
+                        var path=API.get("path");
+                        if(path == null){
+                            path="/";
+                        }else{
+                            path+="/";
+                        }
+                        var name =Filename[i].children().eq(0).children().eq(2).attr("title")||Filename[i].children().eq(1).children().eq(0).attr("title");
+                        
+                        self.get_filemetas(path+""+name);
                     }
                     //self.get_all_dir(Filename[i].attr("data-id"));
                     //console.log(Filename[i].attr("data-extname"));

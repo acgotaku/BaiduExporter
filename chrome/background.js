@@ -44,7 +44,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复IDM导出无法下载的问题~",
         iconUrl: "images/icon.jpg"
     }
     var notification = chrome.notifications.create(status.toString(),opt,function(notifyId){return notifyId});
