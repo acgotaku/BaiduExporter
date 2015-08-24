@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.3.9
+// @version 0.4.0
 // ==/UserScript==
-var baidu = function(cookies) {
-    var version = "0.3.9";
-    var update_date = "2015/08/04";
+var baidu = function(cookies,chrome_id) {
+    var version = "0.4.0";
+    var update_date = "2015/08/24";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -32,55 +32,56 @@ var baidu = function(cookies) {
         //console.log=function() {};
         //重新封装的XMLHttpRequest 用来代替$.ajax 因为百度网盘的$.ajax已经被修改了
         var HttpSendRead = function(info) {
-            var http = new XMLHttpRequest();
-            var contentType = "\u0061\u0070\u0070\u006c\u0069\u0063\u0061\u0074\u0069\u006f\u006e\u002f\u0078\u002d\u0077\u0077\u0077\u002d\u0066\u006f\u0072\u006d\u002d\u0075\u0072\u006c\u0065\u006e\u0063\u006f\u0064\u0065\u0064\u003b\u0020\u0063\u0068\u0061\u0072\u0073\u0065\u0074\u003d\u0055\u0054\u0046\u002d\u0038";
-            var timeout = 3000;
-            var deferred = jQuery.Deferred();
-            if (info.contentType != null) {
-                contentType = info.contentType;
-            }
-            if (info.timeout != null) {
-                timeout = info.timeout;
-            }
-            var timeId = setTimeout(httpclose, timeout);
-            function httpclose() {
-                http.abort();
-            }
-            deferred.promise(http);
-            http.onreadystatechange = function() {
-                if (http.readyState == 4) {
-                    if ((http.status == 200 && http.status < 300) || http.status == 304) {
-                        clearTimeout(timeId);
-                        if (info.dataType == "json") {
-                            deferred.resolve(JSON.parse(http.responseText), http.status, http);
+            Promise.prototype.done=Promise.prototype.then;
+            Promise.prototype.fail=Promise.prototype.catch;
+            return new Promise(function(resolve, reject) {
+                var http = new XMLHttpRequest();
+                var contentType = "\u0061\u0070\u0070\u006c\u0069\u0063\u0061\u0074\u0069\u006f\u006e\u002f\u0078\u002d\u0077\u0077\u0077\u002d\u0066\u006f\u0072\u006d\u002d\u0075\u0072\u006c\u0065\u006e\u0063\u006f\u0064\u0065\u0064\u003b\u0020\u0063\u0068\u0061\u0072\u0073\u0065\u0074\u003d\u0055\u0054\u0046\u002d\u0038";
+                var timeout = 3000;
+                if (info.contentType != null) {
+                    contentType = info.contentType;
+                }
+                if (info.timeout != null) {
+                    timeout = info.timeout;
+                }
+                var timeId = setTimeout(httpclose, timeout);
+                function httpclose() {
+                    http.abort();
+                }
+                http.onreadystatechange = function() {
+                    if (http.readyState == 4) {
+                        if ((http.status == 200 && http.status < 300) || http.status == 304) {
+                            clearTimeout(timeId);
+                            if (info.dataType == "json") {
+                                resolve(JSON.parse(http.responseText), http.status, http);
+                            }
+                            else if (info.dataType == "SCRIPT") {
+                                // eval(http.responseText);
+                                resolve(http.responseText, http.status, http);
+                            }
                         }
-                        else if (info.dataType == "SCRIPT") {
-                            // eval(http.responseText);
-                            deferred.resolve(http.responseText, http.status, http);
+                        else {
+                            clearTimeout(timeId);
+                            reject(http, http.statusText, http.status);
                         }
                     }
-                    else {
-                        clearTimeout(timeId);
-                        deferred.reject(http, http.statusText, http.status);
+                }
+                http.open(info.type, info.url, true);
+                http.setRequestHeader("Content-type", contentType);
+                for (h in info.headers) {
+                    if (info.headers[h]) {
+                        http.setRequestHeader(h, info.headers[h]);
                     }
                 }
-            }
-
-            http.open(info.type, info.url, true);
-            http.setRequestHeader("Content-type", contentType);
-            for (h in info.headers) {
-                if (info.headers[h]) {
-                    http.setRequestHeader(h, info.headers[h]);
+                if (info.type == "POST") {
+                    http.send(info.data);
                 }
-            }
-            if (info.type == "POST") {
-                http.send(info.data);
-            }
-            else {
-                http.send();
-            }
-            return http;
+                else {
+                    http.send();
+                }                          
+            });
         };
+
         //设置aria2c下载设置的Header信息
         var combination = {
             header: function(type) {
@@ -802,7 +803,7 @@ var baidu = function(cookies) {
                 if(path == null || path =="/"){
                     path="";
                 }
-                var parameter = {'url': "http://pan.baidu.com/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//pan.baidu.com/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             SetMessage("获取文件信息成功!", "MODE_SUCCESS");
@@ -869,14 +870,27 @@ var baidu = function(cookies) {
             //和aria2c通信
             aria2send_data: function(data) {
                 var parameter = {'url': url_path, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
-                HttpSendRead(parameter)
-                        .done(function(json, textStatus, jqXHR) {
-                            SetMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+                if(location.protocol == "https:"){
+                    var port = chrome.runtime.connect(chrome_id,{name: "BaiduExporter"});
+                    port.postMessage({
+                        method:"rpc_data",
+                        data: parameter
+                    });
+                    port.onMessage.addListener(function(response) {
+                        SetMessage(response[0],response[1]);
+                    });
+                }else{
+                    HttpSendRead(parameter)
+                            .done(function(json, textStatus, jqXHR) {
+                                SetMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
 
-                        })
-                        .fail(function(jqXHR, textStatus, errorThrown) {
-                            SetMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
-                        });
+                            })
+                            .fail(function(jqXHR, textStatus, errorThrown) {
+                                SetMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+                            });   
+                }
+
+
             }
         }
     })();
@@ -978,12 +992,12 @@ function onload(func) {
 onload(function() {
     //把函数注入到页面中
     //通过background.js获取到 name 为BDUSS的cookie
-    var port = chrome.runtime.connect({name: "get_cookie"});
+    var port = chrome.runtime.connect({name: "BaiduExporter"});
     port.onMessage.addListener(function(response) {
         if (response) {
                 var script = document.createElement('script');
                 script.id = "baidu_script";
-                script.appendChild(document.createTextNode('(' + baidu + ')(\'' +JSON.stringify(response) + '\');'));
+                script.appendChild(document.createTextNode('(' + baidu + ')(\'' +JSON.stringify(response) +'\''+','+JSON.stringify(chrome.runtime.id)+');'));
                 (document.body || document.head || document.documentElement).appendChild(script);
                 var style = document.createElement('style');
                 style.setAttribute('type', 'text/css');
@@ -992,5 +1006,7 @@ onload(function() {
         }
         
     });
-    port.postMessage([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
+    port.postMessage({
+        method:"get_cookie",
+        data:[{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]});
 });

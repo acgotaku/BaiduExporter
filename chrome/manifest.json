@@ -15,8 +15,11 @@
       "48": "images/logo48.png",
       "128": "images/logo128.png"
    },
+   "externally_connectable": {
+   "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*"]
+   },
    "manifest_version": 2,
-   "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*"],
+   "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab"],
    "name": "__MSG_appName__",
-   "version": "0.3.9"
+   "version": "0.4.0"
 }
