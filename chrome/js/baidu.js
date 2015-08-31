@@ -81,7 +81,20 @@ var baidu = function(cookies,chrome_id) {
                 }                          
             });
         };
-
+        // 反转义非字母表中字符，确保按照文件名保存
+        // 取自 https://github.com/binux/ThunderLixianExporter
+        var alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var escape_command = function(str) {
+            var result = "";
+            for (var i = 0; i < str.length; i++) {
+                if (alpha.indexOf(str[i]) == -1) {
+                    result += "\\" + str[i];
+                } else {
+                    result += str[i];
+                }
+            }
+            return result;
+        };
         //设置aria2c下载设置的Header信息
         var combination = {
             header: function(type) {
@@ -454,7 +467,7 @@ var baidu = function(cookies,chrome_id) {
                 if (file_list.length > 0) {
                     var length = file_list.length;
                     for (var i = 0; i < length; i++) {
-                        files.push("aria2c -c -s10 -k1M -x10 -o " + JSON.stringify(file_list[i].name) + combination.header('aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
+                        files.push("aria2c -c -s10 -k1M -x10 -o " + escape_command(file_list[i].name) + combination.header('aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
                             file_list[i].link,
                             combination.header("aria2c_txt"),
