@@ -467,7 +467,8 @@ var baidu = function(cookies,chrome_id) {
                 if (file_list.length > 0) {
                     var length = file_list.length;
                     for (var i = 0; i < length; i++) {
-                        files.push("aria2c -c -s10 -k1M -x10 -o " + escape_command(file_list[i].name) + combination.header('aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
+                        filename = (navigator.platform.indexOf("Win") != -1) ? JSON.stringify(file_list[i].name) : escape_command(file_list[i].name);
+                        files.push("aria2c -c -s10 -k1M -x10 -o " + filename + combination.header('aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
                             file_list[i].link,
                             combination.header("aria2c_txt"),
