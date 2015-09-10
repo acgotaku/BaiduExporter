@@ -412,7 +412,7 @@ var baidu = function(cookies,chrome_id) {
                 div.css({left: divLeft + "px", top: divTop + "px", "z-index": 2000});
                 $("#vcode" + id).attr("src", json.vcode_img);
                 $("#change" + id).unbind().click(function() {
-                    var url = "http://vcode.baidu.com/genimage";
+                    var url = "//vcode.baidu.com/genimage";
                     $("#vcode" + id).attr("src", url + "?" + json.vcode_str + "&" + new Date().getTime());
                 });
                 $("#okay" + id).unbind().click(function() {
@@ -589,7 +589,7 @@ var baidu = function(cookies,chrome_id) {
                     path=path_head+path;
                 }
                 console.log(path);
-                var parameter = {'url': "http://pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             SetMessage("获取共享列表成功!", "MODE_SUCCESS");
@@ -617,7 +617,7 @@ var baidu = function(cookies,chrome_id) {
                 var self=this;
                 var time=0;
                 var delay=parseInt($("#rpc_delay").val());
-                var parameter = {'url': "http://pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             var array=json.list;
@@ -661,8 +661,8 @@ var baidu = function(cookies,chrome_id) {
             },
             get_share_dlink: function(obj, data) {
                 var self = this;  
-                var download = "http://" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
-                var pic="http://" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken="+yunData.MYBDSTOKEN+"&app_id="+yunData.FILEINFO[0].app_id;
+                var download = "//" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
+                var pic="//" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken="+yunData.MYBDSTOKEN+"&app_id="+yunData.FILEINFO[0].app_id;
                 var parameter = {'url': download, 'dataType': 'json', type: 'POST', 'data': data};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
