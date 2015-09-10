@@ -122,7 +122,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新解决https下无法获取文件夹目录的BUG",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新解决Win平台下载文件转义的BUG",
         iconUrl: "images/icon.jpg"
     }
     var notification = chrome.notifications.create(status.toString(),opt,function(notifyId){return notifyId});

@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.4.1
+// @version 0.4.2
 // ==/UserScript==
 var baidu = function(cookies,chrome_id) {
-    var version = "0.4.1";
-    var update_date = "2015/09/07";
+    var version = "0.4.2";
+    var update_date = "2015/09/10";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -56,7 +56,6 @@ var baidu = function(cookies,chrome_id) {
                                 resolve(JSON.parse(http.responseText), http.status, http);
                             }
                             else if (info.dataType == "SCRIPT") {
-                                // eval(http.responseText);
                                 resolve(http.responseText, http.status, http);
                             }
                         }
@@ -775,7 +774,7 @@ var baidu = function(cookies,chrome_id) {
                 var self=this;
                 var time=0;
                 var delay=parseInt($("#rpc_delay").val());
-                var parameter = {'url': "http://pan.baidu.com/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//pan.baidu.com/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             var array=json.list;
