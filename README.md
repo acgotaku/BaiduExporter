@@ -1,14 +1,16 @@
 #BaiduExporter
 
-##必须用插件方式才可以使用,不是单纯的UserScript.
-
 可以方便的把百度网盘的下载地址导出到aria2/aria2-rpc，支持YAAW。
 
 #Usage
 
+插件的设置必须保存之后才会生效
+
 Recommend: Set --rpc-secret=<secret> if you are using aria2 1.18.4(or higher) with 'JSON-RPC PATH' like http://token:secret@hostname:port/jsonrpc
 
 Set --rpc-user=<username> --rpc-passwd=<passwd> if you are using aria2 1.15.2(or higher) with 'JSON-RPC PATH' like http://username:passwd@hostname:port/jsonrpc
+
+已上传Aria2配置文件方便大家使用：[aria2.conf](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/aria2.conf)
 
 Aria2配置参考我的博客：[使用Aria2下载百度网盘和115的资源](https://blog.icehoney.me/posts/2015-1-31-Aria2-download)
 
@@ -43,4 +45,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with SwitchyOmega.  If not, see <http://www.gnu.org/licenses/>.
+along with BaiduExporter.  If not, see <http://www.gnu.org/licenses/>.
