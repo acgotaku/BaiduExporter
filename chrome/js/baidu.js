@@ -2,7 +2,7 @@
 //单纯的JS是无法运行的,必须使用扩展才行.
 // @name            百度网盘aria2导出工具
 // @author          acgotaku311
-// @description 一个方便吧百度网盘的Aria2rpc导出的脚本。
+// @description 一个方便把百度网盘的Aria2rpc导出的脚本。
 // @encoding           utf-8
 // @include     http://*n.baidu.com/s/*
 // @include     http://*n.baidu.com/disk/home*
