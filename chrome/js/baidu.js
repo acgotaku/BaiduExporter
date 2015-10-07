@@ -11,11 +11,11 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.4.2
+// @version 0.4.3
 // ==/UserScript==
 var baidu = function(cookies,chrome_id) {
-    var version = "0.4.2";
-    var update_date = "2015/09/10";
+    var version = "0.4.3";
+    var update_date = "2015/10/07";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         //封装的百度的Toast提示消息
@@ -497,6 +497,7 @@ var baidu = function(cookies,chrome_id) {
             },
             //填充已经设置的配置数据
             set_config: function() {
+                var self=this;
                 $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
                 $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
@@ -542,6 +543,7 @@ var baidu = function(cookies,chrome_id) {
                     }
                 }
                 localStorage.setItem("rpc_list", JSON.stringify(rpc_list));
+                self.sendToBackground("config_data",rpc_list);
                 self.update_export_ui();
             },
             get_share_id: function() {
@@ -847,13 +849,7 @@ var baidu = function(cookies,chrome_id) {
                     data.params.unshift(auth);
                 }
                 var parameter = {'url': url_path, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
-                HttpSendRead(parameter)
-                        .done(function(xml, textStatus, jqXHR) {
-                            $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + xml.result.version);
-                        })
-                        .fail(function(jqXHR, textStatus, errorThrown) {
-                            $("#send_test").html("错误,请查看是否开启Aria2");
-                        });
+                self.sendToBackground("rpc_version",parameter);
             },
             //封装rpc要发送的数据
             aria2_rpc: function(file_list) {
@@ -880,18 +876,38 @@ var baidu = function(cookies,chrome_id) {
                     }
                 }
             },
+            //和 background.js进行通讯
+            sendToBackground:function(method,data){
+                var port = chrome.runtime.connect(chrome_id,{name: "BaiduExporter"});
+                port.postMessage({
+                    method:method,
+                    data: data
+                });
+                port.onMessage.addListener(function(response) {
+                    switch(response.method){
+                        case "rpc_data":
+                            if(response.status){
+                                SetMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+                            }else{
+                                SetMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+                            }
+                            break;
+                        case "rpc_version":
+                            if(response.status == false){
+                                $("#send_test").html("错误,请查看是否开启Aria2");
+                            }else{
+                                $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + response.data.result.version);
+                            }
+                            break;
+                    }
+                });
+            },
             //和aria2c通信
             aria2send_data: function(data) {
+                var self=this;
                 var parameter = {'url': url_path, 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': auth}};
                 if(location.protocol == "https:"){
-                    var port = chrome.runtime.connect(chrome_id,{name: "BaiduExporter"});
-                    port.postMessage({
-                        method:"rpc_data",
-                        data: parameter
-                    });
-                    port.onMessage.addListener(function(response) {
-                        SetMessage(response[0],response[1]);
-                    });
+                    self.sendToBackground("rpc_data",parameter);
                 }else{
                     HttpSendRead(parameter)
                             .done(function(json, textStatus, jqXHR) {

@@ -48,7 +48,7 @@ var HttpSendRead = function(info) {
         }                          
     });
 };
-
+var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status === 'loading' && tab.url.indexOf("n.baidu.com") != -1) {
         if (!chrome.runtime.onConnect.hasListeners()) {
@@ -84,16 +84,32 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                     console.log(request.method);
                     switch(request.method){
                         case "rpc_data":
-
                             HttpSendRead(request.data)
                                     .done(function(json, textStatus, jqXHR) {
-                                        port.postMessage(["下载成功!赶紧去看看吧~", "MODE_SUCCESS"]);
+                                        port.postMessage({'method':'rpc_data','status':true});
 
                                     })
                                     .fail(function(jqXHR, textStatus, errorThrown) {
-                                        port.postMessage(["下载失败!是不是没有开启aria2?", "MODE_FAILURE"]);
+                                        port.postMessage({'method':'rpc_data','status':false});
                                     }); 
-                        break;                 
+                            break;
+                        case "rpc_version":
+                            HttpSendRead(request.data)
+                                    .done(function(json, textStatus, jqXHR) {
+                                        port.postMessage({'method':'rpc_version','status':true,'data':json});
+
+                                    })
+                                    .fail(function(jqXHR, textStatus, errorThrown) {
+                                        port.postMessage({'method':'rpc_data','status':false});
+                                    });
+                            break;
+                        case "config_data":
+                            localStorage.setItem("rpc_list", JSON.stringify(request.data));
+                            rpc_list = request.data;
+                            for(var i in rpc_list){
+                                addContextMenu(i,rpc_list[i]['name']);
+                            }
+                            break;        
                     }
                 });
             });
@@ -101,7 +117,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
     }
 });
-
+//获取系统的cookies 使用Promise异步处理
 function get_cookie(site,name){
     return new Promise(function(resolve, reject) {
         chrome.cookies.get({"url": site, "name": name}, function(cookies) {
@@ -115,19 +131,88 @@ function get_cookie(site,name){
         });
     });
 }
-
+//弹出chrome通知
+function showNotification(opt){
+    var notification = chrome.notifications.create(status.toString(),opt,function(notifyId){return notifyId});
+    setTimeout(function(){
+        chrome.notifications.clear(status.toString(),function(){});
+    },5000);
+}
+function parse_url(url){
+    var auth_str = request_auth(url);
+    var auth = null;
+    if (auth_str) {
+        if(auth_str.indexOf('token:') == 0){
+            auth= auth_str;
+        }else{
+        auth = "Basic " + btoa(auth_str);
+        }    
+    }
+    url_path=remove_auth(url);
+    function request_auth(url) {
+        return url.match(/^(?:(?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(?:\/\/)?(?:([^:@]*(?::[^:@]*)?)?@)?/)[1];
+    }
+    function remove_auth(url) {
+        return url.replace(/^((?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(\/\/)?(?:(?:[^:@]*(?::[^:@]*)?)?@)?(.*)/, '$1$2$3');
+    }
+    return [url_path,auth];
+}
+//生成右键菜单
+function addContextMenu(id,title){
+    chrome.contextMenus.create({
+    id:id,
+    title: title,
+    contexts: ['link']
+    });
+}
+//设置右键菜单
+for(var i in rpc_list){
+    addContextMenu(i,rpc_list[i]['name']);
+}
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
+    var rpc_data = {
+        "jsonrpc": "2.0",
+        "method": "aria2.addUri",
+        "id": new Date().getTime(),
+        "params": [[info.linkUrl]
+        ]
+    };
+    var result=parse_url(rpc_list[info.menuItemId]['url']);
+    var auth=result[1];
+    var parameter = {'url': result[0], 'dataType': 'json', type: 'POST', data: JSON.stringify(rpc_data), 'headers': {'Authorization': auth}};
+    if (auth && auth.indexOf('token:') == 0) {
+        rpc_data.params.unshift(auth);
+    }
+    HttpSendRead(parameter)
+            .done(function(json, textStatus, jqXHR) {
+                var opt={
+                    type: "basic",
+                    title: "下载成功",
+                    message: "导出下载成功~",
+                    iconUrl: "images/icon.jpg"
+                }                    
+                showNotification(opt);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                var opt={
+                    type: "basic",
+                    title: "下载失败",
+                    message: "导出下载失败! QAQ",
+                    iconUrl: "images/icon.jpg"
+                }                    
+                showNotification(opt);
+            }); 
+});
+//软件版本更新提示
 var manifest = chrome.runtime.getManifest();
 var previousVersion=localStorage.getItem("version");
 if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新解决Win平台下载文件转义的BUG",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新添加右键导出RPC功能~",
         iconUrl: "images/icon.jpg"
     }
-    var notification = chrome.notifications.create(status.toString(),opt,function(notifyId){return notifyId});
-    setTimeout(function(){
-        chrome.notifications.clear(status.toString(),function(){});
-    },5000);
+    showNotification(opt);
     localStorage.setItem("version",manifest.version);
 }
