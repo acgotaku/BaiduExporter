@@ -106,6 +106,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                         case "config_data":
                             localStorage.setItem("rpc_list", JSON.stringify(request.data));
                             rpc_list = request.data;
+                            chrome.contextMenus.removeAll();
                             for(var i in rpc_list){
                                 addContextMenu(i,rpc_list[i]['name']);
                             }
@@ -166,6 +167,7 @@ function addContextMenu(id,title){
     });
 }
 //设置右键菜单
+chrome.contextMenus.removeAll();
 for(var i in rpc_list){
     addContextMenu(i,rpc_list[i]['name']);
 }
@@ -174,15 +176,17 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
         "jsonrpc": "2.0",
         "method": "aria2.addUri",
         "id": new Date().getTime(),
-        "params": [[info.linkUrl]
+        "params": [[info.linkUrl],{}
         ]
     };
     var result=parse_url(rpc_list[info.menuItemId]['url']);
+    console.log(result);
     var auth=result[1];
-    var parameter = {'url': result[0], 'dataType': 'json', type: 'POST', data: JSON.stringify(rpc_data), 'headers': {'Authorization': auth}};
     if (auth && auth.indexOf('token:') == 0) {
         rpc_data.params.unshift(auth);
     }
+    var parameter = {'url': result[0], 'dataType': 'json', type: 'POST', data: JSON.stringify(rpc_data), 'headers': {'Authorization': auth}};
+    console.log(rpc_data);
     HttpSendRead(parameter)
             .done(function(json, textStatus, jqXHR) {
                 var opt={
@@ -210,7 +214,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新添加右键导出RPC功能~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复BUG~",
         iconUrl: "images/icon.jpg"
     }
     showNotification(opt);

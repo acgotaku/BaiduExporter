@@ -11,10 +11,10 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version 0.4.3
+// @version 0.4.4
 // ==/UserScript==
 var baidu = function(cookies,chrome_id) {
-    var version = "0.4.3";
+    var version = "0.4.4";
     var update_date = "2015/10/07";
     var baidupan = (function() {
         var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
