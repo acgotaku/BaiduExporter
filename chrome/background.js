@@ -106,9 +106,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                         case "config_data":
                             localStorage.setItem("rpc_list", JSON.stringify(request.data));
                             rpc_list = request.data;
-                            chrome.contextMenus.removeAll();
-                            for(var i in rpc_list){
-                                addContextMenu(i,rpc_list[i]['name']);
+                            break;
+                        case "context_menu":
+                            localStorage.setItem("context_menu", request.data);
+                            if(request.data){
+                                chrome.contextMenus.removeAll();
+                                for(var i in rpc_list){
+                                    addContextMenu(i,rpc_list[i]['name']);
+                                }                                
+                            }else{
+                                chrome.contextMenus.removeAll();
                             }
                             break;        
                     }
@@ -167,9 +174,12 @@ function addContextMenu(id,title){
     });
 }
 //设置右键菜单
-chrome.contextMenus.removeAll();
-for(var i in rpc_list){
-    addContextMenu(i,rpc_list[i]['name']);
+var context_menu = localStorage.getItem("context_menu");
+if(context_menu){
+    chrome.contextMenus.removeAll();
+    for(var i in rpc_list){
+        addContextMenu(i,rpc_list[i]['name']);
+    }   
 }
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
     var rpc_data = {
@@ -214,7 +224,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复BUG~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新支持手动开启右键导出~\n 默认不开启",
         iconUrl: "images/icon.jpg"
     }
     showNotification(opt);
