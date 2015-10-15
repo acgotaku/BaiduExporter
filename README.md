@@ -27,6 +27,12 @@ https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/firefox/baidu-ex
 
 下载XPI包,打开Firefox.Ctrl+O 打开选择文件对话框,选中XPI包即可安装.
 
+Safari:
+
+https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/safari/BaiduExporter.safariextz
+
+下载安装即可
+
 
 License
 -------
