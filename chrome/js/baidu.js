@@ -142,6 +142,7 @@ var baidu = function(cookies,chrome_id) {
         };
         var auth = null; //是否设置用户名密码验证 设置的话变为auth赋值
         var url_path=null;
+        var convert=false;
         //设置RPC PATH
         var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
         if(rpc_list == "undefined" || rpc_list.length == 0 || rpc_list[0].hasOwnProperty("url") == false){
@@ -182,15 +183,22 @@ var baidu = function(cookies,chrome_id) {
             set_export_ui: function() {
                 var self = this;
                 var aria2_btn = $("<span>").addClass("icon-btn-device").css("float", "none");
+                //添加批量转存按钮
+                var convert_btn = $("<span>").addClass("icon-btn-device").css("float", "none");
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").appendTo(aria2_btn);
                 //var aria2_export = $("<a>").text("ARIA2 RPC").appendTo(list);
                 var aria2_download = $("<a>").text("导出下载").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").appendTo(list);
                 if (!home) {
                     aria2_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>导出下载</b>');
-                    $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);
-
+                    convert_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>批量转存</b>');
+                    $('span a[class="new-dbtn"]').parent().prepend(aria2_btn).prepend(convert_btn);
+                    convert_btn.click(function(){
+                        convert=true;
+                        self.get_share_id();
+                    });
                     aria2_download.click(function() {
+                        convert=false;
                         self.aria2_download();
                         func = "aria2_data";
                         self.get_share_id();
@@ -564,16 +572,6 @@ var baidu = function(cookies,chrome_id) {
                         SetMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
                         return;
                     }
-                    // if($("#rpc_zip").prop('checked') == true){
-                    //     for (var i = 0; i < Filename.length; i++) {
-                    //         if (Filename[i].attr("data-extname") == "dir") {
-                    //             var fid_list = 'fid_list=' + JSON.stringify(File.get("selectedList"));
-                    //             yunData["isdir"]=1;
-                    //             self.set_share_data(yunData, fid_list);
-                    //             return;
-                    //         }
-                    //     }
-                    // }
                     for (var i = 0; i < Filename.length; i++) {
                             if (Filename[i].attr("data-extname") != "dir") {
                                 var fid_list = 'fid_list=' + JSON.stringify([Filename[i].attr("data-id")]);
@@ -596,7 +594,7 @@ var baidu = function(cookies,chrome_id) {
                     path=path_head+path;
                 }
                 console.log(path);
-                var parameter = {'url': "//pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             SetMessage("获取共享列表成功!", "MODE_SUCCESS");
@@ -610,7 +608,12 @@ var baidu = function(cookies,chrome_id) {
                                     }else{
                                         var fid_list = 'fid_list=' + JSON.stringify([array[i].fs_id]);
                                         yunData["isdir"]=0;
-                                        self.set_share_data(yunData, fid_list);
+                                        
+                                        if(convert == true){
+                                            self.convert_share_data(array[i]);
+                                        }else{
+                                            self.set_share_data(yunData, fid_list);
+                                        }
                                     }
                                 }
                             }
@@ -624,7 +627,7 @@ var baidu = function(cookies,chrome_id) {
                 var self=this;
                 var time=0;
                 var delay=parseInt($("#rpc_delay").val());
-                var parameter = {'url': "//pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             var array=json.list;
@@ -634,8 +637,13 @@ var baidu = function(cookies,chrome_id) {
                                 if(array[i].isdir == 1){
                                     delayLoopList(array[i].path,time);
                                 }else{
-                                    delayLoopFile(array[i].fs_id,time);  
-                                    //self.get_filemetas(array[i].path);
+                                    if(convert == true){
+                                        self.convert_share_data(array[i]);
+                                    }else{
+                                        delayLoopFile(array[i].fs_id,time);
+                                    }
+                                    
+                                    
                                 }
                             }
                         })
@@ -653,6 +661,7 @@ var baidu = function(cookies,chrome_id) {
                         var fid_list = 'fid_list=' + JSON.stringify([fs_id]);
                         yunData["isdir"]=0;
                         self.set_share_data(yunData, fid_list);
+                        
                     },time);
                 } 
             },
@@ -665,6 +674,22 @@ var baidu = function(cookies,chrome_id) {
                 }
                 if( obj.isdir == 1 ){ data = data+"&type=batch"; }
                 self.get_share_dlink(obj, data);
+            },
+            convert_share_data:function(obj){
+                var self = this; 
+                var data = 'filelist='+encodeURIComponent("[\""+obj.path+"\"]")+'&path=%2FDM';
+                console.log(data);
+                var convert = "//" + window.location.host + "/share/transfer?ondup=newcopy&async=1&channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN + "&shareid="+ yunData.SHARE_ID + "&from="+yunData.SHARE_UK ;
+                var parameter = {'url': convert, 'dataType': 'json', type: 'POST', 'data': data};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            console.log(json);
+
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取地址失败?", "MODE_FAILURE");
+                        });                
+
             },
             get_share_dlink: function(obj, data) {
                 var self = this;  
@@ -750,7 +775,7 @@ var baidu = function(cookies,chrome_id) {
                 if(path == null){
                     path="/";
                 }
-                var parameter = {'url': "//pan.baidu.com/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             SetMessage("获取列表成功!", "MODE_SUCCESS");
@@ -776,7 +801,7 @@ var baidu = function(cookies,chrome_id) {
                 var self=this;
                 var time=0;
                 var delay=parseInt($("#rpc_delay").val());
-                var parameter = {'url': "//pan.baidu.com/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             var array=json.list;
@@ -818,7 +843,7 @@ var baidu = function(cookies,chrome_id) {
                 if(path == null || path =="/"){
                     path="";
                 }
-                var parameter = {'url': "//pan.baidu.com/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//"+window.location.host+"/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             SetMessage("获取文件信息成功!", "MODE_SUCCESS");

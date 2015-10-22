@@ -82,6 +82,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                 console.assert(port.name == "BaiduExporter");
                 port.onMessage.addListener(function(request) {
                     console.log(request.method);
+                    console.log(request.data);
                     switch(request.method){
                         case "rpc_data":
                             HttpSendRead(request.data)
@@ -175,7 +176,7 @@ function addContextMenu(id,title){
 }
 //设置右键菜单
 var context_menu = localStorage.getItem("context_menu");
-if(context_menu){
+if(context_menu == true){
     chrome.contextMenus.removeAll();
     for(var i in rpc_list){
         addContextMenu(i,rpc_list[i]['name']);
