@@ -143,6 +143,7 @@ var baidu = function(cookies,chrome_id) {
         var auth = null; //是否设置用户名密码验证 设置的话变为auth赋值
         var url_path=null;
         var convert=false;
+        var last_path=null;
         //设置RPC PATH
         var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
         if(rpc_list == "undefined" || rpc_list.length == 0 || rpc_list[0].hasOwnProperty("url") == false){
@@ -578,7 +579,12 @@ var baidu = function(cookies,chrome_id) {
                                 yunData["isdir"]=0;
                                 self.set_share_data(yunData, fid_list);
                             }else{
-                                self.get_share_dir(Filename[i].attr("data-id"));
+                                if(convert == true){
+                                    self.get_convert_dir(Filename[i].attr("data-id"));
+                                }else{
+                                    self.get_share_dir(Filename[i].attr("data-id"));
+                                }
+                                
                             }
                     }
                 }
@@ -594,7 +600,7 @@ var baidu = function(cookies,chrome_id) {
                     path=path_head+path;
                 }
                 console.log(path);
-                var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                var parameter = {'url': "//pan.baidu.com/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             SetMessage("获取共享列表成功!", "MODE_SUCCESS");
@@ -608,12 +614,7 @@ var baidu = function(cookies,chrome_id) {
                                     }else{
                                         var fid_list = 'fid_list=' + JSON.stringify([array[i].fs_id]);
                                         yunData["isdir"]=0;
-                                        
-                                        if(convert == true){
-                                            self.convert_share_data(array[i]);
-                                        }else{
-                                            self.set_share_data(yunData, fid_list);
-                                        }
+                                        self.set_share_data(yunData, fid_list);
                                     }
                                 }
                             }
@@ -622,6 +623,69 @@ var baidu = function(cookies,chrome_id) {
                             SetMessage("获取List失败!", "MODE_FAILURE");
                             console.log(textStatus);
                         });          
+            },
+            //得到转存到文件夹
+            get_convert_dir:function(fs_id){
+                var self=this;
+                var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+                var path_head=yunData.PATH.slice(0,yunData.PATH.lastIndexOf("/"));
+                var path=API.get("path");
+                if(path == "/"|| path == null){
+                    path=yunData.PATH;
+                }else{
+                    path=path_head+path;
+                }
+                self.create_dir(path);
+                var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            SetMessage("获取转存列表成功!", "MODE_SUCCESS");
+                            var array=json.list;
+                            for(var i=0;i<array.length;i++){
+                                if(array[i].fs_id == fs_id ||API.get("path")=="/" || API.get("path") == null){
+                                    if(array[i].isdir == 1){
+                                        self.get_convert_list(array[i].path);
+                                    }else{
+                                        self.convert_share_file(array[i]);
+                                    }
+                                }
+                            }
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取List失败!", "MODE_FAILURE");
+                            console.log(textStatus);
+                        });          
+            },
+            get_convert_list:function(path){
+                var self=this;
+                var time=0;
+                var delay=parseInt($("#rpc_delay").val());
+                self.create_dir(path);
+                var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            var array=json.list;
+                            console.log(json);
+                            for(var i=0;i<array.length;i++){
+                                time=time+delay;
+                                if(array[i].isdir == 1){
+                                    delayLoopList(array[i].path,time);
+                                }else{
+                                    self.convert_share_file(array[i]);
+                                    
+                                    
+                                }
+                            }
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("获取转存List失败!", "MODE_FAILURE");
+                            console.log(textStatus);
+                        });  
+                function delayLoopList(path){
+                    setTimeout(function(){
+                        self.get_convert_list(path);
+                    },time);
+                }
             },
             get_share_list:function(path){
                 var self=this;
@@ -637,13 +701,7 @@ var baidu = function(cookies,chrome_id) {
                                 if(array[i].isdir == 1){
                                     delayLoopList(array[i].path,time);
                                 }else{
-                                    if(convert == true){
-                                        self.convert_share_data(array[i]);
-                                    }else{
-                                        delayLoopFile(array[i].fs_id,time);
-                                    }
-                                    
-                                    
+                                    delayLoopFile(array[i].fs_id,time);     
                                 }
                             }
                         })
@@ -675,21 +733,51 @@ var baidu = function(cookies,chrome_id) {
                 if( obj.isdir == 1 ){ data = data+"&type=batch"; }
                 self.get_share_dlink(obj, data);
             },
-            convert_share_data:function(obj){
+            convert_share_file:function(obj){
                 var self = this; 
-                var data = 'filelist='+encodeURIComponent("[\""+obj.path+"\"]")+'&path=%2FDM';
-                console.log(data);
+                var data = 'filelist='+encodeURIComponent("[\""+obj.path+"\"]")+'&path='+encodeURIComponent(obj.path.substring(0,obj.path.lastIndexOf("/")));
                 var convert = "//" + window.location.host + "/share/transfer?ondup=newcopy&async=1&channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN + "&shareid="+ yunData.SHARE_ID + "&from="+yunData.SHARE_UK ;
                 var parameter = {'url': convert, 'dataType': 'json', type: 'POST', 'data': data};
                 HttpSendRead(parameter)
                         .done(function(json, textStatus, jqXHR) {
-                            console.log(json);
+                            if(json.errno == 2){
+                                console.log("folder miss");
+                                self.create_dir(obj.path.substring(0,obj.path.lastIndexOf("/")));
+                                self.convert_share_file(obj);
+                            } else if(json.errno ==0){
+                                SetMessage("转存成功!", "MODE_SUCCESS");
+                            }else{
+                                console.log(json);
+                                SetMessage("转存出现异常!", "MODE_FAILURE");   
+                            }
 
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
-                            SetMessage("获取地址失败?", "MODE_FAILURE");
+                            SetMessage("转存失败?", "MODE_FAILURE");
                         });                
 
+            },
+            create_dir:function(path) {
+                if(last_path == path){
+                    return;
+                }
+                var self = this; 
+                var data = 'path='+encodeURIComponent(path)+'&isdir=1&size=&block_list=%5B%5D&method=post';
+                var convert = "//" + window.location.host + "/api/create?a=commit&channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN;
+                var parameter = {'url': convert, 'dataType': 'json', type: 'POST', 'data': data};
+                HttpSendRead(parameter)
+                        .done(function(json, textStatus, jqXHR) {
+                            if(json.errno == 0){
+                                 SetMessage("创建文件夹成功!", "MODE_SUCCESS");
+                            }else{
+                                console.log(json);
+                                SetMessage("创建文件夹出现异常!", "MODE_CAUTION");   
+                            }
+
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            SetMessage("创建失败?", "MODE_FAILURE");
+                        });                  
             },
             get_share_dlink: function(obj, data) {
                 var self = this;  
