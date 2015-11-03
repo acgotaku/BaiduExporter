@@ -8,8 +8,6 @@ var port=null;
             window.addEventListener("message", function(){
                 if(event.origin == window.location.origin){
                     extensionId=event.data;
-                    port= chrome.runtime.connect(extensionId,{name: "BaiduExporter"});
-                    self.listenBackground(port);
                 }
             }, false);
         },
@@ -19,6 +17,7 @@ var port=null;
                 method:method,
                 data: data
             });
+            this.listenBackground(port);
 
         },
         listenBackground:function(port){
