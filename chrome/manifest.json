@@ -5,7 +5,8 @@
    },
    "content_scripts": [ {
       "js": [ "js/baidu.js" ],
-      "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*"]
+      "css":["css/setting.css"],
+      "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/info*", "*://yun.baidu.com/pcloud/album/info*"]
    } ],
    "default_locale": "en",
    "description": "__MSG_description__",
@@ -18,8 +19,16 @@
    "externally_connectable": {
    "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*"]
    },
+  "web_accessible_resources": [
+    "js/core.js",
+    "js/home.js",
+    "js/connect.js",
+    "js/share.js",
+    "js/convert.js",
+    "js/album.js"
+  ],
    "manifest_version": 2,
    "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab", "contextMenus"],
    "name": "__MSG_appName__",
-   "version": "0.4.5"
+   "version": "0.4.6"
 }

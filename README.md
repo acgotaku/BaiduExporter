@@ -33,6 +33,8 @@ https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/safari/BaiduExpo
 
 下载安装即可
 
+Icon by[Losses Don](https://github.com/Losses)
+
 
 License
 -------

@@ -48,35 +48,8 @@ var HttpSendRead = function(info) {
         }                          
     });
 };
-var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status === 'loading' && tab.url.indexOf("n.baidu.com") != -1) {
-        if (!chrome.runtime.onConnect.hasListeners()) {
-            chrome.runtime.onConnect.addListener(function(port) {
-                console.assert(port.name == "BaiduExporter");
-                port.onMessage.addListener(function(request) {
-                    console.log(request.method);
-                    switch(request.method){
-                        case "get_cookie":
-                            Promise.all(function(){
-                                var array=[];
-                                var data=request.data;
-                                for(var i=0;i<data.length;i++){
-                                    array.push(get_cookie(data[i].site,data[i].name));
-                                }
-                                return array;
-                            }()).then(function(value){
-                
-                                port.postMessage(value);        
-                                
-                            },function(){
-                                console.log("error");
-                            });
-                            break;                
-                    }
-                });
-            });
-        }
         if (!chrome.runtime.onConnectExternal.hasListeners()) {
             chrome.runtime.onConnectExternal.addListener(function(port) {
                 console.assert(port.name == "BaiduExporter");
@@ -87,11 +60,11 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                         case "rpc_data":
                             HttpSendRead(request.data)
                                     .done(function(json, textStatus, jqXHR) {
-                                        port.postMessage({'method':'rpc_data','status':true});
+                                        port.postMessage({'method':'rpc_result','status':true});
 
                                     })
                                     .fail(function(jqXHR, textStatus, errorThrown) {
-                                        port.postMessage({'method':'rpc_data','status':false});
+                                        port.postMessage({'method':'rpc_result','status':false});
                                     }); 
                             break;
                         case "rpc_version":
@@ -105,20 +78,12 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                                     });
                             break;
                         case "config_data":
-                            localStorage.setItem("rpc_list", JSON.stringify(request.data));
-                            rpc_list = request.data;
-                            break;
-                        case "context_menu":
-                            localStorage.setItem("context_menu", request.data);
-                            if(request.data){
-                                chrome.contextMenus.removeAll();
-                                for(var i in rpc_list){
-                                    addContextMenu(i,rpc_list[i]['name']);
-                                }                                
-                            }else{
-                                chrome.contextMenus.removeAll();
+                            for(var keys in request.data){
+                                var key =Object.keys(request.data[keys])[0];
+                                var value =request.data[keys];
+                                localStorage.setItem(key,value[key]);
                             }
-                            break;        
+                            break;      
                     }
                 });
             });
@@ -141,83 +106,14 @@ function get_cookie(site,name){
     });
 }
 //弹出chrome通知
-function showNotification(opt){
-    var notification = chrome.notifications.create(status.toString(),opt,function(notifyId){return notifyId});
+function showNotification(id,opt){
+    var notification = chrome.notifications.create(id,opt,function(notifyId){return notifyId});
     setTimeout(function(){
-        chrome.notifications.clear(status.toString(),function(){});
+        chrome.notifications.clear(id,function(){});
     },5000);
 }
-function parse_url(url){
-    var auth_str = request_auth(url);
-    var auth = null;
-    if (auth_str) {
-        if(auth_str.indexOf('token:') == 0){
-            auth= auth_str;
-        }else{
-        auth = "Basic " + btoa(auth_str);
-        }    
-    }
-    url_path=remove_auth(url);
-    function request_auth(url) {
-        return url.match(/^(?:(?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(?:\/\/)?(?:([^:@]*(?::[^:@]*)?)?@)?/)[1];
-    }
-    function remove_auth(url) {
-        return url.replace(/^((?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(\/\/)?(?:(?:[^:@]*(?::[^:@]*)?)?@)?(.*)/, '$1$2$3');
-    }
-    return [url_path,auth];
-}
-//生成右键菜单
-function addContextMenu(id,title){
-    chrome.contextMenus.create({
-    id:id,
-    title: title,
-    contexts: ['link']
-    });
-}
-//设置右键菜单
-var context_menu = localStorage.getItem("context_menu");
-if(context_menu == true){
-    chrome.contextMenus.removeAll();
-    for(var i in rpc_list){
-        addContextMenu(i,rpc_list[i]['name']);
-    }   
-}
-chrome.contextMenus.onClicked.addListener(function(info, tab) {
-    var rpc_data = {
-        "jsonrpc": "2.0",
-        "method": "aria2.addUri",
-        "id": new Date().getTime(),
-        "params": [[info.linkUrl],{}
-        ]
-    };
-    var result=parse_url(rpc_list[info.menuItemId]['url']);
-    console.log(result);
-    var auth=result[1];
-    if (auth && auth.indexOf('token:') == 0) {
-        rpc_data.params.unshift(auth);
-    }
-    var parameter = {'url': result[0], 'dataType': 'json', type: 'POST', data: JSON.stringify(rpc_data), 'headers': {'Authorization': auth}};
-    console.log(rpc_data);
-    HttpSendRead(parameter)
-            .done(function(json, textStatus, jqXHR) {
-                var opt={
-                    type: "basic",
-                    title: "下载成功",
-                    message: "导出下载成功~",
-                    iconUrl: "images/icon.jpg"
-                }                    
-                showNotification(opt);
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) {
-                var opt={
-                    type: "basic",
-                    title: "下载失败",
-                    message: "导出下载失败! QAQ",
-                    iconUrl: "images/icon.jpg"
-                }                    
-                showNotification(opt);
-            }); 
-});
+
+
 //软件版本更新提示
 var manifest = chrome.runtime.getManifest();
 var previousVersion=localStorage.getItem("version");
@@ -225,9 +121,10 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新支持手动开启右键导出~\n 默认不开启",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新支持网盘批量转存~",
         iconUrl: "images/icon.jpg"
     }
-    showNotification(opt);
+    var id= new Date().getTime().toString();              
+    showNotification(id,opt);
     localStorage.setItem("version",manifest.version);
 }
