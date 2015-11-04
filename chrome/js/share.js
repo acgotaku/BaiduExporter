@@ -36,7 +36,7 @@ var SHARE =(function(){
                 var self = this;
                 if (yunData.SHAREPAGETYPE=="single_file_page") {
                     var fid_list = 'fid_list=' + JSON.stringify([yunData.FS_ID]);
-                    self.set_share_data(yunData, fid_list);
+                    self.setFileData(fid_list);
                 } else {
                     var File = require("common:widget/data-center/data-center.js");
                     var Filename = File.get("selectedItemList");
@@ -103,7 +103,7 @@ var SHARE =(function(){
         getRecursiveFold:function(path){
             var self=this;
             var time=0;
-            var delay=parseInt(localStorage.getItem("rpc_delay"))||0;
+            var delay=parseInt(localStorage.getItem("rpc_delay"))||300;
             var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
             HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {

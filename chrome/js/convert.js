@@ -6,7 +6,7 @@ var CONVERT =(function(){
     var HttpSend= CONNECT.HttpSend;
     const prefix="/我的资源";
     var fold_list=[];
-    var delay=10000;
+    var delay=parseInt(localStorage.getItem("rpc_delay"))||3000;
     return {
         //绑定事件
         init:function(){
