@@ -20,7 +20,7 @@ var SHARE =(function(){
             var self=this;
             menu.find(".rpc_export_list").on("click",function(){
                 MODE="RPC";
-                var RPC_PATH=$(this).attr('data-id');
+                RPC_PATH=$(this).attr('data-id');
                 self.getShareFile();
 
             });

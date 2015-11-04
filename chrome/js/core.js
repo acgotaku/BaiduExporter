@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.4.5";
-    const update_date = "2015/11/02";
+    const version = "0.4.9";
+    const update_date = "2015/11/04";
     return {
         init:function(){
 
