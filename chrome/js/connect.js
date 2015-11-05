@@ -38,6 +38,14 @@ var port=null;
                             $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + response.data.result.version);
                         }
                         break;
+                    case "send_cookies":
+                        if(response.data){
+                            CORE.setCookies(response.data);
+                            
+                        }else{
+                            console.log(response.data);
+                        }
+                        break;
                 }
             });
             // port.onMessage.addListener(function(){

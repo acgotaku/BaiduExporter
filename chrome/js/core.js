@@ -1,8 +1,9 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4;PC;PC-Windows;6.2.9200;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.5.1";
-    const update_date = "2015/11/04";
+    const version = "0.5.2";
+    const update_date = "2015/11/05";
+    var cookies=null;
     return {
         init:function(){
 
@@ -61,8 +62,15 @@ var CORE=(function(){
             }
             return [auth_str,url];
         },
+        //names format  [{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]
+        requestCookies:function(names){
+            CONNECT.sendToBackground("get_cookies",names);
+        },
+        setCookies:function(value){
+            cookies=value;
+        },
         //获取 http header信息
-        getHeader:function(type,cookies){
+        getHeader:function(type){
             var addheader = [];
             var UA =localStorage.getItem("UA") || defaultUA;
             var headers = localStorage.getItem("headers");
@@ -76,7 +84,7 @@ var CORE=(function(){
                 }
             }
             if(cookies){
-                var baidu_cookies=JSON.parse(cookies);
+                var baidu_cookies=cookies;
                 var format_cookies=[];
                 for(var i=0;i<baidu_cookies.length;i++){
                     for(var key in baidu_cookies[i]){

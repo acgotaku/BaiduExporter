@@ -18,6 +18,7 @@ var SHARE =(function(){
         init:function(){
             var menu=CORE.addMenu.init("share");
             var self=this;
+            CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
             menu.find(".rpc_export_list").on("click",function(){
                 MODE="RPC";
                 RPC_PATH=$(this).attr('data-id');

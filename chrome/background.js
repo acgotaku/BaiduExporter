@@ -83,7 +83,23 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                                 var value =request.data[keys];
                                 localStorage.setItem(key,value[key]);
                             }
-                            break;      
+                            break;
+                        case "get_cookies":
+                            Promise.all(function(){
+                                var array=[];
+                                var data=request.data;
+                                for(var i=0;i<data.length;i++){
+                                    array.push(get_cookie(data[i].site,data[i].name));
+                                }
+                                return array;
+                            }()).then(function(value){
+                
+                                port.postMessage({'method':'send_cookies','data':value});        
+                                
+                            },function(){
+                                console.log("error");
+                            });
+                            break; 
                     }
                 });
             });
