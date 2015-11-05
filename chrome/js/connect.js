@@ -20,6 +20,21 @@ var port=null;
             this.listenBackground(port);
 
         },
+        sendToHttp:function(method,data){
+            var self=this;
+            switch(method){
+                case "rpc_data":
+                    self.HttpSend(data)
+                            .done(function(json, textStatus, jqXHR) {
+                                CORE.setMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+
+                            })
+                            .fail(function(jqXHR, textStatus, errorThrown) {
+                                CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+                            }); 
+                    break;
+            }
+        },
         listenBackground:function(port){
             port.onMessage.addListener(function(response) {
                 console.log(response);
@@ -29,13 +44,6 @@ var port=null;
                             CORE.setMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
                         }else{
                             CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
-                        }
-                        break;
-                    case "rpc_version":
-                        if(response.status == false){
-                            $("#send_test").html("错误,请查看是否开启Aria2");
-                        }else{
-                            $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + response.data.result.version);
                         }
                         break;
                     case "send_cookies":
@@ -48,10 +56,6 @@ var port=null;
                         break;
                 }
             });
-            // port.onMessage.addListener(function(){
-            //     console.log("reconnect");
-            //     port= chrome.runtime.connect(extensionId,{name: "BaiduExporter"});
-            // });
 
         },
         HttpSend:function(info) {

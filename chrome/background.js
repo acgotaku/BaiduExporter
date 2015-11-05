@@ -67,16 +67,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                                         port.postMessage({'method':'rpc_result','status':false});
                                     }); 
                             break;
-                        case "rpc_version":
-                            HttpSendRead(request.data)
-                                    .done(function(json, textStatus, jqXHR) {
-                                        port.postMessage({'method':'rpc_version','status':true,'data':json});
-
-                                    })
-                                    .fail(function(jqXHR, textStatus, errorThrown) {
-                                        port.postMessage({'method':'rpc_data','status':false});
-                                    });
-                            break;
                         case "config_data":
                             for(var keys in request.data){
                                 var key =Object.keys(request.data[keys])[0];
