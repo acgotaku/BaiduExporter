@@ -18,7 +18,7 @@ var HOME =(function(){
         init:function(){
             var menu=CORE.addMenu.init("home");
             var self=this;
-            // CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
+            CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "BAIDUID"}]);
             menu.find(".rpc_export_list").on("click",function(){
                 MODE="RPC";
                 RPC_PATH=$(this).attr('data-id');
@@ -127,9 +127,12 @@ var HOME =(function(){
                     setMessage("获取文件信息成功!", "MODE_SUCCESS");
                     var file=json.info;
                     var file_list = [];
+                    //备用下载地址
+                    var dlink ="http://"+"d.pcs.baidu.com"+"/rest/2.0/pcs/file?app_id=250528&method=download&check_blue=1&ec=1&path="+encodeURIComponent(target)+"&psl=216&taskcount=1&urlcount=3&p2sspd=86016";
+
                     for(var i=0;i<file.length;i++){
                         //这里文件名的操作是为了下载到相应的路径中去
-                        file_list.push({"name":self.getPath() + file[i].path.slice(path.length+1,file[i].path.length), "link": file[i].dlink});
+                        file_list.push({"name":self.getPath() + file[i].path.slice(path.length+1,file[i].path.length), "link":file[i].dlink});
                     }
                     if(MODE =="TXT"){
                         CORE.dataBox.fillData(file_list);
