@@ -127,7 +127,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新更换UA突破限速请重置设置~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复BUG~",
         iconUrl: "images/icon.jpg"
     }
     var id= new Date().getTime().toString();              
