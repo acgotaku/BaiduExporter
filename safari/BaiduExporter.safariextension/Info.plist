@@ -5,7 +5,7 @@
 	<key>Author</key>
 	<string>Cee</string>
 	<key>Builder Version</key>
-	<string>11601.1.56</string>
+	<string>11601.2.7.2</string>
 	<key>CFBundleDisplayName</key>
 	<string>BaiduExporter</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.4.4</string>
+	<string>0.5.3</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>Content</key>
@@ -27,13 +27,18 @@
 		</dict>
 		<key>Stylesheets</key>
 		<array>
-			<string>style.css</string>
+			<string>setting.css</string>
 		</array>
 		<key>Whitelist</key>
 		<array>
 			<string>http://pan.baidu.com/s/*</string>
 			<string>http://pan.baidu.com/disk/home*</string>
 			<string>http://pan.baidu.com/share/link*</string>
+			<string>http://yun.baidu.com/s/*</string>
+			<string>http://yun.baidu.com/disk/home*</string>
+			<string>http://yun.baidu.com/share/link*</string>
+			<string>http://pan.baidu.com/pcloud/album/info*</string>
+			<string>http://yun.baidu.com/pcloud/album/info*</string>
 		</array>
 	</dict>
 	<key>Description</key>
