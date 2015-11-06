@@ -5,6 +5,7 @@ var port=null;
     return {
         init:function(){
             var self=this;
+            //获得扩展的ID
             window.addEventListener("message", function(){
                 if(event.origin == window.location.origin){
                     extensionId=event.data;

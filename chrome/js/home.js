@@ -9,7 +9,6 @@ var HOME =(function(){
 
     */
     var setMessage =CORE.setMessage;
-    var HttpSend= CONNECT.HttpSend;
     //两种导出模式 RPC模式 和 TXT模式
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
@@ -58,7 +57,7 @@ var HOME =(function(){
         getSelectFold:function(fs_id){
                 var self=this;
                 var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(self.getCurrentPath()), 'dataType': 'json', type: 'GET'};
-                HttpSend(parameter)
+                CONNECT.HttpSend(parameter)
                         .done(function(json, textStatus, jqXHR) {
                             setMessage("获取列表成功!", "MODE_SUCCESS");
                             var array=json.list;
@@ -83,7 +82,7 @@ var HOME =(function(){
             var self=this;
             var delay=parseInt(localStorage.getItem("rpc_delay"))||0;
             var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
                     var array=json.list;
                     console.log(json);
@@ -122,7 +121,7 @@ var HOME =(function(){
                 path="";
             }
             var parameter = {'url': "//"+window.location.host+"/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
                     setMessage("获取文件信息成功!", "MODE_SUCCESS");
                     var file=json.info;

@@ -9,7 +9,6 @@ var SHARE =(function(){
 
     */
     var setMessage =CORE.setMessage;
-    var HttpSend= CONNECT.HttpSend;
     //两种导出模式 RPC模式 和 TXT模式
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
@@ -78,7 +77,7 @@ var SHARE =(function(){
                 path=path_head+path;
             }
             var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         setMessage("获取共享列表成功!", "MODE_SUCCESS");
                         var array=json.list;
@@ -106,7 +105,7 @@ var SHARE =(function(){
             var time=0;
             var delay=parseInt(localStorage.getItem("rpc_delay"))||300;
             var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         var array=json.list;
                         console.log(json);
@@ -202,10 +201,10 @@ var SHARE =(function(){
             var download = "//" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
             var pic="//" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken="+yunData.MYBDSTOKEN+"&app_id="+yunData.FILEINFO[0].app_id;
             var parameter = {'url': download, 'dataType': 'json', type: 'POST', 'data': data};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         if (json.errno == -20) {
-                            HttpSend({'url':pic,'dataType': 'json',type: 'GET'})
+                            CONNECT.HttpSend({'url':pic,'dataType': 'json',type: 'GET'})
                             .done(function(json, textStatus, jqXHR){
                                 if (data.indexOf("input") != -1) {
                                     json.auth = true;
