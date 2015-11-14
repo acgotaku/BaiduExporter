@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.5.4";
-    const update_date = "2015/11/06";
+    const version = "0.5.5";
+    const update_date = "2015/11/14";
     var cookies=null;
     return {
         init:function(){
@@ -142,7 +142,7 @@ var CORE=(function(){
                     //convert_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>批量转存</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);
                 }else if(type == "album"){
-                    aria2_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>导出下载</b>');
+                    aria2_btn.addClass("new-dbtn").append('<em class="quick_save_icon"></em><b>导出下载</b>');
                     $("#albumFileSaveKey").parent().prepend(aria2_btn);
                 }
                 aria2_btn.on("mouseover",function(){

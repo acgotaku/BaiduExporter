@@ -1,9 +1,10 @@
-#setting_div{
+#setting_div,#download_ui{
     border: 3px solid #999;
     background: #FFF;
     width: 568px;
     box-shadow: 0 0 9px #999;
 }
+
 #setting_div_table input{
     text-indent: 10px;
     border: 1px solid #C6C6C6;

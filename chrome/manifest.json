@@ -17,7 +17,7 @@
       "128": "images/logo128.png"
    },
    "externally_connectable": {
-   "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*"]
+   "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/info*", "*://yun.baidu.com/pcloud/album/info*"]
    },
   "web_accessible_resources": [
     "js/core.js",
@@ -30,5 +30,5 @@
    "manifest_version": 2,
    "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab", "contextMenus"],
    "name": "__MSG_appName__",
-   "version": "0.5.4"
+   "version": "0.5.5"
 }

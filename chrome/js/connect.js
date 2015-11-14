@@ -18,6 +18,7 @@ var port=null;
                 method:method,
                 data: data
             });
+            console.log(data);
             this.listenBackground(port);
 
         },
