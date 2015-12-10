@@ -4,7 +4,50 @@
     width: 568px;
     box-shadow: 0 0 9px #999;
 }
-
+.g-button-menu{
+    cursor: pointer;
+}
+.b-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #FFF;
+}
+.b-dialog {
+    z-index: 998;
+    display: none;
+    border: 3px solid #999;
+}
+.new-dbtn .btn .download-btn{
+    background-position: 0 -1028px;
+    text-decoration: none;
+    font-size: 12px;
+    height: 34px;
+    line-height: 34px;
+    padding-left: 35px;
+    position: relative;
+    margin-right: 10px;
+}
+.dlg-hd .dlg-cnr-min, .dlg-hd .dlg-cnr-r {
+    background: url(http://s1.pan.bdstatic.com/yun-static/common-cdn/images/btn_icon.gif?t=1449478533149) no-repeat scroll -109px -111px transparent;
+    cursor: pointer;
+    height: 20px;
+    right: 10px;
+    top: 10px;
+    width: 20px;
+    position: absolute;
+}
+.dlg-hd h3, .dlg-cnr {
+    height: 42px;
+    line-height: 40px;
+}
+.dlg-hd h3 {
+    text-indent: 1em;
+    color: #333;
+    font-size: 14px;
+    background: url(http://s1.pan.bdstatic.com/yun-static/common-cdn/images/dialog/globe-dlg-hd.png?t=1449478533149) repeat-x 0 0 #EEE;
+    font-weight: 700;
+}
 #setting_div_table input{
     text-indent: 10px;
     border: 1px solid #C6C6C6;

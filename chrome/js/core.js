@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.5.5";
-    const update_date = "2015/11/14";
+    const version = "0.5.6";
+    const update_date = "2015/12/10";
     var cookies=null;
     return {
         init:function(){
@@ -10,8 +10,9 @@ var CORE=(function(){
         },
         //封装的百度的Toast提示消息
         //Type类型有
-        //MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
+        //caution  警告  failure  失败  loading 加载 success 成功
         setMessage:function(msg, type) {
+        var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         if(typeof require=="undefined"){
            Utilities.useToast({
                 toastMode: disk.ui.Toast[type],
@@ -19,12 +20,20 @@ var CORE=(function(){
                 sticky: false
             });
         }else{
-            var Toast = require("common:widget/toast/toast.js");
-            Toast.obtain.useToast({
-                toastMode: Toast.obtain[type],
-                msg: msg,
-                sticky: false
-            });            
+            if(home){
+                var Toast = require("disk-system:widget/context/context.js").instanceForSystem;
+                Toast.ui.tip({
+                    mode: type,
+                    msg: msg
+                }); 
+            }else{
+                var Toast = require("common:widget/toast/toast.js");
+                Toast.obtain.useToast({
+                    toastMode: Toast.obtain[type],
+                    msg: msg,
+                    sticky: false
+                });            
+            }           
         }
 
         },
@@ -130,13 +139,14 @@ var CORE=(function(){
                     return $("#export_menu");
                 }
                 var aria2_btn = $("<span>").addClass("icon-btn-device").css("float", "none").attr("id","export_menu");
-                var list = $("<div>").addClass("menu").attr("id", "aria2_list").appendTo(aria2_btn);
+                var list = $("<div>").addClass("menu").attr("id", "aria2_list").css("display", "none").appendTo(aria2_btn);
                 //var aria2_export = $("<a>").text("ARIA2 RPC").attr("id", "aria2_rpc").appendTo(list);
-                var aria2_download = $("<a>").text("导出下载").attr("id", "aria2_download").appendTo(list);
-                var config = $("<a>").text("设置").appendTo(list);
+                var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
+                var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
                 if(type == "home"){
-                    aria2_btn.append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
-                    $(".icon-btn-device").after(aria2_btn);
+                    aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").attr("href","javascript:void(0);").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool").after($("<span>").addClass("text").text("导出下载")))));
+                    // aria2_btn.append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
+                    $(".g-dropdown-button").eq(3).after(aria2_btn);
                 }else if (type == "share"){
                     aria2_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     //convert_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>批量转存</b>');
@@ -167,7 +177,7 @@ var CORE=(function(){
                 var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
                 while(rpc_list.length > 0){
                     var rpcObj = rpc_list.pop();
-                    $("<a class='rpc_export_list'>").attr('data-id',rpcObj.url).text(rpcObj.name).prependTo($("#aria2_list"));
+                    $("<a class='rpc_export_list'>").addClass("g-button-menu").attr('data-id',rpcObj.url).text(rpcObj.name).prependTo($("#aria2_list"));
                 }
             },
         },
@@ -322,9 +332,9 @@ var CORE=(function(){
                     content_ui.empty();
                     var download_menu = $("<div>").addClass("module-list-toolbar").css({"display": "block", "margin-bottom": "10px"}).appendTo(content_ui);
                     if (type == "home") {
-                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为aria2文件")).appendTo(download_menu);
-                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("存为IDM文件")).appendTo(download_menu);
-                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank"}).addClass("btn download-btn").append($("<span>").addClass("ico")).append($("<span>").addClass("btn-val").text("保存下载链接")).appendTo(download_menu);
+                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download-gray")).append($("<span>").addClass("text").text("存为aria2文件"))).appendTo(download_menu);
+                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download-gray")).append($("<span>").addClass("text").text("存为IDM文件"))).appendTo(download_menu);
+                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank"}).addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download-gray")).append($("<span>").addClass("text").text("保存下载链接"))).appendTo(download_menu);
                         var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px"}).appendTo(content_ui);;
 
                     } else {
