@@ -3,33 +3,38 @@
     background: #FFF;
     width: 568px;
     box-shadow: 0 0 9px #999;
+    position: absolute;
+    z-index: 998;
 }
 .g-button-menu{
     cursor: pointer;
 }
-.b-panel {
-    position: absolute;
-    left: 0;
-    top: 0;
-    background: #FFF;
-}
-.b-dialog {
-    z-index: 998;
-    display: none;
-    border: 3px solid #999;
-}
-.new-dbtn .btn .download-btn{
-    background-position: 0 -1028px;
-    text-decoration: none;
+.save-button{
     font-size: 12px;
     height: 34px;
     line-height: 34px;
     padding-left: 35px;
     position: relative;
     margin-right: 10px;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMUAAAAiCAYAAADveR3KAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwLBCo75CTjigAAAT5JREFUeNrt2Ttug0AUheEzPAqn4tGwEPbAmtkDO0AyqRCNoYsLGMZNjBUEkVJF1vxfSYN0NVfn3hkzL4uz86yv+114T/M8K47jt//Hf/u4XBTGsaLPrlPTNMqzjNMFr93GUWVZKmqaRlVVKU1TqgKvTdOkuq4VSVKSJHLOURV4LUkSSVJAKYCfaApgJ5LE6ARIMsaQFMBpUqwkBbAlBEkBsGgDx54TE00BHO0Ubl2pBLxngoCkAM6TgtsnQIZFGzhGUwDfnrt1tP8AeDs+hSFJAZyOT6QE8LpwIimAnW2nsKQFfG8GHu+AX5LCrqtWkgIgKYDTpiAlgNctLEkBMD4BNAXwJ9s7BXsFfGfZKYCTpMizTMMwqCgKqgGv9X2vPMtk2rZ13fWq2zhSFXivLEsZa61bloVqwHvGGJkg0APD/WsWsNiZMwAAAABJRU5ErkJggg==') no-repeat 0 0;
+    display: inline-block;
 }
-.dlg-hd .dlg-cnr-min, .dlg-hd .dlg-cnr-r {
-    background: url(http://s1.pan.bdstatic.com/yun-static/common-cdn/images/btn_icon.gif?t=1449478533149) no-repeat scroll -109px -111px transparent;
+.save-button em{
+    position: absolute;
+    left: 10px;
+    top: 8px;
+}
+.save-button b {
+    color: #666;
+    padding-right: 10px;
+    height: 34px;
+    line-height: 34px;
+    text-decoration: none;
+    display: block;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMUAAAAiCAYAAADveR3KAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwLBCo75CTjigAAAT5JREFUeNrt2Ttug0AUheEzPAqn4tGwEPbAmtkDO0AyqRCNoYsLGMZNjBUEkVJF1vxfSYN0NVfn3hkzL4uz86yv+114T/M8K47jt//Hf/u4XBTGsaLPrlPTNMqzjNMFr93GUWVZKmqaRlVVKU1TqgKvTdOkuq4VSVKSJHLOURV4LUkSSVJAKYCfaApgJ5LE6ARIMsaQFMBpUqwkBbAlBEkBsGgDx54TE00BHO0Ubl2pBLxngoCkAM6TgtsnQIZFGzhGUwDfnrt1tP8AeDs+hSFJAZyOT6QE8LpwIimAnW2nsKQFfG8GHu+AX5LCrqtWkgIgKYDTpiAlgNctLEkBMD4BNAXwJ9s7BXsFfGfZKYCTpMizTMMwqCgKqgGv9X2vPMtk2rZ13fWq2zhSFXivLEsZa61bloVqwHvGGJkg0APD/WsWsNiZMwAAAABJRU5ErkJggg==') no-repeat right 0;
+}
+.top .close {
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwLAhwxiWDnUwAAAP9JREFUOMvtkE1uwjAQhd9UkSxl4RvAIr5VOABVfIDS8lP6J2DZRSJygHKNchFnEW4wi0hZTVdYSVpIu6sQb+c39ud5D7jq34m6hojINs9RlgcMhwOM4hhaa3+PmeVjt/Pz2/EYROTnwbcfiIiZZbXeYP+5R1kewMyitfZ+4RwiYzCK4xbsxw2bmzQfW5sgTTN/ns+mCMOQeiN34z9MZyic815kDO4nd60amro5WzARWZsgMsbDrE1OwnqBzCzHmABQOIc0zcDM8mdgt8P3LEdkDArnsFpvTkKD38COndV1Lcun5xa0Gz/ogy0fF1BKEQAopaiqKnl5fTsLverS9QXS7puw76aeiwAAAABJRU5ErkJggg==') no-repeat scroll 0 0 transparent;
     cursor: pointer;
     height: 20px;
     right: 10px;
@@ -37,16 +42,22 @@
     width: 20px;
     position: absolute;
 }
-.dlg-hd h3, .dlg-cnr {
+.top h3, .close {
     height: 42px;
     line-height: 40px;
 }
-.dlg-hd h3 {
+.top h3 {
     text-indent: 1em;
     color: #333;
     font-size: 14px;
-    background: url(http://s1.pan.bdstatic.com/yun-static/common-cdn/images/dialog/globe-dlg-hd.png?t=1449478533149) repeat-x 0 0 #EEE;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAABgCAIAAAC19kRlAAAAkUlEQVQ4y81SMQ6AIAwshoQ3OLr4S3+Jv2AgTiRC6iRtiZiGRbtd7q5cWwwiwl22lFLBBKyUwPJu33v+LPvEI4ARp/feExNjJMY5R0zO+bnBSIKh1Ou2U7ZlngkAnwf5qgCQy/gSRxj5Dnbv00sgGd6tkak82PO8xGmGQ01qpUyXoGFUV5Ce42Q/MYRAIKVUwQVuRHZj5tt3GgAAAABJRU5ErkJggg==') repeat-x 0 0 #EEE;
     font-weight: 700;
+}
+
+.global-icon-download{
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwLAxApN3taPgAAAJBJREFUOMtjYBjsgJGQgtylD//D2JOj5QmqZyLF9v////+nqoHEgGFiIA8HG+WxjBy7yAZ++fELb2wzEXIZzLAvP34RFduMhNIgunfbgiQgGhkZGclK2JVrn/8n1jCiQeXa5/9hgGgNyC4hJZeg62UiNmsR8iZMLwuyYNW6FwyEXEr3nMJISklC0DBKY58uAADhV0qO0TJN9gAAAABJRU5ErkJggg==') no-repeat;
+    height: 20px;
+    width: 20px;
 }
 #setting_div_table input{
     text-indent: 10px;
@@ -139,7 +150,7 @@ a{
     cursor: pointer;
     text-decoration: none;
 }
-.download-mgr-dialog .content {
+#download_ui > .content {
     padding: 10px 20px;
     height:auto;
     overflow: hidden;

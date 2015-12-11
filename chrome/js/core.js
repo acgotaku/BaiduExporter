@@ -138,7 +138,7 @@ var CORE=(function(){
                 if($("#export_menu").length != 0){
                     return $("#export_menu");
                 }
-                var aria2_btn = $("<span>").addClass("icon-btn-device").css("float", "none").attr("id","export_menu");
+                var aria2_btn = $("<span>").css("float", "none").attr("id","export_menu");
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").css("display", "none").appendTo(aria2_btn);
                 //var aria2_export = $("<a>").text("ARIA2 RPC").attr("id", "aria2_rpc").appendTo(list);
                 var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
@@ -186,14 +186,13 @@ var CORE=(function(){
             init:function(){
                 var self = this;
                 var setting_div = document.createElement("div");
-                setting_div.className = "b-panel b-dialog download-mgr-dialog";
                 setting_div.id = "setting_div";
                 if($("#setting_div").length != 0){
                     return setting_div.id;
                 }
                 var html_ = [
-                    '<div class="dlg-hd b-rlv"><div title="关闭" id="setting_div_close" class="dlg-cnr dlg-cnr-r"></div><h3>导出设置</h3></div>',
-                    '<div class="dlg-bd clearfix" style=" margin: 20px 10px 10px 10px; ">',
+                    '<div class="top"><div title="关闭" id="setting_div_close" class="close"></div><h3>导出设置</h3></div>',
+                    '<div style=" margin: 20px 10px 10px 10px; ">',
                     '<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>',
                     '<table id="setting_div_table" >',
                     '<tbody>',
@@ -326,23 +325,15 @@ var CORE=(function(){
         dataBox:{
             init:function(type){
                 if ($("#download_ui").length == 0) {
-                    var download_ui = $("<div>").attr("id", "download_ui").addClass("b-panel b-dialog download-mgr-dialog common-dialog").append('<div class="dlg-hd b-rlv"><span class="dlg-cnr dlg-cnr-l"></span><a href="javascript:;" title="关闭" id="aria2_download_close" class="dlg-cnr dlg-cnr-r"></a><h3><em></em>ARIA2导出</h3></div>');
+                    var download_ui = $("<div>").attr("id", "download_ui").append('<div class="top"><a href="javascript:;" title="关闭" id="aria2_download_close" class="close"></a><h3><em></em>ARIA2导出</h3></div>');
                     var content_ui = $("<div>").addClass("content").attr("id", "content_ui").appendTo(download_ui);
                     download_ui.appendTo($("body"));
                     content_ui.empty();
-                    var download_menu = $("<div>").addClass("module-list-toolbar").css({"display": "block", "margin-bottom": "10px"}).appendTo(content_ui);
-                    if (type == "home") {
-                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download-gray")).append($("<span>").addClass("text").text("存为aria2文件"))).appendTo(download_menu);
-                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download-gray")).append($("<span>").addClass("text").text("存为IDM文件"))).appendTo(download_menu);
-                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank"}).addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download-gray")).append($("<span>").addClass("text").text("保存下载链接"))).appendTo(download_menu);
-                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px"}).appendTo(content_ui);;
-
-                    } else {
-                        var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
-                        var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                        var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank"}).addClass("new-dbtn").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
-                        var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px"}).appendTo(content_ui);;
-                    }
+                    var download_menu = $("<div>").css({"margin-bottom": "10px"}).appendTo(content_ui);
+                    var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank"}).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
+                    var idm_btn = $("<a>").attr("id", "idm_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank"}).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                    var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({"href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank"}).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+                    var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px"}).appendTo(content_ui);
                     CORE.setCenter($("#download_ui"));
                     $("#download_ui").on("click","#aria2_download_close",function(){
                         download_ui.hide();
