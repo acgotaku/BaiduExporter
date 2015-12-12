@@ -6,11 +6,14 @@ var port=null;
         init:function(){
             var self=this;
             //获得扩展的ID
-            window.addEventListener("message", function(){
-                if(event.origin == window.location.origin){
-                    extensionId=event.data;
+            var script =document.querySelectorAll("script");
+            for(var i=0; i <script.length;i++){
+                var url=script[i].src;
+                if(url.startsWith("chrome")){
+                    extensionId = url.match(/^chrome-extension:\/\/(.*?)(?:\/.*)/)[1];
+                    return ;
                 }
-            }, false);
+            }
         },
         sendToBackground:function(method,data){
             port= chrome.runtime.connect(extensionId,{name: "BaiduExporter"});

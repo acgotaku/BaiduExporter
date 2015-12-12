@@ -10,6 +10,7 @@
     cursor: pointer;
 }
 .save-button{
+    cursor: pointer;
     font-size: 12px;
     height: 34px;
     line-height: 34px;
@@ -128,7 +129,7 @@ a{
     color: #333;
     text-decoration: none;
 }
-.new-dbtn .menu{
+.save-button .menu{
     position: absolute;
     width: 98%;
     left: 0;
@@ -139,13 +140,13 @@ a{
     display: none;
     z-index:100;
 }
-.new-dbtn .menu a{
+.save-button .menu a{
     height: 24px;
     line-height: 24px;
     display: block;
     color: #666;
 }
-.new-dbtn .menu a:hover{
+.save-button .menu a:hover{
     background: #e4eefe;
     cursor: pointer;
     text-decoration: none;

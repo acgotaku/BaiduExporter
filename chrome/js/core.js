@@ -138,21 +138,18 @@ var CORE=(function(){
                 if($("#export_menu").length != 0){
                     return $("#export_menu");
                 }
-                var aria2_btn = $("<span>").css("float", "none").attr("id","export_menu");
+                var aria2_btn = $("<span>").attr("id","export_menu");
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").css("display", "none").appendTo(aria2_btn);
-                //var aria2_export = $("<a>").text("ARIA2 RPC").attr("id", "aria2_rpc").appendTo(list);
                 var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
                 if(type == "home"){
                     aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").attr("href","javascript:void(0);").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool").after($("<span>").addClass("text").text("导出下载")))));
-                    // aria2_btn.append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
                     $(".g-dropdown-button").eq(3).after(aria2_btn);
                 }else if (type == "share"){
-                    aria2_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>导出下载</b>');
-                    //convert_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>批量转存</b>');
+                    aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);
                 }else if(type == "album"){
-                    aria2_btn.addClass("new-dbtn").append('<em class="quick_save_icon"></em><b>导出下载</b>');
+                    aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $("#albumFileSaveKey").parent().prepend(aria2_btn);
                 }
                 aria2_btn.on("mouseover",function(){
@@ -248,20 +245,13 @@ var CORE=(function(){
             },
             //保存配置数据
             save:function(){
-                var config_data=[];
-                localStorage.setItem("UA", document.getElementById("setting_aria2_useragent_input").value);
-                localStorage.setItem("rpc_delay", $("#rpc_delay").val());
-                localStorage.setItem("referer", $("#setting_aria2_referer_input").val());
-                localStorage.setItem("rpc_dir", $("#setting_aria2_dir").val());
-                localStorage.setItem("rpc_fold", $("#rpc_fold").val());
-                localStorage.setItem("rpc_headers", $("#setting_aria2_headers").val());
-
-                config_data.push({"UA":document.getElementById("setting_aria2_useragent_input").value});
-                config_data.push({"rpc_delay": $("#rpc_delay").val()});
-                config_data.push({"referer": $("#setting_aria2_referer_input").val()});
-                config_data.push({"rpc_dir": $("#setting_aria2_dir").val()});
-                config_data.push({"rpc_fold":$("#rpc_fold").val()});
-                config_data.push({"rpc_headers": $("#setting_aria2_headers").val()});
+                var config_data={};
+                config_data["UA"] = document.getElementById("setting_aria2_useragent_input").value;
+                config_data["rpc_delay"] = $("#rpc_delay").val();
+                config_data["referer"] = $("#setting_aria2_referer_input").val();
+                config_data["rpc_dir"] = $("#setting_aria2_dir").val();
+                config_data["rpc_fold"] =  $("#rpc_fold").val();
+                config_data["rpc_headers"] = $("#setting_aria2_headers").val();
                 var rpc_list=[];
                 for(var i=0;i<$(".rpc_list").length;i++){
                     var num=i+1;
@@ -269,9 +259,9 @@ var CORE=(function(){
                         rpc_list.push({"name":$("#rpc_name_"+num).val(),"url":$("#rpc_url_"+num).val()});
                     }
                 }
-                localStorage.setItem("rpc_list", JSON.stringify(rpc_list));
-                config_data.push({"rpc_list":JSON.stringify(rpc_list)});
+                config_data["rpc_list"] = JSON.stringify(rpc_list);
                 CONNECT.sendToBackground("config_data",config_data);
+                window.postMessage({ type: "config_data", data: config_data}, "*");
             },
             //根据配置数据 更新 设置菜单
             update:function(){

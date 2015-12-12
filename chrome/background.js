@@ -68,10 +68,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                                     }); 
                             break;
                         case "config_data":
-                            for(var keys in request.data){
-                                var key =Object.keys(request.data[keys])[0];
-                                var value =request.data[keys];
-                                localStorage.setItem(key,value[key]);
+                            for(var key in request.data){
+                                localStorage.setItem(key,request.data[key]);
                             }
                             break;
                         case "get_cookies":

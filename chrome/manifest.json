@@ -1,7 +1,7 @@
 {
    "background": {
       "scripts": ["background.js"],
-      "persistent": false
+      "persistent": true
    },
    "content_scripts": [ {
       "js": [ "js/baidu.js" ],
@@ -28,7 +28,7 @@
     "js/album.js"
   ],
    "manifest_version": 2,
-   "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab", "contextMenus"],
+   "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab", "contextMenus", "storage"],
    "name": "__MSG_appName__",
    "version": "0.5.6"
 }
