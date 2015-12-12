@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.5.6";
-    const update_date = "2015/12/10";
+    const version = "0.5.7";
+    const update_date = "2015/12/12";
     var cookies=null;
     return {
         init:function(){
@@ -224,6 +224,7 @@ var CORE=(function(){
                             break;
                         case "reset":
                             localStorage.clear();
+                            window.postMessage({ type: "clear_data"}, "*");
                             $("#setting_divtopmsg").html("设置已重置.");
                             self.update();
                             break;

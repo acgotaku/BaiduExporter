@@ -21,7 +21,7 @@ var port=null;
                 method:method,
                 data: data
             });
-            console.log(data);
+            // console.log(data);
             this.listenBackground(port);
 
         },
@@ -42,7 +42,7 @@ var port=null;
         },
         listenBackground:function(port){
             port.onMessage.addListener(function(response) {
-                console.log(response);
+                // console.log(response);
                 switch(response.method){
                     case "rpc_result":
                         if(response.status){

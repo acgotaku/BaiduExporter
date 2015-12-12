@@ -116,8 +116,6 @@ function showNotification(id,opt){
         chrome.notifications.clear(id,function(){});
     },5000);
 }
-
-
 //软件版本更新提示
 var manifest = chrome.runtime.getManifest();
 var previousVersion=localStorage.getItem("version");
@@ -125,7 +123,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新解决新版百度网盘无法下载的问题~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新支持用户配置同步功能~",
         iconUrl: "images/icon.jpg"
     }
     var id= new Date().getTime().toString();              

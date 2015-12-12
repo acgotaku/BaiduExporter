@@ -22,11 +22,16 @@ onload(function() {
         if(album){
             addJS("album");
         }else{
-            addJS("share");
-            addJS("convert");
+            addJS("share").addJS("convert");
         }    
     }
+    chrome.storage.sync.get(null, function(items) {
+        for(var key in items){
+            localStorage.setItem(key,items[key]);
+        }
+    });
 });
+
 function saveSyncData(data ,value){
     var obj= new Object();
     obj[data] =value;
@@ -42,5 +47,8 @@ window.addEventListener("message", function(event) {
             localStorage.setItem(key,event.data.data[key]);
             saveSyncData(key,event.data.data[key]);
         }
+    }
+    if (event.data.type && (event.data.type == "clear_data")){
+        chrome.storage.sync.clear();
     }
 }, false);
