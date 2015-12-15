@@ -123,7 +123,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新支持用户配置同步功能~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新同时支持新旧两版UI~",
         iconUrl: "images/icon.jpg"
     }
     var id= new Date().getTime().toString();              
