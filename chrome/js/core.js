@@ -1,7 +1,7 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.5.8";
+    const version = "0.5.9";
     const update_date = "2015/12/15";
     var cookies=null;
     var newVersion = typeof manifest == "object" ? true : false;
@@ -12,6 +12,7 @@ var CORE=(function(){
         //封装的百度的Toast提示消息
         //Type类型有
         //caution  警告  failure  失败  loading 加载 success 成功
+        //MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
         setMessage:function(msg, type) {
         if(typeof require=="undefined"){
            Utilities.useToast({
@@ -22,6 +23,9 @@ var CORE=(function(){
         }else{
             if(newVersion){
                 var Toast = require("disk-system:widget/context/context.js").instanceForSystem;
+                if(type.startsWith("MODE")){
+                    type=type.split("_")[1].toLowerCase();
+                }
                 Toast.ui.tip({
                     mode: type,
                     msg: msg
