@@ -4,6 +4,7 @@ var CORE=(function(){
     const version = "0.5.7";
     const update_date = "2015/12/12";
     var cookies=null;
+    var newVersion = typeof manifest == "object" ? true : false;
     return {
         init:function(){
 
@@ -12,7 +13,6 @@ var CORE=(function(){
         //Type类型有
         //caution  警告  failure  失败  loading 加载 success 成功
         setMessage:function(msg, type) {
-        var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
         if(typeof require=="undefined"){
            Utilities.useToast({
                 toastMode: disk.ui.Toast[type],
@@ -20,7 +20,7 @@ var CORE=(function(){
                 sticky: false
             });
         }else{
-            if(home){
+            if(newVersion){
                 var Toast = require("disk-system:widget/context/context.js").instanceForSystem;
                 Toast.ui.tip({
                     mode: type,
@@ -142,9 +142,14 @@ var CORE=(function(){
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").css("display", "none").appendTo(aria2_btn);
                 var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
-                if(type == "home"){
-                    aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").attr("href","javascript:void(0);").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool").after($("<span>").addClass("text").text("导出下载")))));
-                    $(".g-dropdown-button").eq(3).after(aria2_btn);
+                if(type == "home"){           
+                    if(newVersion){
+                        aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").attr("href","javascript:void(0);").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool").after($("<span>").addClass("text").text("导出下载")))));
+                        $(".g-dropdown-button").eq(3).after(aria2_btn);
+                    }else{
+                        aria2_btn.addClass("icon-btn-device").append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
+                        $(".icon-btn-device").after(aria2_btn);
+                    }              
                 }else if (type == "share"){
                     aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);

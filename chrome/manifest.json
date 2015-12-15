@@ -22,6 +22,7 @@
   "web_accessible_resources": [
     "js/core.js",
     "js/home.js",
+    "js/oldhome.js",
     "js/connect.js",
     "js/share.js",
     "js/convert.js",
