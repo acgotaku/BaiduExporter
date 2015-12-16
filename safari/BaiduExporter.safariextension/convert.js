@@ -3,7 +3,6 @@ var CONVERT =(function(){
     /*
     */
     var setMessage =CORE.setMessage;
-    var HttpSend= CONNECT.HttpSend;
     const prefix="/我的资源";
     var fold_list=[];
     var delay=parseInt(localStorage.getItem("rpc_delay"))||3000;
@@ -67,7 +66,7 @@ var CONVERT =(function(){
             }
             fold_list.push(path);
             var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
-            return HttpSend(parameter);
+            return CONNECT.HttpSend(parameter);
         },
         saveConvertFile:function(path){
             console.log(path);
@@ -75,7 +74,7 @@ var CONVERT =(function(){
             var data = 'filelist='+encodeURIComponent("[\""+path+"\"]")+'&path='+encodeURIComponent(prefix+path.substring(0,path.lastIndexOf("/")));
             var convert = "//" + window.location.host + "/share/transfer?async=1&channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN + "&shareid="+ yunData.SHARE_ID + "&from="+yunData.SHARE_UK ;
             var parameter = {'url': convert, 'dataType': 'json', type: 'POST', 'data': data};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         if(json.errno == 2){
                             console.log("folder miss");
@@ -112,7 +111,7 @@ var CONVERT =(function(){
             if(result){
                 result.done(function(json, textStatus, jqXHR){
                     if(json.errno == "-9"){
-                        HttpSend(parameter).done(function(json, textStatus, jqXHR) {
+                        CONNECT.HttpSend(parameter).done(function(json, textStatus, jqXHR) {
                             setMessage("创建文件夹成功!", "MODE_SUCCESS");
                             callback(file_path);
                         })
@@ -130,7 +129,7 @@ var CONVERT =(function(){
             var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
             var path=self.getCurrentPath();
             var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         setMessage("获取共享列表成功!", "MODE_SUCCESS");
                         var array=json.list;
@@ -158,7 +157,7 @@ var CONVERT =(function(){
             var self=this;
             var time=0;
             var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
-            HttpSend(parameter)
+            CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         var array=json.list;
                         for(var i=0;i<array.length;i++){

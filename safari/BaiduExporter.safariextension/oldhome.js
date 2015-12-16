@@ -1,4 +1,4 @@
-var HOME =(function(){
+var OLDHOME =(function(){
     //网盘主页导出
     /*
     基本步骤是首先设定导出模式,文本模式的话
@@ -12,7 +12,6 @@ var HOME =(function(){
     //两种导出模式 RPC模式 和 TXT模式
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
-    var list = require("disk-system:widget/context/context.js").instanceForSystem.list;
     return {
         //绑定事件
         init:function(){
@@ -30,22 +29,27 @@ var HOME =(function(){
                 CORE.dataBox.init("home").show();
                 self.getSelectFile();
             });
-            setMessage("初始化成功!", "success");
+            setMessage("初始化成功!", "MODE_SUCCESS");
         },
         //获得选中的文件
         getSelectFile:function(){
             var self=this;
-            var selectedFile = list.getSelected();
+            var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+            var path=API.get("path");
+            var File = require("common:widget/data-center/data-center.js");
+            var Service = require("common:widget/commonService/commonService.js");
+            var selectedFile = File.get("selectedItemList");
             var length = selectedFile.length;
             if (length == 0) {
-                setMessage("先选择一下你要下载的文件哦", "failure");
+                setMessage("先选择一下你要下载的文件哦", "MODE_FAILURE");
                 return;
             }
             for (var i = 0; i < length; i++) {
-                if (selectedFile[i].isdir == 1) {
-                    self.getSelectFold(selectedFile[i].fs_id);
+                if (selectedFile[i].attr("data-extname") == "dir") {
+                    self.getSelectFold(selectedFile[i].attr("data-id"));
                 }else{
-                    self.getFilemetas(selectedFile[i].path);
+                    var name =selectedFile[i].children().eq(0).children().eq(2).attr("title")||selectedFile[i].children().eq(1).children().eq(0).attr("title");
+                    self.getFilemetas(self.getCurrentPath()+""+name);
                 }
             }
         },
@@ -55,7 +59,7 @@ var HOME =(function(){
                 var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(self.getCurrentPath()), 'dataType': 'json', type: 'GET'};
                 CONNECT.HttpSend(parameter)
                         .done(function(json, textStatus, jqXHR) {
-                            setMessage("获取列表成功!", "success");
+                            setMessage("获取列表成功!", "MODE_SUCCESS");
                             var array=json.list;
                             for(var i=0;i<array.length;i++){
                                 if(array[i].fs_id == fs_id){
@@ -68,7 +72,7 @@ var HOME =(function(){
                             }
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
-                            setMessage("获取List失败!", "failure");
+                            setMessage("获取List失败!", "MODE_FAILURE");
                             console.log(jqXHR);
                         });   
         },
@@ -93,7 +97,7 @@ var HOME =(function(){
                     }
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
-                    setMessage("获取List失败! code:92", "failure");
+                    setMessage("获取List失败! code:92", "MODE_FAILURE");
                     console.log(jqXHR);
                 });  
             function delayLoopList(path,time){
@@ -110,15 +114,16 @@ var HOME =(function(){
         },
         //根据文件路径获取文件的信息
         getFilemetas:function(target){
-            var self=this;     
-            var path=self.getCurrentPath();
+            var self=this;
+            var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+            var path=API.get("path");
             if(path == null || path =="/"){
                 path="";
             }
             var parameter = {'url': "//"+window.location.host+"/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
             CONNECT.HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
-                    setMessage("获取文件信息成功!", "success");
+                    setMessage("获取文件信息成功!", "MODE_SUCCESS");
                     var file=json.info;
                     var file_list = [];
                     //备用下载地址
@@ -138,7 +143,7 @@ var HOME =(function(){
                     }
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
-                    setMessage("获取File失败!", "failure");
+                    setMessage("获取File失败!", "MODE_FAILURE");
                     console.log(jqXHR);
                 });
         },
@@ -153,9 +158,9 @@ var HOME =(function(){
         },
         //根据设置 获取文件名前面需要的文件夹路径
         getPath:function(){
-            var self =this;
+            var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
             var level=parseInt(localStorage.getItem("rpc_fold"))||0;
-            var path=self.getCurrentPath();
+            var path=API.get("path");
             var maxlevel=0;
             if(path == "/"|| path == null){
                 path="";
@@ -182,10 +187,16 @@ var HOME =(function(){
         },
         //得到当前文件夹的路径
         getCurrentPath:function(){
-            
-            return list.getCurrentPath();
+            var API = (require("common:widget/restApi/restApi.js"),require("common:widget/hash/hash.js"));
+            var path=API.get("path");
+            if(path == null){
+                path="/";
+            }else{
+                path+="/";
+            }
+            return path;
         }
 
     }
 })();
-HOME.init();
+OLDHOME.init();

@@ -5,7 +5,7 @@
 	<key>Author</key>
 	<string>Cee</string>
 	<key>Builder Version</key>
-	<string>11601.2.7.2</string>
+	<string>11601.3.9</string>
 	<key>CFBundleDisplayName</key>
 	<string>BaiduExporter</string>
 	<key>CFBundleIdentifier</key>
@@ -13,9 +13,14 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.5.3</string>
+	<string>0.5.9</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Database Quota</key>
+		<integer>52428800</integer>
+	</dict>
 	<key>Content</key>
 	<dict>
 		<key>Scripts</key>
