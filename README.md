@@ -23,7 +23,7 @@ Firefox
 
 XPI包安装:
 
-https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/firefox/baidu-exporter.xpi
+https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/firefox/BaiduExporter.xpi
 
 下载XPI包,打开Firefox.Ctrl+O 打开选择文件对话框,选中XPI包即可安装.
 
