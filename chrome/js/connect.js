@@ -8,10 +8,11 @@ var port=null;
             //获得扩展的ID
             var script =document.querySelectorAll("script");
             for(var i=0; i <script.length;i++){
+                var ex = script[i].getAttribute('extension');
                 var url=script[i].src;
-                if(url.startsWith("chrome")){
-                    extensionId = url.match(/^chrome-extension:\/\/(.*?)(?:\/.*)/)[1];
-                    return ;
+                if(url.startsWith("chrome") && ex){
+                    extensionId = ex.match(/^BaiduExporter\/(.*)/)[1];
+                    return;
                 }
             }
         },
@@ -36,7 +37,7 @@ var port=null;
                             })
                             .fail(function(jqXHR, textStatus, errorThrown) {
                                 CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
-                            }); 
+                            });
                     break;
             }
         },
@@ -54,7 +55,7 @@ var port=null;
                     case "send_cookies":
                         if(response.data){
                             CORE.setCookies(response.data);
-                            
+
                         }else{
                             console.log(response.data);
                         }
@@ -110,7 +111,7 @@ var port=null;
                 }
                 else {
                     http.send();
-                }                          
+                }
             });
         }
     }

@@ -7,6 +7,7 @@ function onload(func) {
 }
 function addJS(name){
     var s = document.createElement('script');
+    s.setAttribute('extension', 'BaiduExporter/' + chrome.runtime.id);
     s.src = chrome.extension.getURL('js/'+name+'.js');
     (document.body || document.head || document.documentElement).appendChild(s);
     return this;
@@ -28,7 +29,7 @@ onload(function() {
             addJS("album");
         }else{
             addJS("share").addJS("convert");
-        }    
+        }
     }
     chrome.storage.sync.get(null, function(items) {
         for(var key in items){
