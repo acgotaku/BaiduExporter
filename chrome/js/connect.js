@@ -43,7 +43,7 @@ var port=null;
         },
         listenBackground:function(port){
             port.onMessage.addListener(function(response) {
-                // console.log(response);
+                console.log(response);
                 switch(response.method){
                     case "rpc_result":
                         if(response.status){
@@ -58,6 +58,13 @@ var port=null;
 
                         }else{
                             console.log(response.data);
+                        }
+                        break;
+                    case "rpc_version":
+                        if(response.status == false){
+                            $("#send_test").html("错误,请查看是否开启Aria2");
+                        }else{
+                            $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + response.data.result.version);
                         }
                         break;
                 }

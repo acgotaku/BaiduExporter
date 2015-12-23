@@ -72,6 +72,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                                 localStorage.setItem(key,request.data[key]);
                             }
                             break;
+                        case "rpc_version":
+                            HttpSendRead(request.data)
+                                    .done(function(json, textStatus, jqXHR) {
+                                        port.postMessage({'method':'rpc_version','status':true,'data':json});
+
+                                    })
+                                    .fail(function(jqXHR, textStatus, errorThrown) {
+                                        port.postMessage({'method':'rpc_version','status':false});
+                                    });
+                            break;
                         case "get_cookies":
                             Promise.all(function(){
                                 var array=[];
@@ -123,7 +133,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复BUG~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复RPC故障~\n加回测试通讯按钮,仅限第一个RPC地址\n添加配置同步选项",
         iconUrl: "images/icon.jpg"
     }
     var id= new Date().getTime().toString();              

@@ -42,7 +42,7 @@ function saveSyncData(data ,value){
     var obj= new Object();
     obj[data] =value;
     chrome.storage.sync.set(obj, function() {
-        console.log(data + ' saved');
+        // console.log(data + ' saved');
     });
 }
 window.addEventListener("message", function(event) {
@@ -51,7 +51,9 @@ window.addEventListener("message", function(event) {
     if (event.data.type && (event.data.type == "config_data")) {
         for(var key in event.data.data){
             localStorage.setItem(key,event.data.data[key]);
-            saveSyncData(key,event.data.data[key]);
+            if(event.data.data["rpc_sync"] == true){
+                saveSyncData(key,event.data.data[key]);
+            }
         }
     }
     if (event.data.type && (event.data.type == "clear_data")){

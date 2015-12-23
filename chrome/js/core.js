@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.5.9";
-    const update_date = "2015/12/15";
+    const version = "0.6.0";
+    const update_date = "2015/12/23";
     var cookies=null;
     var newVersion = typeof manifest == "object" ? true : false;
     return {
@@ -202,8 +202,9 @@ var CORE=(function(){
                     '<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>',
                     '<table id="setting_div_table" >',
                     '<tbody>',
+                    '<tr><td><label>开启配置同步:</label></td><td><input id="rpc_sync" type="checkbox"></td></tr>',
                     '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
-                    '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"></div></td></tr>',
+                    '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
                     '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
                     '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
                     '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
@@ -238,7 +239,7 @@ var CORE=(function(){
                             self.update();
                             break;
                         case "send_test":
-                            //待其它模块完善再添加
+                            CORE.getVersion();
                             break;
                         case "add_rpc":
                         var num=$(".rpc_list").length+1;
@@ -262,6 +263,7 @@ var CORE=(function(){
                 config_data["rpc_dir"] = $("#setting_aria2_dir").val();
                 config_data["rpc_fold"] =  $("#rpc_fold").val();
                 config_data["rpc_headers"] = $("#setting_aria2_headers").val();
+                config_data["rpc_sync"] = $("#rpc_sync").prop('checked');
                 var rpc_list=[];
                 for(var i=0;i<$(".rpc_list").length;i++){
                     var num=i+1;
@@ -277,6 +279,12 @@ var CORE=(function(){
             update:function(){
                 $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
                 $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
+                var rpc_sync =localStorage.getItem("rpc_sync");
+                if(rpc_sync == "false"){
+                    $("#rpc_sync").prop('checked',false);
+                }else{
+                    $("#rpc_sync").prop('checked',true);
+                }
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || defaultUA);
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || defaultreferer);
@@ -294,6 +302,22 @@ var CORE=(function(){
                     }
                 }
             }
+        },
+        //获取aria2c的版本号用来测试通信
+        getVersion: function() {
+            var data = {
+                "jsonrpc": "2.0",
+                "method": "aria2.getVersion",
+                "id": 1,
+                "params": []
+            };
+            var rpc_path = $("#rpc_url_1").val();
+            var paths=CORE.parseAuth(rpc_path);
+            if (paths[0]) {
+                data.params.unshift(paths[0]);
+            }
+            var parameter = {'url': paths[1], 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': paths[0]}};
+            CONNECT.sendToBackground("rpc_version",parameter);
         },
         //把要下载的link和name作为数组对象传过来
         aria2Data:function(file_list,token){
