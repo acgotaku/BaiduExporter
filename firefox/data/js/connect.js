@@ -24,6 +24,16 @@ var port=null;
                                 CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
                             }); 
                     break;
+                case "rpc_version":
+                    self.HttpSend(data)
+                            .done(function(json, textStatus, jqXHR) {
+                                $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + json.result.version);
+
+                            })
+                            .fail(function(jqXHR, textStatus, errorThrown) {
+                                $("#send_test").html("错误,请查看是否开启Aria2");
+                            }); 
+                    break;
             }
         },
         sendToHttp:function(method,data){
@@ -46,13 +56,6 @@ var port=null;
                 if (event.origin != window.location.origin)
                     return;  
                 switch(event.data.type){
-                    case "rpc_result":
-                        if(event.data.status){
-                            CORE.setMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
-                        }else{
-                            CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
-                        }
-                        break;
                     case "send_cookies":
                         if(event.data.data){
                             CORE.setCookies(event.data.data);

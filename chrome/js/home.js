@@ -188,4 +188,6 @@ var HOME =(function(){
 
     }
 })();
-HOME.init();
+setTimeout(function(){
+    HOME.init();
+},600);
