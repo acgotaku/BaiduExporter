@@ -72,6 +72,21 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                                 localStorage.setItem(key,request.data[key]);
                             }
                             break;
+                        case "copy_text":
+                            var input = document.createElement('textarea');
+                            document.body.appendChild(input);
+                            input.value = request.data;
+                            input.focus();
+                            input.select();
+                            var result =document.execCommand('Copy');
+                            input.remove();
+                            console.log(result);
+                            if(result){
+                                port.postMessage({'method':'copy_text','status':true});
+                            }else{
+                                port.postMessage({'method':'copy_text','status':false});
+                            }
+                            break;
                         case "rpc_version":
                             HttpSendRead(request.data)
                                     .done(function(json, textStatus, jqXHR) {
@@ -133,7 +148,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复RPC故障~\n加回测试通讯按钮,仅限第一个RPC地址\n添加配置同步选项",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新添加拷贝到粘帖版功能~",
         iconUrl: "images/icon.jpg"
     }
     var id= new Date().getTime().toString();              

@@ -52,6 +52,13 @@ var port=null;
                             CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
                         }
                         break;
+                    case "copy_text":
+                        if(response.status){
+                            CORE.setMessage("拷贝成功~", "MODE_SUCCESS");
+                        }else{
+                            CORE.setMessage("拷贝失败 QAQ", "MODE_FAILURE");
+                        }
+                        break;
                     case "send_cookies":
                         if(response.data){
                             CORE.setCookies(response.data);
