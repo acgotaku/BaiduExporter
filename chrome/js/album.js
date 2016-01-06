@@ -58,7 +58,7 @@ var ALBUM =(function(){
             }
             var file_list=[];
             for(var i = 0; i < file_info.length; i++){
-                var num = file_info.eq(0).attr("_position");
+                var num = file_info.eq(i).attr("_position");
                 file_list.push({"name":FileList[num].server_filename,"link":FileList[num].dlink});
             }
             if(MODE =="TXT"){
