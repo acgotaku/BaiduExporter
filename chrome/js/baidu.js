@@ -15,7 +15,7 @@ function addJS(name){
 onload(function() {
     //把函数注入到页面中
     var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
-    var album = window.location.href.indexOf("/pcloud/album/info") != -1 ? true : false;
+    var album = window.location.href.indexOf("/pcloud/album/") != -1 ? true : false;
     var newversion =  document.querySelector('link[rel="shortcut icon"]').href != "http://pan.baidu.com/res/static/images/favicon.ico" ? true : false;
     addJS("connect").addJS("core");
     if(home){

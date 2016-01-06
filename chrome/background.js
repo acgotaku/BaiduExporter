@@ -148,7 +148,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新添加拷贝到粘帖版功能~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新解决专辑下载的BUG~",
         iconUrl: "images/icon.jpg"
     }
     var id= new Date().getTime().toString();              
