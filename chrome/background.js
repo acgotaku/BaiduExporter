@@ -28,6 +28,8 @@ var HttpSendRead = function(info) {
         var timeId = setTimeout(httpclose, timeout);
         function httpclose() {
             http.abort();
+            pendingSend -= 1;
+            reject(http);
         }
         http.onreadystatechange = function() {
             if (http.readyState == 4) {
@@ -42,6 +44,8 @@ var HttpSendRead = function(info) {
                         pendingSend -= 1;
                         resolve(http.responseText, http.status, http);
                     }
+                    pendingSend -= 1;
+                    resolve(http, http.status);
                 }
                 else {
                     clearTimeout(timeId);
