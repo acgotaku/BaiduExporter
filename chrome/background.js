@@ -33,23 +33,20 @@ var HttpSendRead = function(info) {
         }
         http.onreadystatechange = function() {
             if (http.readyState == 4) {
+                pendingSend -= 1;
                 if ((http.status == 200 && http.status < 300) || http.status == 304) {
                     clearTimeout(timeId);
                     if (info.dataType == "json") {
-                        pendingSend -= 1;
                         resolve(JSON.parse(http.responseText), http.status, http);
                     }
                     else if (info.dataType == "SCRIPT") {
                         // eval(http.responseText);
-                        pendingSend -= 1;
                         resolve(http.responseText, http.status, http);
                     }
-                    pendingSend -= 1;
                     resolve(http, http.status);
                 }
                 else {
                     clearTimeout(timeId);
-                    pendingSend -= 1;
                     reject(http, http.statusText, http.status);
                 }
             }
