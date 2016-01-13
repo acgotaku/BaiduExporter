@@ -8,7 +8,7 @@
 - 推荐设置：
 	- Set `--rpc-secret=<secret>` if you are using aria2 1.18.4（or higher） with 'JSON-RPC PATH' like http://token:secret@hostname:port/jsonrpc
 	- Set `--rpc-user=<username> --rpc-passwd=<passwd>` if you are using aria2 1.15.2（or higher） with 'JSON-RPC PATH' like http://username:passwd@hostname:port/jsonrpc
-- 已上传 Aria2 配置文件方便大家使用：[aria2.conf](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/aria2.conf)。
+- 已上传 Aria2 配置文件方便大家使用：[aria2.conf](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/aria2c/aria2.conf)
 - Aria2 配置参考我的博客：[使用 Aria2 下载百度网盘和 115 的资源](https://blog.icehoney.me/posts/2015-01-31-Aria2-download)。
 
 ## Install
