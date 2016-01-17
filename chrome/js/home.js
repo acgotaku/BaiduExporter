@@ -116,6 +116,7 @@ var HOME =(function(){
                 path="";
             }
             var parameter = {'url': "//"+window.location.host+"/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+            console.log(parameter);
             CONNECT.HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
                     setMessage("获取文件信息成功!", "success");
