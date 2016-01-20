@@ -5,7 +5,7 @@ var CONVERT =(function(){
     var setMessage =CORE.setMessage;
     const prefix="/我的资源";
     var BUFFER_SIZE = 8;
-    var POLLING_INTERVAL = 1000;
+    var POLLING_INTERVAL = 100;
     var pendingSend = 0;
     var list={};
     var HttpSend = function(info) {
@@ -213,14 +213,18 @@ var CONVERT =(function(){
                     .done(function(json, textStatus, jqXHR) {
                         var array=json.list;
                         for(var i=0;i<array.length;i++){
-                            var file_path=array[i].path;
-                            self.saveConvertFile({"fs_id": array[i].fs_id, "path": file_path});
+                            delayLoop({"fs_id": array[i].fs_id, "path": array[i].path} ,i);
                         }
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         setMessage("获取List失败!", "MODE_FAILURE");
                         console.log(jqXHR);
                     });
+            function delayLoop(item , i){
+                setTimeout(function() {
+                    self.saveConvertFile(item);
+                }, POLLING_INTERVAL * i);  
+            }
         },
         //得到当前文件夹的路径
         getCurrentPath:function(){

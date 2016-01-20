@@ -7,3 +7,8 @@
 生成安装包方法
 
 `jpm xpi`
+
+关闭Firefox插件校验
+
+- Go to `about:config` (enter it into address bar)
+- Set `xpinstall.signatures.required` to `false`.
