@@ -90,6 +90,7 @@ var ALBUM =(function(){
             self.selectMode(file_list);
         },
         selectMode:function(file_list){
+            var self =this;
             if(MODE =="TXT"){
                 CORE.dataBox.fillData(file_list);
             }else{
