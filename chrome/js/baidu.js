@@ -34,6 +34,7 @@ onload(function() {
     chrome.storage.sync.get(null, function(items) {
         for(var key in items){
             localStorage.setItem(key,items[key]);
+            //console.log(key + items[key]);
         }
     });
 });
@@ -53,6 +54,8 @@ window.addEventListener("message", function(event) {
             localStorage.setItem(key,event.data.data[key]);
             if(event.data.data["rpc_sync"] == true){
                 saveSyncData(key,event.data.data[key]);
+            }else{
+                chrome.storage.sync.clear();
             }
         }
     }
