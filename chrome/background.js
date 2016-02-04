@@ -1,7 +1,21 @@
+var BUFFER_SIZE = 10;
+var POLLING_INTERVAL = 1000;
+var pendingSend = 0;
+
 var HttpSendRead = function(info) {
     Promise.prototype.done=Promise.prototype.then;
     Promise.prototype.fail=Promise.prototype.catch;
+    
+    if (pendingSend > BUFFER_SIZE) {
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                resolve(HttpSendRead(info))
+            }, POLLING_INTERVAL)
+        });
+    }
+
     return new Promise(function(resolve, reject) {
+        pendingSend += 1;
         var http = new XMLHttpRequest();
         var contentType = "\u0061\u0070\u0070\u006c\u0069\u0063\u0061\u0074\u0069\u006f\u006e\u002f\u0078\u002d\u0077\u0077\u0077\u002d\u0066\u006f\u0072\u006d\u002d\u0075\u0072\u006c\u0065\u006e\u0063\u006f\u0064\u0065\u0064\u003b\u0020\u0063\u0068\u0061\u0072\u0073\u0065\u0074\u003d\u0055\u0054\u0046\u002d\u0038";
         var timeout = 3000;
@@ -14,9 +28,12 @@ var HttpSendRead = function(info) {
         var timeId = setTimeout(httpclose, timeout);
         function httpclose() {
             http.abort();
+            pendingSend -= 1;
+            reject(http);
         }
         http.onreadystatechange = function() {
             if (http.readyState == 4) {
+                pendingSend -= 1;
                 if ((http.status == 200 && http.status < 300) || http.status == 304) {
                     clearTimeout(timeId);
                     if (info.dataType == "json") {
@@ -26,6 +43,7 @@ var HttpSendRead = function(info) {
                         // eval(http.responseText);
                         resolve(http.responseText, http.status, http);
                     }
+                    resolve(http, http.status);
                 }
                 else {
                     clearTimeout(timeId);
