@@ -20,6 +20,9 @@
 - [Firefox（XPI）](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/firefox/BaiduExporter.xpi)：下载后打开 Firefox，Ctrl/Command + O 打开选择文件对话框选中 XPI 包即可安装。
 - [Safari](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/safari/BaiduExporter.safariextz)：下载后双击安装即可。
 
+### ISSUE需知
+请先阅读[这里](https://github.com/acgotaku/BaiduExporter/issues/128)
+
 ## Thanks
 
 - Icon by [Losses Don](https://github.com/Losses)
