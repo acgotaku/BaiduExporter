@@ -41,21 +41,13 @@ var CORE=(function(){
         }
 
         },
-        // 反转义非字母表中字符，确保按照文件名保存
-        // 取自 https://github.com/binux/ThunderLixianExporter
+        // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
         escapeString:function(str){
-            var alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var result = "";
             if(navigator.platform.indexOf("Win") != -1){
                 return str;
             }
-            for (var i = 0; i < str.length; i++) {
-                if (alpha.indexOf(str[i]) == -1) {
-                    result += "\\" + str[i];
-                } else {
-                    result += str[i];
-                }
-            }
+
+            var result = "'" + str.replace("'", "'\\''") + "'";
             return result;
         },
         //解析 RPC地址 返回验证数据 和地址
