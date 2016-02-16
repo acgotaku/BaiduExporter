@@ -47,7 +47,7 @@ var CORE=(function(){
                 return str;
             }
 
-            var result = "'" + str.replace("'", "\\'") + "'";
+            var result = "'" + str.replace("'", "'\\''") + "'";
             return result;
         },
         //解析 RPC地址 返回验证数据 和地址
