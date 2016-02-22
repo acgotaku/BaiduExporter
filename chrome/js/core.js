@@ -14,31 +14,32 @@ var CORE=(function(){
         //caution  警告  failure  失败  loading 加载 success 成功
         //MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
         setMessage:function(msg, type) {
-        if(typeof require=="undefined"){
-           Utilities.useToast({
-                toastMode: disk.ui.Toast[type],
-                msg: msg,
-                sticky: false
-            });
-        }else{
-            if(newVersion){
-                var Toast = require("disk-system:widget/context/context.js").instanceForSystem;
-                if(type.startsWith("MODE")){
-                    type=type.split("_")[1].toLowerCase();
-                }
-                Toast.ui.tip({
-                    mode: type,
-                    msg: msg
-                }); 
-            }else{
-                var Toast = require("common:widget/toast/toast.js");
-                Toast.obtain.useToast({
-                    toastMode: Toast.obtain[type],
+            if (typeof require == "undefined") {
+                Utilities.useToast({
+                    toastMode: disk.ui.Toast[type],
                     msg: msg,
                     sticky: false
-                });            
-            }           
-        }
+                });
+            } else {
+                var Toast;
+                if (newVersion) {
+                    Toast = require("disk-system:widget/context/context.js").instanceForSystem;
+                    if(type.startsWith("MODE")){
+                        type=type.split("_")[1].toLowerCase();
+                    }
+                    Toast.ui.tip({
+                        mode: type,
+                        msg: msg
+                    });
+                } else {
+                    Toast = require("common:widget/toast/toast.js");
+                    Toast.obtain.useToast({
+                        toastMode: Toast.obtain[type],
+                        msg: msg,
+                        sticky: false
+                    });
+                }
+            }
 
         },
         // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
@@ -54,16 +55,16 @@ var CORE=(function(){
         parseAuth:function(url){
             var auth_str = request_auth(url);
             if (auth_str) {
-                if(auth_str.indexOf('token:') != 0){
+                if(auth_str.indexOf("token:") != 0){
                     auth_str = "Basic " + btoa(auth_str);
-                }  
+                }
             }
             url=remove_auth(url);
             function request_auth(url) {
                 return url.match(/^(?:(?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(?:\/\/)?(?:([^:@]*(?::[^:@]*)?)?@)?/)[1];
             }
             function remove_auth(url) {
-                return url.replace(/^((?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(\/\/)?(?:(?:[^:@]*(?::[^:@]*)?)?@)?(.*)/, '$1$2$3');
+                return url.replace(/^((?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(\/\/)?(?:(?:[^:@]*(?::[^:@]*)?)?@)?(.*)/, "$1$2$3");
             }
             return [auth_str,url];
         },
@@ -91,7 +92,7 @@ var CORE=(function(){
             if(cookies){
                 var baidu_cookies=cookies;
                 var format_cookies=[];
-                for(var i=0;i<baidu_cookies.length;i++){
+                for(i=0;i<baidu_cookies.length;i++){
                     for(var key in baidu_cookies[i]){
                         format_cookies.push(key +"=" +baidu_cookies[i][key]);
                     }
@@ -101,17 +102,17 @@ var CORE=(function(){
 
             var header = "";
             if (type == "aria2c_line") {
-                for (var i = 0; i < addheader.length; i++) {
+                for (i = 0; i < addheader.length; i++) {
                     header += " --header " + JSON.stringify(addheader[i]) + " ";
                 }
                 return header;
             } else if (type == "aria2c_txt") {
-                for (var i = 0; i < addheader.length; i++) {
+                for (i = 0; i < addheader.length; i++) {
                     header += " header=" + (addheader[i]) + " \n";
                 }
                 return header;
             } else if (type == "idm_txt") {
-                for (var i = 0; i < addheader.length; i++) {
+                for (i = 0; i < addheader.length; i++) {
                     header += " header=" + (addheader[i]) + " \n";
                 }
                 return header;
@@ -122,11 +123,11 @@ var CORE=(function(){
         },
         //调整元素的位置使元素居中
         setCenter:function(obj){
-                var screenWidth = $(window).width(), screenHeight = $(window).height();
-                var scrolltop = $(document).scrollTop();
-                var objLeft = (screenWidth - obj.width())/2 ;
-                var objTop = (screenHeight - obj.height())/2 + scrolltop;
-                obj.css({left: objLeft + 'px', top: objTop + 'px'});
+            var screenWidth = $(window).width(), screenHeight = $(window).height();
+            var scrolltop = $(document).scrollTop();
+            var objLeft = (screenWidth - obj.width())/2 ;
+            var objTop = (screenHeight - obj.height())/2 + scrolltop;
+            obj.css({left: objLeft + "px", top: objTop + "px"});
         },
         //导出菜单
         addMenu:{
@@ -138,14 +139,14 @@ var CORE=(function(){
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").css("display", "none").appendTo(aria2_btn);
                 var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
-                if(type == "home"){           
+                if(type == "home"){
                     if(newVersion){
                         aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").attr("href","javascript:void(0);").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool").after($("<span>").addClass("text").text("导出下载")))));
                         $(".g-dropdown-button").eq(3).after(aria2_btn);
                     }else{
                         aria2_btn.addClass("icon-btn-device").append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
                         $(".icon-btn-device").after(aria2_btn);
-                    }              
+                    }
                 }else if (type == "share"){
                     aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);
@@ -163,21 +164,20 @@ var CORE=(function(){
                     if($("#setting_div").length == 0){
                         CORE.setting.init();
                     }
-                     $("#setting_div").show();
+                    $("#setting_div").show();
                 });
                 this.update();
                 return aria2_btn;
             },
             //根据设置更新按钮
             update:function(){
-                var self=this;
                 $(".rpc_export_list").remove();
                 var rpc_list=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
                 while(rpc_list.length > 0){
                     var rpcObj = rpc_list.pop();
-                    $("<a class='rpc_export_list'>").addClass("g-button-menu").attr('data-id',rpcObj.url).text(rpcObj.name).prependTo($("#aria2_list"));
+                    $("<a class='rpc_export_list'>").addClass("g-button-menu").attr("data-id",rpcObj.url).text(rpcObj.name).prependTo($("#aria2_list"));
                 }
-            },
+            }
         },
         //设置界面
         setting:{
@@ -193,7 +193,7 @@ var CORE=(function(){
                     '<div style=" margin: 20px 10px 10px 10px; ">',
                     '<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>',
                     '<table id="setting_div_table" >',
-                    '<tbody>',
+                    "<tbody>",
                     '<tr><td><label>开启配置同步:</label></td><td><input id="rpc_sync" type="checkbox"></td></tr>',
                     '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
                     '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
@@ -202,13 +202,13 @@ var CORE=(function(){
                     '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
                     '<tr><td colspan="2"><div style="color: #656565;">Headers<label style="margin-left: 65px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td></tr>',
                     '<tr><td><label>headers ：</label></td><td><textarea id="setting_aria2_headers" ></textarea></td></tr>',
-                    '</tbody>',
-                    '</table>',
+                    "</tbody>",
+                    "</table>",
                     '<div style="margin-top:10px;">',
-                    '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a><br/> Version:' + version + ' 更新日期: ' + update_date + ' </div>',
+                    '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a><br/> Version:' + version + " 更新日期: " + update_date + " </div>",
                     '<div style="margin-left:50px; display:inline-block"><a href="javascript:;" id="apply" class="button">应用</a><a href="javascript:;" id="reset" class="button">重置</a></div>',
-                    '</div>',
-                    '</div>'
+                    "</div>",
+                    "</div>"
                 ];
                 setting_div.innerHTML = html_.join("");
                 document.body.appendChild(setting_div);
@@ -216,30 +216,30 @@ var CORE=(function(){
                 self.update();
                 $("#setting_div").on("click",function(event){
                     switch(event.target.id){
-                        case "setting_div_close":
-                            $("#setting_div").hide();
-                            break;
-                        case "apply":
-                            self.save();
-                            CORE.addMenu.update();
-                            $("#setting_divtopmsg").html("设置已保存.");
-                            break;
-                        case "reset":
-                            localStorage.clear();
-                            window.postMessage({ type: "clear_data"}, "*");
-                            $("#setting_divtopmsg").html("设置已重置.");
-                            self.update();
-                            break;
-                        case "send_test":
-                            CORE.getVersion();
-                            break;
-                        case "add_rpc":
+                    case "setting_div_close":
+                        $("#setting_div").hide();
+                        break;
+                    case "apply":
+                        self.save();
+                        CORE.addMenu.update();
+                        $("#setting_divtopmsg").html("设置已保存.");
+                        break;
+                    case "reset":
+                        localStorage.clear();
+                        window.postMessage({ type: "clear_data"}, "*");
+                        $("#setting_divtopmsg").html("设置已重置.");
+                        self.update();
+                        break;
+                    case "send_test":
+                        CORE.getVersion();
+                        break;
+                    case "add_rpc":
                         var num=$(".rpc_list").length+1;
                         var row='<tr class="rpc_list"><td width="100"><input id="rpc_name_'+num+'" type="text" value="ARIA2 RPC '+num+'" class="input-medium">：</td><td><input id="rpc_url_'+num+'" type="text" class="input-large"></td></tr>';
                         $(row).insertAfter($(".rpc_list").eq(num-2));
-                            break;
-                        default:
-                            //console.log(event);
+                        break;
+                    default:
+                        //console.log(event);
 
                     }
                 });
@@ -255,7 +255,7 @@ var CORE=(function(){
                 config_data["rpc_dir"] = $("#setting_aria2_dir").val();
                 config_data["rpc_fold"] =  $("#rpc_fold").val();
                 config_data["rpc_headers"] = $("#setting_aria2_headers").val();
-                config_data["rpc_sync"] = $("#rpc_sync").prop('checked');
+                config_data["rpc_sync"] = $("#rpc_sync").prop("checked");
                 var rpc_list=[];
                 for(var i=0;i<$(".rpc_list").length;i++){
                     var num=i+1;
@@ -273,9 +273,9 @@ var CORE=(function(){
                 $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
                 var rpc_sync =localStorage.getItem("rpc_sync");
                 if(rpc_sync == "false"){
-                    $("#rpc_sync").prop('checked',false);
+                    $("#rpc_sync").prop("checked",false);
                 }else{
-                    $("#rpc_sync").prop('checked',true);
+                    $("#rpc_sync").prop("checked",true);
                 }
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || defaultUA);
@@ -285,8 +285,8 @@ var CORE=(function(){
                 $(".rpc_list").remove();
                 for(var i in rpc_list){
                     var num=(+i)+1;
-                    var addBtn=1==num?'<a id="add_rpc" href="javascript:;" >ADD RPC</a>':'';
-                    var row='<tr class="rpc_list"><td width="100"><input id="rpc_name_'+num+'" type="text" value="'+rpc_list[i]['name']+'" class="input-medium">：</td><td><input id="rpc_url_'+num+'" type="text" class="input-large" value="'+rpc_list[i]['url']+'">'+addBtn+'</td></tr>';
+                    var addBtn=1==num?'<a id="add_rpc" href="javascript:;" >ADD RPC</a>':"";
+                    var row='<tr class="rpc_list"><td width="100"><input id="rpc_name_'+num+'" type="text" value="'+rpc_list[i]["name"]+'" class="input-medium">：</td><td><input id="rpc_url_'+num+'" type="text" class="input-large" value="'+rpc_list[i]["url"]+'">'+addBtn+"</td></tr>";
                     if($(".rpc_list").length>0){
                         $(row).insertAfter($(".rpc_list").eq(num-2));
                     }else{
@@ -308,7 +308,7 @@ var CORE=(function(){
             if (paths[0]) {
                 data.params.unshift(paths[0]);
             }
-            var parameter = {'url': paths[1], 'dataType': 'json', type: 'POST', data: JSON.stringify(data), 'headers': {'Authorization': paths[0]}};
+            var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(data), headers: {Authorization: paths[0]}};
             CONNECT.sendToBackground("rpc_version",parameter);
         },
         //把要下载的link和name作为数组对象传过来
@@ -323,13 +323,12 @@ var CORE=(function(){
                         "method": "aria2.addUri",
                         "id": new Date().getTime(),
                         "params": [[file_list[i].link], {
-                                "out": file_list[i].name,
-                                "dir":localStorage.getItem("rpc_dir")||null,
-                                "header": self.getHeader()
-                            }
-                        ]
+                            "out": file_list[i].name,
+                            "dir":localStorage.getItem("rpc_dir")||null,
+                            "header": self.getHeader()
+                        }]
                     };
-                    if (token && token.indexOf('token:') == 0) {
+                    if (token && token.indexOf("token:") == 0) {
                         rpc_data.params.unshift(token);
                     }
                     rpc_list.push(rpc_data);
@@ -377,24 +376,24 @@ var CORE=(function(){
                 if (file_list.length > 0) {
                     var length = file_list.length;
                     for (var i = 0; i < length; i++) {
-                        filename = (navigator.platform.indexOf("Win") != -1) ? JSON.stringify(file_list[i].name) : CORE.escapeString(file_list[i].name);
-                        files.push("aria2c -c -s10 -k1M -x10 -o " + filename + CORE.getHeader('aria2c_line') + " " + JSON.stringify(file_list[i].link) + "\n");
+                        var filename = (navigator.platform.indexOf("Win") != -1) ? JSON.stringify(file_list[i].name) : CORE.escapeString(file_list[i].name);
+                        files.push("aria2c -c -s10 -k1M -x10 -o " + filename + CORE.getHeader("aria2c_line") + " " + JSON.stringify(file_list[i].link) + "\n");
                         aria2c_txt.push([
                             file_list[i].link,
                             CORE.getHeader("aria2c_txt"),
-                            ' out=' + file_list[i].name,
-                            ' continue=true',
-                            ' max-connection-per-server=10',
-                            '  split=10',
-                            '\n'
-                        ].join('\n'));
+                            " out=" + file_list[i].name,
+                            " continue=true",
+                            " max-connection-per-server=10",
+                            "  split=10",
+                            "\n"
+                        ].join("\n"));
                         idm_txt.push([
-                            '<',
+                            "<",
                             file_list[i].link,
-                            ' out=' + file_list[i].name,
-                            ' >'
-                        ].join('\r\n'));
-                        down_txt.push([file_list[i].link, ' '].join('\n'));
+                            " out=" + file_list[i].name,
+                            " >"
+                        ].join("\r\n"));
+                        down_txt.push([file_list[i].link, " "].join("\n"));
                     }
                     $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
                     $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("")));
@@ -403,8 +402,6 @@ var CORE=(function(){
                     $("#download_link").val($("#download_link").val() + files.join(""));
                 }
             }
-        },
-
-
-    }
+        }
+    };
 })();

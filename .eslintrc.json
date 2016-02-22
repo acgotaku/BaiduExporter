@@ -7,6 +7,14 @@
         "webextensions": true
     },
     "extends": "eslint:recommended",
+    "globals": {
+        "CORE": true,
+        "CONNECT": true,
+        "Utilities": true,
+        "SetMessage": true,
+        "disk": true,
+        "yunData": true
+    },
     "parserOptions": {
         "sourceType": "module"
     },
@@ -24,7 +32,8 @@
         ],
         "quotes": [
             2,
-            "double"
+            "double",
+            "avoid-escape"
         ],
         "semi": [
             2,

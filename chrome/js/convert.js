@@ -11,12 +11,12 @@ var CONVERT =(function(){
     var HttpSend = function(info) {
         Promise.prototype.done=Promise.prototype.then;
         Promise.prototype.fail=Promise.prototype.catch;
-        
+
         if (pendingSend > BUFFER_SIZE) {
             return new Promise(function(resolve, reject) {
                 setTimeout(function() {
-                    resolve(HttpSend(info))
-                }, POLLING_INTERVAL)
+                    resolve(HttpSend(info));
+                }, POLLING_INTERVAL);
             });
         }
 
@@ -56,9 +56,10 @@ var CONVERT =(function(){
                         reject(http, http.statusText, http.status);
                     }
                 }
-            }
+            };
             http.open(info.type, info.url, true);
             http.setRequestHeader("Content-type", contentType);
+            var h;
             for (h in info.headers) {
                 if (info.headers[h]) {
                     http.setRequestHeader(h, info.headers[h]);
@@ -69,7 +70,7 @@ var CONVERT =(function(){
             }
             else {
                 http.send();
-            }                          
+            }
         });
     };
     return {
@@ -98,29 +99,28 @@ var CONVERT =(function(){
             return convert_btn;
         },
         //获得选中的文件
-        getConvertFile:function(){
-                var self = this;
-                if (yunData.SHAREPAGETYPE=="single_file_page") {
-                    setMessage("单个文件你转存个毛!", "MODE_CAUTION");
-                } else {
-                    var File = require("common:widget/data-center/data-center.js");
-                    var Filename = File.get("selectedItemList");
-                    var file_info = File.get("selectedList");
-                    if (file_info.length == 0) {
-                        setMessage("先选择一下你要转存的文件夹哦", "MODE_CAUTION");
-                        return;
-                    }
-                    for (var i = 0; i < Filename.length; i++) {
-                        var fs_id = parseInt(Filename[i].attr("data-id"));
-                        self.saveConvertFile({"fs_id":fs_id,"path":list[fs_id]});   
-                    }
+        getConvertFile: function(){
+            var self = this;
+            if (yunData.SHAREPAGETYPE=="single_file_page") {
+                setMessage("单个文件你转存个毛!", "MODE_CAUTION");
+            } else {
+                var File = require("common:widget/data-center/data-center.js");
+                var Filename = File.get("selectedItemList");
+                var file_info = File.get("selectedList");
+                if (file_info.length == 0) {
+                    setMessage("先选择一下你要转存的文件夹哦", "MODE_CAUTION");
+                    return;
                 }
+                for (var i = 0; i < Filename.length; i++) {
+                    var fs_id = parseInt(Filename[i].attr("data-id"));
+                    self.saveConvertFile({"fs_id":fs_id,"path":list[fs_id]});
+                }
+            }
         },
         //检测这个文件夹是否存在
-        removeFold:function(path){
-            var self = this;
-            var data ='filelist='+encodeURIComponent("[\""+path+"\"]");
-            var parameter = {'url': "//"+window.location.host+"/api/filemanager?"+"opera=delete&async=2&channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN, 'dataType': 'json', type: 'POST', 'data': data};
+        removeFold: function(path){
+            var data ="filelist="+encodeURIComponent('[\"'+path+'\"]');
+            var parameter = {url: "//"+window.location.host+"/api/filemanager?"+"opera=delete&async=2&channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN, dataType: "json", type: "POST", data: data};
             HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
                     if(json.errno ==12){
@@ -133,18 +133,17 @@ var CONVERT =(function(){
                 });
         },
         checkFold:function(path){
-            var self=this;
             if(path.length<=1){
                 return null;
-            };
-            var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
+            }
+            var parameter = {url: "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), dataType: "json", type: "GET"};
             return HttpSend(parameter);
         },
         saveConvertFile:function(item){
-            var self = this; 
-            var data = 'filelist='+encodeURIComponent("[\""+item.path+"\"]")+'&path='+encodeURIComponent(prefix+item.path.substring(0,item.path.lastIndexOf("/")));
+            var self = this;
+            var data = "filelist="+encodeURIComponent("[\""+item.path+"\"]")+"&path="+encodeURIComponent(prefix+item.path.substring(0,item.path.lastIndexOf("/")));
             var convert = "//" + window.location.host + "/share/transfer?async=1&channel=chunlei&clienttype=0&web=1&ondup=overwrite&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN + "&shareid="+ yunData.SHARE_ID + "&from="+yunData.SHARE_UK ;
-            var parameter = {'url': convert, 'dataType': 'json', type: 'POST', 'data': data};
+            var parameter = {url: convert, dataType: "json", type: "POST", data: data};
             HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         if(json.errno == 2){
@@ -161,28 +160,28 @@ var CONVERT =(function(){
                                 });
                             }
                         }else if(json.errno ==111){ //当前还有未完成的任务，需完成后才能操作
-                            setMessage("保存的有点太快了!", "MODE_FAILURE");   
+                            setMessage("保存的有点太快了!", "MODE_FAILURE");
                             console.log("111", item.path);
                         }else{
                             console.log("some error"+json);
-                            setMessage("转存出现异常!", "MODE_FAILURE");   
+                            setMessage("转存出现异常!", "MODE_FAILURE");
                         }
 
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         setMessage("转存失败?", "MODE_FAILURE");
                         console.log(jqXHR);
-                    });   
+                    });
 
         },
         //创建转存文件需要的文件夹
         createFold:function(path,callback) {
-            var self = this; 
+            var self = this;
             var file_path=path;
             path=prefix+path;
-            var data = 'path='+encodeURIComponent(path)+'&isdir=1&size=&block_list=%5B%5D&method=post';
+            var data = "path="+encodeURIComponent(path)+"&isdir=1&size=&block_list=%5B%5D&method=post";
             var convert = "//" + window.location.host + "/api/create?a=commit&channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN;
-            var parameter = {'url': convert, 'dataType': 'json', type: 'POST', 'data': data};
+            var parameter = {url: convert, dataType: "json", type: "POST", data: data};
             self.checkFold(path)
                 .done(function(json, textStatus, jqXHR){
                     if(json.errno === -9){
@@ -195,7 +194,7 @@ var CONVERT =(function(){
                                     self.removeFold(json.path);
                                 },POLLING_INTERVAL * 50);
                             }
-                        })
+                        });
                     }else{
                         callback(file_path);
                     }
@@ -208,7 +207,7 @@ var CONVERT =(function(){
         //递归下载
         getRecursiveFold:function(item){
             var self=this;
-            var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(item.path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+            var parameter = {url: "//"+window.location.host+"/share/list?dir="+encodeURIComponent(item.path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET"};
             HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         var array=json.list;
@@ -223,7 +222,7 @@ var CONVERT =(function(){
             function delayLoop(item , i){
                 setTimeout(function() {
                     self.saveConvertFile(item);
-                }, POLLING_INTERVAL * i);  
+                }, POLLING_INTERVAL * i);
             }
         },
         //得到当前文件夹的路径
@@ -238,7 +237,7 @@ var CONVERT =(function(){
             }
             return path;
         }
-    }
+    };
 })();
 setTimeout(function(){
     CONVERT.init();
