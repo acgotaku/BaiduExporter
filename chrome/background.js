@@ -32,9 +32,10 @@ var HttpSendRead = function(info) {
                     reject(http, http.statusText, http.status);
                 }
             }
-        }
+        };
         http.open(info.type, info.url, true);
         http.setRequestHeader("Content-type", contentType);
+        var h;
         for (h in info.headers) {
             if (info.headers[h]) {
                 http.setRequestHeader(h, info.headers[h]);
@@ -45,11 +46,11 @@ var HttpSendRead = function(info) {
         }
         else {
             http.send();
-        }                          
+        }
     });
 };
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status === 'loading' && tab.url.indexOf("n.baidu.com") != -1) {
+    if (changeInfo.status === "loading" && tab.url.indexOf("n.baidu.com") != -1) {
         if (!chrome.runtime.onConnectExternal.hasListeners()) {
             chrome.runtime.onConnectExternal.addListener(function(port) {
                 console.assert(port.name == "BaiduExporter");
@@ -57,62 +58,61 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                     console.log(request.method);
                     console.log(request.data);
                     switch(request.method){
-                        case "rpc_data":
-                            HttpSendRead(request.data)
-                                    .done(function(json, textStatus, jqXHR) {
-                                        port.postMessage({'method':'rpc_result','status':true});
-
-                                    })
+                    case "rpc_data":
+                        HttpSendRead(request.data)
+                               .done(function(json, textStatus, jqXHR) {
+                                   port.postMessage({method:"rpc_result",status:true});
+                               })
                                     .fail(function(jqXHR, textStatus, errorThrown) {
-                                        port.postMessage({'method':'rpc_result','status':false});
-                                    }); 
-                            break;
-                        case "config_data":
-                            for(var key in request.data){
-                                localStorage.setItem(key,request.data[key]);
-                            }
-                            break;
-                        case "copy_text":
-                            var input = document.createElement('textarea');
-                            document.body.appendChild(input);
-                            input.value = request.data;
-                            input.focus();
-                            input.select();
-                            var result =document.execCommand('Copy');
-                            input.remove();
-                            console.log(result);
-                            if(result){
-                                port.postMessage({'method':'copy_text','status':true});
-                            }else{
-                                port.postMessage({'method':'copy_text','status':false});
-                            }
-                            break;
-                        case "rpc_version":
-                            HttpSendRead(request.data)
-                                    .done(function(json, textStatus, jqXHR) {
-                                        port.postMessage({'method':'rpc_version','status':true,'data':json});
-
-                                    })
-                                    .fail(function(jqXHR, textStatus, errorThrown) {
-                                        port.postMessage({'method':'rpc_version','status':false});
+                                        port.postMessage({method:"rpc_result",status:false});
                                     });
-                            break;
-                        case "get_cookies":
-                            Promise.all(function(){
-                                var array=[];
-                                var data=request.data;
-                                for(var i=0;i<data.length;i++){
-                                    array.push(get_cookie(data[i].site,data[i].name));
-                                }
-                                return array;
-                            }()).then(function(value){
-                
-                                port.postMessage({'method':'send_cookies','data':value});        
-                                
-                            },function(){
-                                console.log("error");
-                            });
-                            break; 
+                        break;
+                    case "config_data":
+                        for(var key in request.data){
+                            localStorage.setItem(key,request.data[key]);
+                        }
+                        break;
+                    case "copy_text":
+                        var input = document.createElement("textarea");
+                        document.body.appendChild(input);
+                        input.value = request.data;
+                        input.focus();
+                        input.select();
+                        var result =document.execCommand("Copy");
+                        input.remove();
+                        console.log(result);
+                        if(result){
+                            port.postMessage({method:"copy_text",status:true});
+                        }else{
+                            port.postMessage({method:"copy_text",status:false});
+                        }
+                        break;
+                    case "rpc_version":
+                        HttpSendRead(request.data)
+                                .done(function(json, textStatus, jqXHR) {
+                                    port.postMessage({method:"rpc_version",status:true,data:json});
+
+                                })
+                                .fail(function(jqXHR, textStatus, errorThrown) {
+                                    port.postMessage({method:"rpc_version",status:false});
+                                });
+                        break;
+                    case "get_cookies":
+                        Promise.all(function(){
+                            var array=[];
+                            var data=request.data;
+                            for(var i=0;i<data.length;i++){
+                                array.push(get_cookie(data[i].site,data[i].name));
+                            }
+                            return array;
+                        }()).then(function(value){
+
+                            port.postMessage({method:"send_cookies",data:value});
+
+                        },function(){
+                            console.log("error");
+                        });
+                        break;
                     }
                 });
             });
@@ -124,7 +124,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 function get_cookie(site,name){
     return new Promise(function(resolve, reject) {
         chrome.cookies.get({"url": site, "name": name}, function(cookies) {
-			var obj = {};
+            var obj = {};
             if (cookies) {
                 obj[cookies.name] = cookies.value;
                 resolve(obj);
@@ -136,7 +136,7 @@ function get_cookie(site,name){
 }
 //弹出chrome通知
 function showNotification(id,opt){
-    var notification = chrome.notifications.create(id,opt,function(notifyId){return notifyId});
+    var notification = chrome.notifications.create(id,opt,function(notifyId){return notifyId;});
     setTimeout(function(){
         chrome.notifications.clear(id,function(){});
     },5000);
@@ -150,8 +150,8 @@ if(previousVersion == "" || previousVersion != manifest.version){
         title: "更新",
         message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复无法关闭同步的BUG~",
         iconUrl: "images/icon.jpg"
-    }
-    var id= new Date().getTime().toString();              
+    };
+    var id= new Date().getTime().toString();
     showNotification(id,opt);
     localStorage.setItem("version",manifest.version);
 }
