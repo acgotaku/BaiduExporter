@@ -24,13 +24,13 @@ var ALBUM =(function(){
             CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
             menu.on("click",".rpc_export_list",function(){
                 MODE="RPC";
-                RPC_PATH=$(this).attr('data-id');
+                RPC_PATH=$(this).attr("data-id");
                 if(info){
                     self.getShareFile();
                 }else{
                     self.getFilemetas();
                 }
-                
+
 
             });
             menu.on("click","#aria2_download",function(){
@@ -43,11 +43,11 @@ var ALBUM =(function(){
                 }
             });
         },
-        
+
         getFilemetas:function(){
             var self = this;
             var file_list=[];
-            file_list.push({"name":FileList.server_filename,"link":FileList.dlink}); 
+            file_list.push({"name":FileList.server_filename,"link":FileList.dlink});
             self.selectMode(file_list);
 
         },
@@ -59,11 +59,11 @@ var ALBUM =(function(){
             if(info){
                 url = "//"+window.location.host+disk.ui.album.RestAPI.listFile + "?album_id=" + album_id+ "&query_uk=" + query_uk + "&start=" + ($(".page-input").eq(0).val() - 1) * 60 + "&limit=" + 60;
             }else{
-               FileList = JSON.parse(disk.util.ViewShareUtils.viewShareData);
-               return;
+                FileList = JSON.parse(disk.util.ViewShareUtils.viewShareData);
+                return;
             }
-            
-            var parameter = {'url': url, 'dataType': 'json', type: 'GET'};
+
+            var parameter = {url: url, dataType: "json", type: "GET"};
             CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         setMessage("初始化成功!", "MODE_SUCCESS");
@@ -72,7 +72,7 @@ var ALBUM =(function(){
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         setMessage("获取全部列表失败!", "MODE_FAILURE");
                         console.log(textStatus);
-                    });  
+                    });
         },
         //获得选中的文件
         getShareFile:function(){
@@ -102,14 +102,14 @@ var ALBUM =(function(){
         //生成请求参数 发送给后台 进行 http请求
         generateParameter:function(rpc_list){
             var paths=CORE.parseAuth(RPC_PATH);
-            for(var i=0;i<rpc_list.length;i++){
-                var parameter = {'url': paths[1], 'dataType': 'json', type: 'POST', data: JSON.stringify(rpc_list[i]), 'headers': {'Authorization': paths[0]}};
+            for (var i = 0; i < rpc_list.length; i++) {
+                var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: {Authorization: paths[0]}};
                 CONNECT.sendToBackground("rpc_data",parameter);
             }
 
         }
 
-    }
+    };
 })();
 setTimeout(function(){
     ALBUM.init();

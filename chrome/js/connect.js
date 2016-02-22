@@ -1,14 +1,13 @@
 var CONNECT =(function(){
     //此段代码用来和后台通讯和  发送http请求
-var extensionId=null;
-var port=null;
+    var extensionId=null;
+    var port=null;
     return {
         init:function(){
-            var self=this;
             //获得扩展的ID
             var script =document.querySelectorAll("script");
             for(var i=0; i <script.length;i++){
-                var ex = script[i].getAttribute('extension');
+                var ex = script[i].getAttribute("extension");
                 var url=script[i].src;
                 if(url.startsWith("chrome") && ex){
                     extensionId = ex.match(/^BaiduExporter\/(.*)/)[1];
@@ -29,51 +28,51 @@ var port=null;
         sendToHttp:function(method,data){
             var self=this;
             switch(method){
-                case "rpc_data":
-                    self.HttpSend(data)
-                            .done(function(json, textStatus, jqXHR) {
-                                CORE.setMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+            case "rpc_data":
+                self.HttpSend(data)
+                        .done(function(json, textStatus, jqXHR) {
+                            CORE.setMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
 
-                            })
-                            .fail(function(jqXHR, textStatus, errorThrown) {
-                                CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
-                            });
-                    break;
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+                        });
+                break;
             }
         },
         listenBackground:function(port){
             port.onMessage.addListener(function(response) {
                 console.log(response);
                 switch(response.method){
-                    case "rpc_result":
-                        if(response.status){
-                            CORE.setMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
-                        }else{
-                            CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
-                        }
-                        break;
-                    case "copy_text":
-                        if(response.status){
-                            CORE.setMessage("拷贝成功~", "MODE_SUCCESS");
-                        }else{
-                            CORE.setMessage("拷贝失败 QAQ", "MODE_FAILURE");
-                        }
-                        break;
-                    case "send_cookies":
-                        if(response.data){
-                            CORE.setCookies(response.data);
+                case "rpc_result":
+                    if(response.status){
+                        CORE.setMessage("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+                    }else{
+                        CORE.setMessage("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+                    }
+                    break;
+                case "copy_text":
+                    if(response.status){
+                        CORE.setMessage("拷贝成功~", "MODE_SUCCESS");
+                    }else{
+                        CORE.setMessage("拷贝失败 QAQ", "MODE_FAILURE");
+                    }
+                    break;
+                case "send_cookies":
+                    if(response.data){
+                        CORE.setCookies(response.data);
 
-                        }else{
-                            console.log(response.data);
-                        }
-                        break;
-                    case "rpc_version":
-                        if(response.status == false){
-                            $("#send_test").html("错误,请查看是否开启Aria2");
-                        }else{
-                            $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + response.data.result.version);
-                        }
-                        break;
+                    }else{
+                        console.log(response.data);
+                    }
+                    break;
+                case "rpc_version":
+                    if(response.status == false){
+                        $("#send_test").html("错误,请查看是否开启Aria2");
+                    }else{
+                        $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + response.data.result.version);
+                    }
+                    break;
                 }
             });
 
@@ -112,9 +111,10 @@ var port=null;
                             reject(http, http.statusText, http.status);
                         }
                     }
-                }
+                };
                 http.open(info.type, info.url, true);
                 http.setRequestHeader("Content-type", contentType);
+                var h;
                 for (h in info.headers) {
                     if (info.headers[h]) {
                         http.setRequestHeader(h, info.headers[h]);
@@ -128,6 +128,6 @@ var port=null;
                 }
             });
         }
-    }
+    };
 })();
 CONNECT.init();

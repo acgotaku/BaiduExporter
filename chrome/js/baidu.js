@@ -2,13 +2,13 @@ function onload(func) {
     if (document.readyState === "complete") {
         func();
     } else {
-        window.addEventListener('load', func);
+        window.addEventListener("load", func);
     }
 }
 function addJS(name){
-    var s = document.createElement('script');
-    s.setAttribute('extension', 'BaiduExporter/' + chrome.runtime.id);
-    s.src = chrome.extension.getURL('js/'+name+'.js');
+    var s = document.createElement("script");
+    s.setAttribute("extension", "BaiduExporter/" + chrome.runtime.id);
+    s.src = chrome.extension.getURL("js/" + name + ".js");
     (document.body || document.head || document.documentElement).appendChild(s);
     return this;
 }
@@ -16,11 +16,11 @@ onload(function() {
     //把函数注入到页面中
     var home = window.location.href.indexOf("/disk/home") != -1 ? true : false;
     var album = window.location.href.indexOf("/pcloud/album/") != -1 ? true : false;
-    var newversion =  document.querySelector('link[rel="shortcut icon"]').href != "http://pan.baidu.com/res/static/images/favicon.ico" ? true : false;
+    var newversion =  document.querySelector("link[rel='shortcut icon']").href != "http://pan.baidu.com/res/static/images/favicon.ico" ? true : false;
     addJS("connect").addJS("core");
     if(home){
         if(newversion){
-            addJS("home")
+            addJS("home");
         }else{
             addJS("oldhome");
         }

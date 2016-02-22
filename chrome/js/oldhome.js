@@ -20,7 +20,7 @@ var OLDHOME =(function(){
             CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "BAIDUID"}]);
             menu.on("click",".rpc_export_list",function(){
                 MODE="RPC";
-                RPC_PATH=$(this).attr('data-id');
+                RPC_PATH=$(this).attr("data-id");
                 self.getSelectFile();
 
             });
@@ -55,33 +55,33 @@ var OLDHOME =(function(){
         },
         //获取选择的文件夹
         getSelectFold:function(fs_id){
-                var self=this;
-                var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(self.getCurrentPath()), 'dataType': 'json', type: 'GET'};
-                CONNECT.HttpSend(parameter)
-                        .done(function(json, textStatus, jqXHR) {
-                            setMessage("获取列表成功!", "MODE_SUCCESS");
-                            var array=json.list;
-                            for(var i=0;i<array.length;i++){
-                                if(array[i].fs_id == fs_id){
-                                    if(array[i].isdir == 1){
-                                        self.getRecursiveFold(array[i].path);
-                                    }else{
-                                        self.getFilemetas(array[i].path);
-                                    }
+            var self=this;
+            var parameter = {url: "//"+window.location.host+"/api/list?dir="+encodeURIComponent(self.getCurrentPath()), dataType: "json", type: "GET"};
+            CONNECT.HttpSend(parameter)
+                    .done(function(json, textStatus, jqXHR) {
+                        setMessage("获取列表成功!", "MODE_SUCCESS");
+                        var array=json.list;
+                        for(var i=0;i<array.length;i++){
+                            if(array[i].fs_id == fs_id){
+                                if(array[i].isdir == 1){
+                                    self.getRecursiveFold(array[i].path);
+                                }else{
+                                    self.getFilemetas(array[i].path);
                                 }
                             }
-                        })
-                        .fail(function(jqXHR, textStatus, errorThrown) {
-                            setMessage("获取List失败!", "MODE_FAILURE");
-                            console.log(jqXHR);
-                        });   
+                        }
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        setMessage("获取List失败!", "MODE_FAILURE");
+                        console.log(jqXHR);
+                    });
         },
         //递归获取选中文件夹的内容
         getRecursiveFold:function(path){
             var time=0;
             var self=this;
             var delay=parseInt(localStorage.getItem("rpc_delay"))||0;
-            var parameter = {'url': "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), 'dataType': 'json', type: 'GET'};
+            var parameter = {url: "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), dataType: "json", type: "GET"};
             CONNECT.HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
                     var array=json.list;
@@ -99,18 +99,18 @@ var OLDHOME =(function(){
                 .fail(function(jqXHR, textStatus, errorThrown) {
                     setMessage("获取List失败! code:92", "MODE_FAILURE");
                     console.log(jqXHR);
-                });  
+                });
             function delayLoopList(path,time){
                 setTimeout(function(){
                     self.getRecursiveFold(path);
                 },time);
-                
-            } 
+
+            }
             function delayLoopFile(path,time){
                 setTimeout(function(){
                     self.getFilemetas(path);
                 },time);
-            } 
+            }
         },
         //根据文件路径获取文件的信息
         getFilemetas:function(target){
@@ -120,7 +120,7 @@ var OLDHOME =(function(){
             if(path == null || path =="/"){
                 path="";
             }
-            var parameter = {'url': "//"+window.location.host+"/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+            var parameter = {url: "//"+window.location.host+"/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET"};
             CONNECT.HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
                     setMessage("获取文件信息成功!", "MODE_SUCCESS");
@@ -151,7 +151,7 @@ var OLDHOME =(function(){
         generateParameter:function(rpc_list){
             var paths=CORE.parseAuth(RPC_PATH);
             for(var i=0;i<rpc_list.length;i++){
-                var parameter = {'url': paths[1], 'dataType': 'json', type: 'POST', data: JSON.stringify(rpc_list[i]), 'headers': {'Authorization': paths[0]}};
+                var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: {Authorization: paths[0]}};
                 CONNECT.sendToBackground("rpc_data",parameter);
             }
 
@@ -197,6 +197,6 @@ var OLDHOME =(function(){
             return path;
         }
 
-    }
+    };
 })();
 OLDHOME.init();
