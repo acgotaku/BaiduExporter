@@ -147,6 +147,7 @@ var HOME =function(){
         generateParameter:function(rpc_list){
             var paths=CORE.parseAuth(RPC_PATH);
             for(var i=0;i<rpc_list.length;i++){
+		CORE.mergeOptions(rpc_list[i].params[rpc_list[i].params.length - 1], paths[2]);
                 var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: {Authorization: paths[0]}};
                 CONNECT.sendToBackground("rpc_data",parameter);
             }
