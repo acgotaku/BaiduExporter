@@ -52,22 +52,41 @@ var CORE=(function(){
             return result;
         },
         //解析 RPC地址 返回验证数据 和地址
-        parseAuth:function(url){
-            var auth_str = request_auth(url);
-            if (auth_str) {
-                if(auth_str.indexOf("token:") != 0){
-                    auth_str = "Basic " + btoa(auth_str);
-                }
-            }
-            url=remove_auth(url);
-            function request_auth(url) {
-                return url.match(/^(?:(?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(?:\/\/)?(?:([^:@]*(?::[^:@]*)?)?@)?/)[1];
-            }
-            function remove_auth(url) {
-                return url.replace(/^((?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(\/\/)?(?:(?:[^:@]*(?::[^:@]*)?)?@)?(.*)/, "$1$2$3");
-            }
-            return [auth_str,url];
-        },
+	parseAuth:function(url){
+		// we can specify token/user/pass and additional parameters
+		// to be passed to aria2.addUrl as fragment in the RPC URI using query string syntax
+		// like http://token:mysecret@localhost:6800/jsonrpc#max-connection-per-server=5
+		// the DOM based URL parsing is derived from http://www.abeautifulsite.net/parsing-urls-in-javascript/
+		var parser = document.createElement("a"), options = [];
+		parser.href = url;
+		parser.hash.replace(/^#/, "").split("&").forEach(function(o){
+			o = o.split("=");
+			if(o[0].length > 1){
+				options.push([o[0], o.length == 2 ? o[1] : "enabled"]);
+			}
+		});
+		var auth = parser.username + ":" + parser.password;
+		if(parser.username != "token"){
+			auth = "Basic " + btoa(auth_str);
+		}
+		var path = parser.protocol + "//" + parser.host + parser.pathname;
+		if(parser.search.length > 0){
+			if(parser.search.slice(0, 1) != "?"){
+				path += "?";
+			}
+			path += parser.search
+		}
+		return [auth, path, options];
+	},
+	mergeOptions:function(oa, ob){
+		ob.forEach(function(o){
+			if(o[0] == "header"){
+				oa["header"].push(o[1]);
+			}else{
+				oa[o[0]] = o[1];
+			}
+		});
+	},
         //names format  [{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]
         requestCookies:function(names){
             CONNECT.sendToBackground("get_cookies",names);
