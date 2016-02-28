@@ -60,9 +60,9 @@ var CORE=(function(){
             var parser = document.createElement("a"), options = [];
             parser.href = url;
             parser.hash.replace(/^#/, "").split("&").forEach(function(item){
-                var item = item.split("=");
+                item = item.split("=");
                 if(item[0].length > 1){
-                options.push([item[0], item.length == 2 ? item[1] : "enabled"]);
+                    options.push([item[0], item.length == 2 ? item[1] : "enabled"]);
                 }
             });
             var auth = parser.username + ":" + parser.password;
@@ -74,7 +74,7 @@ var CORE=(function(){
                 if(parser.search.slice(0, 1) != "?"){
                     path += "?";
                 }
-                path += parser.search
+                path += parser.search;
             }
             return [auth, path, options];
         },
@@ -346,7 +346,7 @@ var CORE=(function(){
                         options.forEach(function(item){
                             params[item[0]] =item[1];
                         });
-                    };
+                    }
                     if (token && token.indexOf("token:") == 0) {
                         rpc_data.params.unshift(token);
                     }
