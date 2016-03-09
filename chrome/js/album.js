@@ -94,8 +94,8 @@ var ALBUM =(function(){
             if(MODE =="TXT"){
                 CORE.dataBox.fillData(file_list);
             }else{
-                var token=CORE.parseAuth(RPC_PATH)[0];
-                var rpc_list =CORE.aria2Data(file_list,token);
+                var paths=CORE.parseAuth(RPC_PATH);
+                var rpc_list =CORE.aria2Data(file_list,paths[0], paths[2]);
                 self.generateParameter(rpc_list);
             }
         },

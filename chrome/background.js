@@ -148,7 +148,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新可以通过RPC地址添加控制参数~",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复分享网盘无法RPC下载的BUG~",
         iconUrl: "images/icon.jpg"
     };
     var id= new Date().getTime().toString();
