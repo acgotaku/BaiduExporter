@@ -31,7 +31,7 @@
 
 ## Tips
 
-想加快百度网盘的加载请用各种屏蔽插件 添加 `*monitor.jpg?xcode` 和  `http://127.0.0.1:1000*/guanjia*` 规则.
+想加快百度网盘的加载请用各种屏蔽插件 添加 `*monitor.jpg?xcode` 和  `http://127.0.0.1:1000*/guanjia*` 规则.  
 详见 : [Issue 142](https://github.com/acgotaku/BaiduExporter/issues/142) 和 [Issue 140](https://github.com/acgotaku/BaiduExporter/issues/140)
 
 
