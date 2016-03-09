@@ -29,6 +29,11 @@
 
 - Icon by [Losses Don](https://github.com/Losses)
 
+## Tips
+
+想加快百度网盘的加载请用各种屏蔽插件 添加 `*monitor.jpg?xcode` 和  `http://127.0.0.1:1000*/guanjia*` 规则.
+
+
 ## License
 
 ![GPLv3](https://www.gnu.org/graphics/gplv3-127x51.png)
