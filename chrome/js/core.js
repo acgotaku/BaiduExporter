@@ -72,7 +72,7 @@ var CORE=(function(){
                 // use a new regexp to deal with tokens
                 // we can directly decodeURI(parse.password), 
                 // but it will boom once you have percent sign in your token
-                var token=parser.username + ":" + url.match("http[s]:\/\/token:(.*)@")[1];
+                var auth = parser.username + ":" + url.match("http[s]:\/\/token:(.*)@")[1];
             }
             var path = parser.protocol + "//" + parser.host + parser.pathname;
             if(parser.search.length > 0){
