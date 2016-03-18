@@ -224,7 +224,7 @@ var SHARE =(function(){
                             }
                             if(MODE =="TXT"){
                                 CORE.dataBox.fillData(file_list);
-                            }else{;
+                            }else{
                                 var paths=CORE.parseAuth(RPC_PATH);
                                 var rpc_list =CORE.aria2Data(file_list,paths[0], paths[2]);
                                 self.generateParameter(rpc_list);
