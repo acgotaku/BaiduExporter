@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.6.7";
-    const update_date = "2016/03/18";
+    const version = "0.6.8";
+    const update_date = "2016/03/19";
     var cookies=null;
     var newVersion = typeof manifest == "object" ? true : false;
     return {
@@ -60,9 +60,9 @@ var CORE=(function(){
                     auth_str = "Basic " + btoa(auth_str);
                 }  
             }
-            var hash =url.match(/^.*(#.*)$/);
+            var hash =url.match(/^(?:[^#]*)(?:#(.*))?$/)[1];
             if(hash){
-                hash[1].replace(/^#/, "").split("&").forEach(function(item){
+                hash.split("&").forEach(function(item){
                     item = item.split("=");
                     if(item[0].length > 1){
                         options.push([item[0], item.length == 2 ? item[1] : "enabled"]);
@@ -175,6 +175,7 @@ var CORE=(function(){
                     if($("#setting_div").length == 0){
                         CORE.setting.init();
                     }
+                    $("#setting_divtopmsg").html("");
                     $("#setting_div").show();
                 });
                 this.update();
@@ -232,7 +233,9 @@ var CORE=(function(){
                         break;
                     case "apply":
                         self.save();
-                        CORE.addMenu.update();
+                        setTimeout(function(){
+                            CORE.addMenu.update();
+                        },60);
                         $("#setting_divtopmsg").html("设置已保存.");
                         break;
                     case "reset":
@@ -342,6 +345,7 @@ var CORE=(function(){
                             "header": self.getHeader()
                         }]
                     };
+                    console.log(options);
                     if (options.length > 0) {
                         var params =rpc_data.params[rpc_data.params.length -1];
                         options.forEach(function(item){
