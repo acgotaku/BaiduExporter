@@ -1,10 +1,11 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.6.8";
+    const version = "0.6.9";
     const update_date = "2016/03/19";
     var cookies=null;
     var newVersion = typeof manifest == "object" ? true : false;
+    var export_menu =Math.random().toString(36).substr(2);
     return {
         init:function(){
 
@@ -143,10 +144,10 @@ var CORE=(function(){
         //导出菜单
         addMenu:{
             init:function(type){
-                if($("#export_menu").length != 0){
-                    return $("#export_menu");
+                if($("#"+ export_menu).length != 0){
+                    return $("#"+export_menu);
                 }
-                var aria2_btn = $("<span>").attr("id","export_menu");
+                var aria2_btn = $("<span>").attr("id",export_menu);
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").css("display", "none").appendTo(aria2_btn);
                 var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
