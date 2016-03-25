@@ -432,6 +432,3 @@ var CORE=(function(){
         }
     };
 })();
-setTimeout(function(){
-    HOME.init();
-},600);
