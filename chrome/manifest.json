@@ -6,8 +6,13 @@
    "content_scripts": [ {
       "js": [ "js/baidu.js" ],
       "css":["css/setting.css"],
-      "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*"]
-   } ],
+      "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*"],
+      "run_at": "document_end"
+   },{
+      "js": [ "js/fuck_baidu.js" ],
+      "matches": ["*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*"],
+      "run_at": "document_start"
+   }],
    "default_locale": "en",
    "description": "__MSG_description__",
    "icons": {
@@ -31,5 +36,5 @@
    "manifest_version": 2,
    "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab", "contextMenus", "storage", "clipboardWrite"],
    "name": "__MSG_appName__",
-   "version": "0.6.9"
+   "version": "0.7.0"
 }

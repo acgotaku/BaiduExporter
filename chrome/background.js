@@ -148,7 +148,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新修复插件按钮被百度干掉的BUG!",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～此次更新专治各种不服!!!\n!",
         iconUrl: "images/icon.jpg"
     };
     var id= new Date().getTime().toString();
