@@ -20,7 +20,7 @@ var SHARE =(function(){
             CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
             menu.on("click",".rpc_export_list",function(){
                 MODE="RPC";
-                RPC_PATH=$(this).attr('data-id');
+                RPC_PATH=$(this).attr("data-id");
                 self.getShareFile();
 
             });
@@ -33,28 +33,28 @@ var SHARE =(function(){
         },
         //获得选中的文件
         getShareFile:function(){
-                var self = this;
-                if (yunData.SHAREPAGETYPE=="single_file_page") {
-                    var fid_list = 'fid_list=' + JSON.stringify([yunData.FS_ID]);
-                    self.setFileData(fid_list);
-                } else {
-                    var File = require("common:widget/data-center/data-center.js");
-                    var Filename = File.get("selectedItemList");
-                    var file_info = File.get("selectedList");
-                    if (file_info.length == 0) {
-                        setMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
-                        return;
-                    }
-                    for (var i = 0; i < Filename.length; i++) {
-                            if (Filename[i].attr("data-extname") != "dir") {
-                                var fid_list = 'fid_list=' + JSON.stringify([Filename[i].attr("data-id")]);
-                                self.setFileData( fid_list);
-                            }else{
-                                self.getShareFold(Filename[i].attr("data-id"));
-                                
-                            }
+            var self = this;
+            var fid_list;
+            if (yunData.SHAREPAGETYPE=="single_file_page") {
+                fid_list = "fid_list=" + JSON.stringify([yunData.FS_ID]);
+                self.setFileData(fid_list);
+            } else {
+                var File = require("common:widget/data-center/data-center.js");
+                var Filename = File.get("selectedItemList");
+                var file_info = File.get("selectedList");
+                if (file_info.length == 0) {
+                    setMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
+                    return;
+                }
+                for (var i = 0; i < Filename.length; i++) {
+                    if (Filename[i].attr("data-extname") != "dir") {
+                        fid_list = "fid_list=" + JSON.stringify([Filename[i].attr("data-id")]);
+                        self.setFileData(fid_list);
+                    }else{
+                        self.getShareFold(Filename[i].attr("data-id"));
                     }
                 }
+            }
         },
         //设置要请求文件的POST数据
         setFileData:function(fid_list){
@@ -76,7 +76,7 @@ var SHARE =(function(){
             }else{
                 path=path_head+path;
             }
-            var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+            var parameter = {url: "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET"};
             CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         setMessage("获取共享列表成功!", "MODE_SUCCESS");
@@ -88,7 +88,7 @@ var SHARE =(function(){
                                 if(array[i].isdir == 1){
                                     self.getRecursiveFold(array[i].path);
                                 }else{
-                                    var fid_list = 'fid_list=' + JSON.stringify([array[i].fs_id]);
+                                    var fid_list = "fid_list=" + JSON.stringify([array[i].fs_id]);
                                     self.setFileData(fid_list);
                                 }
                             }
@@ -97,14 +97,14 @@ var SHARE =(function(){
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         setMessage("获取共享列表失败!", "MODE_FAILURE");
                         console.log(jqXHR);
-                    });  
+                    });
         },
         //递归下载
         getRecursiveFold:function(path){
             var self=this;
             var time=0;
             var delay=parseInt(localStorage.getItem("rpc_delay"))||300;
-            var parameter = {'url': "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", 'dataType': 'json', type: 'GET'};
+            var parameter = {url: "//"+window.location.host+"/share/list?dir="+encodeURIComponent(path)+"&bdstoken="+yunData.MYBDSTOKEN+"&uk="+yunData.SHARE_UK+"&shareid="+yunData.SHARE_ID+"&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET"};
             CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         var array=json.list;
@@ -114,26 +114,26 @@ var SHARE =(function(){
                             if(array[i].isdir == 1){
                                 delayLoopList(array[i].path,time);
                             }else{
-                                delayLoopFile(array[i].fs_id,time);     
+                                delayLoopFile(array[i].fs_id,time);
                             }
                         }
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         SetMessage("获取List失败!", "MODE_FAILURE");
                         console.log(textStatus);
-                    });  
+                    });
             function delayLoopList(path,time){
                 setTimeout(function(){
                     self.getRecursiveFold(path);
                 },time);
-            } 
+            }
             function delayLoopFile(fs_id,time){
                 setTimeout(function(){
-                    var fid_list = 'fid_list=' + JSON.stringify([fs_id]);
+                    var fid_list = "fid_list=" + JSON.stringify([fs_id]);
                     self.setFileData(fid_list);
-                    
+
                 },time);
-            } 
+            }
         },
         alertDialog:function(json, params){
             var self = this;
@@ -142,27 +142,27 @@ var SHARE =(function(){
             var html = [
                 '<div class="dlg-hd b-rlv">',
                 '<div title="关闭" id="alert_dialog_close" class="dlg-cnr dlg-cnr-r"></div>',
-                '<h3>提示</h3>',
-                '</div>',
+                "<h3>提示</h3>",
+                "</div>",
                 '<div class="dlg-bd">',
                 '<div class="alert-dialog-msg center">',
                 '<div class="download-verify">',
                 '<div class="verify-body">请输入验证码：<input id="verification" type="text" class="input-code" maxlength="4">',
                 '<img id="vcode" class="img-code" alt="验证码获取中"  width="100" height="30">',
                 '<a href="javascript:;" class="underline" id="change">换一张</a>',
-                '</div>',
+                "</div>",
                 '<div class="verify-error">',
                 (json.auth ? "\u9a8c\u8bc1\u7801\u8f93\u5165\u9519\u8bef\uff0c\u8bf7\u91cd\u65b0\u8f93\u5165" : ""),
-                '</div>',
-                '</div>',
-                '</div>',
-                '</div>',
+                "</div>",
+                "</div>",
+                "</div>",
+                "</div>",
                 '<div class="dlg-ft b-rlv">',
                 '<div class="alert-dialog-commands clearfix center">',
                 '<a href="javascript:;" id="okay" class="sbtn okay"><b>确定</b></a>',
                 '<a href="javascript:;" id="ignore" class="dbtn cancel"><b>取消</b></a>',
-                '</div>',
-                '</div>'
+                "</div>",
+                "</div>"
             ];
             div.html(html.join(""));
             div.appendTo($("body"));
@@ -197,14 +197,14 @@ var SHARE =(function(){
         },
         //根据文件路径获取文件的信息
         getFilemetas:function(data){
-            var self = this;  
+            var self = this;
             var download = "//" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id="+yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
             var pic="//" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken="+yunData.MYBDSTOKEN+"&app_id="+yunData.FILEINFO[0].app_id;
-            var parameter = {'url': download, 'dataType': 'json', type: 'POST', 'data': data};
+            var parameter = {url: download, dataType: "json", type: "POST", data: data};
             CONNECT.HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
                         if (json.errno == -20) {
-                            CONNECT.HttpSend({'url':pic,'dataType': 'json',type: 'GET'})
+                            CONNECT.HttpSend({url:pic,dataType: "json",type: "GET"})
                             .done(function(json, textStatus, jqXHR){
                                 if (data.indexOf("input") != -1) {
                                     json.auth = true;
@@ -215,19 +215,18 @@ var SHARE =(function(){
                             .fail(function(json, textStatus, jqXHR){
                                 setMessage("获取验证码失败?", "MODE_FAILURE");
                             });
-                           
+
                         } else if (json.errno == 0) {
                             var file_list = [];
                             for(var i=0;i<json.list.length;i++){
-                            var list=json.list[i];
-                            file_list.push({"name": list.path.slice(yunData.PATH.lastIndexOf("/")+1,list.path.length), "link": list.dlink});
+                                var list=json.list[i];
+                                file_list.push({"name": list.path.slice(yunData.PATH.lastIndexOf("/")+1,list.path.length), "link": list.dlink});
                             }
                             if(MODE =="TXT"){
                                 CORE.dataBox.fillData(file_list);
                             }else{
-                                var token=CORE.parseAuth(RPC_PATH)[0];
-                                var rpc_list =CORE.aria2Data(file_list,token);
-                                console.log(rpc_list);
+                                var paths=CORE.parseAuth(RPC_PATH);
+                                var rpc_list =CORE.aria2Data(file_list,paths[0], paths[2]);
                                 self.generateParameter(rpc_list);
                             }
                         } else {
@@ -238,19 +237,18 @@ var SHARE =(function(){
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         setMessage("获取地址失败?", "MODE_FAILURE");
+                        console.log(jqXHR);
                     });
         },
         //生成请求参数 发送给后台 进行 http请求
         generateParameter:function(rpc_list){
             var paths=CORE.parseAuth(RPC_PATH);
             for(var i=0;i<rpc_list.length;i++){
-                var parameter = {'url': paths[1], 'dataType': 'json', type: 'POST', data: JSON.stringify(rpc_list[i]), 'headers': {'Authorization': paths[0]}};
+                var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: {Authorization: paths[0]}};
                 CONNECT.sendToHttp("rpc_data",parameter);
             }
-
         }
-
-    }
+    };
 })();
 setTimeout(function(){
     SHARE.init();

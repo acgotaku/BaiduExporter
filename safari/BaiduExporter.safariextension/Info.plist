@@ -5,7 +5,7 @@
 	<key>Author</key>
 	<string>Cee</string>
 	<key>Builder Version</key>
-	<string>11601.3.9</string>
+	<string>11601.5.17.1</string>
 	<key>CFBundleDisplayName</key>
 	<string>BaiduExporter</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.5.9</string>
+	<string>0.7.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>Chrome</key>
@@ -28,6 +28,10 @@
 			<key>End</key>
 			<array>
 				<string>baidu.js</string>
+			</array>
+			<key>Start</key>
+			<array>
+				<string>fuck_baidu.js</string>
 			</array>
 		</dict>
 		<key>Stylesheets</key>
