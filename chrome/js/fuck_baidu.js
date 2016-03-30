@@ -1,5 +1,5 @@
 var fuck_baidu=function(){
-	var addevt = document.addEventListener;
+	var addevt = document.addEventListener.bind(document);
 	document.addEventListener = function (p1,p2,p3) {
 		if(p1 == 'DOMNodeInserted'){
 			console.log('Fucked a event listener request');
