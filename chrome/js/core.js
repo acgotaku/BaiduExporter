@@ -183,8 +183,8 @@ var CORE=(function(){
                     aria2_btn.parent()[0].removeChild = function() {
                       console.log('Remove me? Naive!');
                     };
-                }catch(){
-                    
+                }catch(e){
+                    console.log('Unable to hook removeChild');
                 }
                 this.update();
                 return aria2_btn;
