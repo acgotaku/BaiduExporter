@@ -179,6 +179,13 @@ var CORE=(function(){
                     $("#setting_divtopmsg").html("");
                     $("#setting_div").show();
                 });
+                try{
+                    aria2_btn.parent()[0].removeChild = function() {
+                      console.log('Remove me? Naive!');
+                    };
+                }catch(){
+                    
+                }
                 this.update();
                 return aria2_btn;
             },
