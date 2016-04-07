@@ -166,19 +166,26 @@ var CORE=(function(){
                     aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $("#albumFileSaveKey, #emphsizeButton").parent().prepend(aria2_btn);
                 }
-                aria2_btn.on("mouseover",function(){
-                    list.show();
+                aria2_btn[0].addEventListener("mouseover",function() {
+                  list.show();
                 });
-                aria2_btn.on("mouseout",function(){
-                    list.hide();
+                aria2_btn[0].addEventListener("mouseout",function() {
+                  list.hide();
                 });
-                config.on("click",function(){
+                config[0].addEventListener("click",function(){
                     if($("#setting_div").length == 0){
                         CORE.setting.init();
                     }
                     $("#setting_divtopmsg").html("");
                     $("#setting_div").show();
                 });
+                try{
+                    aria2_btn.parent()[0].removeChild = function() {
+                      console.log('Remove me? Naive!');
+                    };
+                }catch(e){
+                    console.log('Unable to hook removeChild');
+                }
                 this.update();
                 return aria2_btn;
             },

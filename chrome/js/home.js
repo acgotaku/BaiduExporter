@@ -19,17 +19,16 @@ var HOME =function(){
             var menu=CORE.addMenu.init("home");
             var self=this;
             CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "BAIDUID"}]);
-            menu.on("click",".rpc_export_list",function(){
-                MODE="RPC";
-                RPC_PATH=$(this).attr("data-id");
-                console.log(RPC_PATH);
-                self.getSelectFile();
-
+            $(".rpc_export_list")[0].addEventListener("click",function() {
+              MODE="RPC";
+              RPC_PATH=$(this).attr("data-id");
+              console.log(RPC_PATH);
+              self.getSelectFile();
             });
-            menu.on("click","#aria2_download",function(){
-                MODE="TXT";
-                CORE.dataBox.init("home").show();
-                self.getSelectFile();
+            $("#aria2_download")[0].addEventListener("click",function() {
+              MODE="TXT";
+              CORE.dataBox.init("home").show();
+              self.getSelectFile();
             });
             setMessage("初始化成功!", "success");
         },
