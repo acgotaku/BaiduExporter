@@ -148,7 +148,7 @@ if(previousVersion == "" || previousVersion != manifest.version){
     var opt={
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～此次可能是最后一次更新 QAQ\n",
+        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次可能是最后一次更新 QAQ",
         iconUrl: "images/icon.jpg"
     };
     var id= new Date().getTime().toString();

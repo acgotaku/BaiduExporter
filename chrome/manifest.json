@@ -36,5 +36,5 @@
    "manifest_version": 2,
    "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab", "contextMenus", "storage", "clipboardWrite"],
    "name": "__MSG_appName__",
-   "version": "0.7.1"
+   "version": "0.7.2"
 }
