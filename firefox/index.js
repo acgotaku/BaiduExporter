@@ -22,7 +22,7 @@ var pageMod = require("sdk/page-mod");
 pageMod.PageMod({
   include: ["http://pan.baidu.com/*","http://yun.baidu.com/*"],
   contentScriptWhen:"start",
-  contentScriptFile: [data.url("js/baidu.js")],
+  contentScriptFile: [data.url("js/baidu.js"),data.url("js/fuck_baidu.js")],
   contentStyleFile: [data.url("css/setting.css")],
   onAttach: startListening,
   contentScriptOptions: {
