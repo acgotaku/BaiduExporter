@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.7.2";
-    const update_date = "2016/04/08";
+    const version = "0.7.3";
+    const update_date = "2016/05/02";
     var cookies=null;
     var newVersion = typeof manifest == "object" ? true : false;
     return {
@@ -56,7 +56,7 @@ var CORE=(function(){
             var auth_str = request_auth(url);
             var options =[];
             if (auth_str) {
-                if(auth_str.indexOf('token:') != 0){
+                if(auth_str.indexOf("token:") != 0){
                     auth_str = "Basic " + btoa(auth_str);
                 }  
             }
@@ -75,7 +75,7 @@ var CORE=(function(){
                 return url.match(/^(?:(?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(?:\/\/)?(?:([^:@]*(?::[^:@]*)?)?@)?/)[1];
             }
             function remove_auth(url) {
-                return url.replace(/^((?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(\/\/)?(?:(?:[^:@]*(?::[^:@]*)?)?@)?(.*)/, '$1$2$3');
+                return url.replace(/^((?![^:@]+:[^:@\/]*@)[^:\/?#.]+:)?(\/\/)?(?:(?:[^:@]*(?::[^:@]*)?)?@)?(.*)/, "$1$2$3");
             }
             return [auth_str, path, options];
         },
@@ -181,10 +181,10 @@ var CORE=(function(){
                 });
                 try{
                     aria2_btn.parent()[0].removeChild = function() {
-                      console.log('Remove me? Naive!');
+                      console.log("Remove me? Naive!");
                     };
                 }catch(e){
-                    console.log('Unable to hook removeChild');
+                    console.log("Unable to hook removeChild");
                 }
                 this.update();
                 return aria2_btn;
