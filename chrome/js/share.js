@@ -178,7 +178,7 @@ var SHARE = (function () {
             div.css({ left: divLeft + "px", top: divTop + "px", "z-index": 2000 });
             $("#vcode" + id).attr("src", json.vcode_img);
             $("#change" + id).unbind().click(function () {
-                var url = "//vcode.baidu.com/genimage";
+                var url = "//pan.baidu.com/genimage";
                 $("#vcode" + id).attr("src", url + "?" + json.vcode_str + "&" + new Date().getTime());
             });
             $("#okay" + id).unbind().click(function () {

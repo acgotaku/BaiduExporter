@@ -115,6 +115,9 @@ var CONNECT = (function () {
         copyText: function (text) {
             var input = document.createElement("textarea");
             document.body.appendChild(input);
+            input.style.position = "fixed";
+            input.style.left = "0";
+            input.style.top = "0";
             input.value = text;
             input.focus();
             input.select();

@@ -379,9 +379,9 @@ var CORE = (function () {
                     download_ui.appendTo($("body"));
                     content_ui.empty();
                     var download_menu = $("<div>").css({ "margin-bottom": "10px" }).appendTo(content_ui);
-                    var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({ "href": "data:text/plain;charset=utf-8,", "download": "aria2c.down", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
-                    var idm_btn = $("<a>").attr("id", "idm_btn").attr({ "href": "data:text/plain;charset=utf-8,", "download": "idm.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                    var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({ "href": "data:text/plain;charset=utf-8,", "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+                    var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({ "download": "aria2c.down", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
+                    var idm_btn = $("<a>").attr("id", "idm_btn").attr({ "download": "idm.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                    var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({ "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
                     var copy_txt_btn = $("<a>").attr("id", "copy_txt_btn").attr({ "href": "javascript:void(0);", "data": "" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(download_menu);
                     var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px" }).appendTo(content_ui);
                     CORE.setCenter($("#download_ui"));
@@ -391,8 +391,25 @@ var CORE = (function () {
                     $("#download_ui").on("click", "#copy_txt_btn", function () {
                         CONNECT.copyText($("#copy_txt_btn").attr("data"));
                     });
+
+                    // Edge does support `a[download]`, but it ignores the file name, so use `msSaveBlob()` instead
+                    if (navigator.msSaveBlob) {
+                        $("#aria2c_btn, #idm_btn, #download_txt_btn").click(function (e) {
+                            e.preventDefault();
+
+                            var $this = $(this);
+                            navigator.msSaveBlob(new Blob([$this.data("href")]), $this.attr("download"));
+                        });
+                    }
+                    else {
+                        $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
+                    }
                 } else {
-                    $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
+                    if (navigator.msSaveBlob)
+                        $("#aria2c_btn, #idm_btn, #download_txt_btn").data("href", "")
+                    else
+                        $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
+
                     $("#copy_txt_btn").attr("data", "");
                     $("#download_link").val("");
                 }
@@ -429,9 +446,17 @@ var CORE = (function () {
                         ].join("\r\n"));
                         down_txt.push([file_list[i].link, " "].join("\n"));
                     }
-                    $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
-                    $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("")));
-                    $("#download_txt_btn").attr("href", $("#download_txt_btn").attr("href") + encodeURIComponent(down_txt.join("")));
+
+                    if (navigator.msSaveBlob) {
+                        $("#aria2c_btn").data("href", aria2c_txt.join(""));
+                        $("#idm_btn").data("href", idm_txt.join(""));
+                        $("#download_txt_btn").data("href", down_txt.join(""));
+                    }
+                    else {
+                        $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
+                        $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("")));
+                        $("#download_txt_btn").attr("href", $("#download_txt_btn").attr("href") + encodeURIComponent(down_txt.join("")));
+                    }
                     $("#copy_txt_btn").attr("data", $("#copy_txt_btn").attr("data") + down_txt.join(""));
                     $("#download_link").val($("#download_link").val() + files.join(""));
                 }
