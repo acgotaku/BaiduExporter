@@ -1,8 +1,8 @@
 var CORE=(function(){
     const defaultUA ="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer="http://pan.baidu.com/disk/home";
-    const version = "0.7.3";
-    const update_date = "2016/05/02";
+    const version = "0.7.4";
+    const update_date = "2016/05/18";
     var cookies=null;
     var newVersion = typeof manifest == "object" ? true : false;
     return {
@@ -23,7 +23,7 @@ var CORE=(function(){
             } else {
                 var Toast;
                 if (newVersion) {
-                    Toast = require("disk-system:widget/context/context.js").instanceForSystem;
+                    Toast = require("system-core:context/context.js").instanceForSystem;
                     if(type.startsWith("MODE")){
                         type=type.split("_")[1].toLowerCase();
                     }
