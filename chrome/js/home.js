@@ -12,7 +12,7 @@ var HOME =function(){
     //两种导出模式 RPC模式 和 TXT模式
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
-    var list = require("disk-system:widget/context/context.js").instanceForSystem.list;
+    var list = require("system-core:context/context.js").instanceForSystem.list;
     return {
         //绑定事件
         init:function(){
