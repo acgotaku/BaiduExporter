@@ -15,7 +15,7 @@
         };
     } else if (typeof manifest == "object") {
         // New version
-        var Context = require("disk-system:widget/context/context.js").instanceForSystem;
+        var Context = require("system-core:context/context.js").instanceForSystem;
         showToast = function (message, type) {
             if (type.startsWith("MODE")) {
                 type = type.split("_")[1].toLowerCase();
