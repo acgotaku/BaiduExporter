@@ -2,7 +2,6 @@ var CONVERT =(function(){
     //网盘分享页面转存
     /*
     */
-    var setMessage =CORE.setMessage;
     const prefix="/我的资源";
     var BUFFER_SIZE = 8;
     var POLLING_INTERVAL = 100;
@@ -89,7 +88,7 @@ var CONVERT =(function(){
                 var file_list = file_lists[i];
                 list[file_list.fs_id] = file_list.path;
             }
-            setMessage("初始化成功!", "MODE_SUCCESS");
+            showToast("初始化成功!", "MODE_SUCCESS");
         },
         addMenu:function(){
             //添加批量转存按钮
@@ -102,13 +101,13 @@ var CONVERT =(function(){
         getConvertFile: function(){
             var self = this;
             if (yunData.SHAREPAGETYPE=="single_file_page") {
-                setMessage("单个文件你转存个毛!", "MODE_CAUTION");
+                showToast("单个文件你转存个毛!", "MODE_CAUTION");
             } else {
                 var File = require("common:widget/data-center/data-center.js");
                 var Filename = File.get("selectedItemList");
                 var file_info = File.get("selectedList");
                 if (file_info.length == 0) {
-                    setMessage("先选择一下你要转存的文件夹哦", "MODE_CAUTION");
+                    showToast("先选择一下你要转存的文件夹哦", "MODE_CAUTION");
                     return;
                 }
                 for (var i = 0; i < Filename.length; i++) {
@@ -149,27 +148,27 @@ var CONVERT =(function(){
                         if(json.errno == 2){
                             console.log("folder miss"+ item.path);
                         } else if(json.errno ==0){
-                            setMessage("转存成功!", "MODE_SUCCESS");
+                            showToast("转存成功!", "MODE_SUCCESS");
                             console.log("转存成功:" + item.path);
                         }else if(json.errno ==12){
                             if(json.limit){
-                                setMessage("文件超过5000,分解转存!", "MODE_SUCCESS");
+                                showToast("文件超过5000,分解转存!", "MODE_SUCCESS");
                                 console.log("文件超过5000,分解转存!" + item.path);
                                 self.createFold(item.path,function(){
                                     self.getRecursiveFold(item);
                                 });
                             }
                         }else if(json.errno ==111){ //当前还有未完成的任务，需完成后才能操作
-                            setMessage("保存的有点太快了!", "MODE_FAILURE");
+                            showToast("保存的有点太快了!", "MODE_FAILURE");
                             console.log("111", item.path);
                         }else{
                             console.log("some error"+json);
-                            setMessage("转存出现异常!", "MODE_FAILURE");
+                            showToast("转存出现异常!", "MODE_FAILURE");
                         }
 
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
-                        setMessage("转存失败?", "MODE_FAILURE");
+                        showToast("转存失败?", "MODE_FAILURE");
                         console.log(jqXHR);
                     });
 
@@ -186,7 +185,7 @@ var CONVERT =(function(){
                 .done(function(json, textStatus, jqXHR){
                     if(json.errno === -9){
                         HttpSend(parameter).done(function(json, textStatus, jqXHR) {
-                            setMessage("创建文件夹成功!", "MODE_SUCCESS");
+                            showToast("创建文件夹成功!", "MODE_SUCCESS");
                             console.log("创建文件夹"+ json.path);
                             callback(file_path);
                             if (json.path !== path && /\(\d+\)/.exec(json.path.substr(path.length))){
@@ -200,7 +199,7 @@ var CONVERT =(function(){
                     }
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
-                    setMessage("创建文件夹失败!", "MODE_FAILURE");
+                    showToast("创建文件夹失败!", "MODE_FAILURE");
                     console.log(jqXHR);
                 });
         },
@@ -216,7 +215,7 @@ var CONVERT =(function(){
                         }
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
-                        setMessage("获取List失败!", "MODE_FAILURE");
+                        showToast("获取List失败!", "MODE_FAILURE");
                         console.log(jqXHR);
                     });
             function delayLoop(item , i){

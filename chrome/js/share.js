@@ -8,134 +8,159 @@ var SHARE = (function () {
     遇到文件就下载 遇到文件夹继续获取文件夹里面的内容
 
     */
-    var setMessage = CORE.setMessage;
     //两种导出模式 RPC模式 和 TXT模式
     var MODE = "RPC";
     var RPC_PATH = "http://localhost:6800/jsonrpc";
+    var cookies;
+    var folders = [], files = [];
+    var completedCount = 0;
+    var currentTaskId;
+    function getNextFile(taskId, setFileData) {
+        if (taskId != currentTaskId)
+            return;
+
+        completedCount++;
+        showToast("正在获取下载地址... " + completedCount + "/" + (completedCount + folders.length + files.length - 1), "MODE_SUCCESS");
+
+        if (folders.length != 0) {
+            var path = folders.pop();
+            $.get("/share/list", {
+                "dir": path,
+                "bdstoken": yunData.MYBDSTOKEN,
+                "uk": yunData.SHARE_UK,
+                "shareid": yunData.SHARE_ID,
+                "channel": "chunlei",
+                "clienttype": 0,
+                "web": 1
+            }, null, "json").done(json => {
+                var delay = parseInt(localStorage.getItem("rpc_delay")) || 300;
+                setTimeout(() => getNextFile(taskId, setFileData), delay);
+
+                if (json.errno != 0) {
+                    showToast("获取共享列表失败!", "MODE_FAILURE");
+                    console.log(json);
+                    return;
+                }
+
+                for (var item of json.list) {
+                    if (item.isdir)
+                        folders.push(item.path);
+                    else
+                        files.push(item.fs_id);
+                }
+            }).fail(function (xhr) {
+                showToast("获取共享列表失败!", "MODE_FAILURE");
+                console.log(xhr);
+
+                var delay = parseInt(localStorage.getItem("rpc_delay")) || 300;
+                setTimeout(() => getNextFile(taskId, setFileData), delay);
+            });
+        }
+        else if (files.length != 0) {
+            var id = files.shift();
+            setFileData(id, function () {
+                var delay = parseInt(localStorage.getItem("rpc_delay")) || 300;
+                setTimeout(() => getNextFile(taskId, setFileData), delay);
+            });
+        }
+        else {
+            showToast("批量导出完成！", "MODE_SUCCESS");
+            currentTaskId = 0;
+        }
+    }
     return {
         //绑定事件
         init: function () {
-            var menu = CORE.addMenu.init("share");
             var self = this;
-            CORE.requestCookies([{ "site": "http://pan.baidu.com/", "name": "BDUSS" }, { "site": "http://pcs.baidu.com/", "name": "pcsett" }]);
-            menu.on("click", ".rpc_export_list", function () {
-                MODE = "RPC";
-                RPC_PATH = $(this).attr("data-id");
-                self.getShareFile();
+            CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
+            // Get `BDCLND` cookie for private share.
+            sendToBackground("get_cookies", [{ url: "http://pan.baidu.com/", name: "BDCLND" }], value => {
+                cookies = decodeURIComponent(value["BDCLND"]);
 
+                var menu = CORE.addMenu.init("share");
+                menu.on("click", ".rpc_export_list", function () {
+                    MODE = "RPC";
+                    RPC_PATH = $(this).data("id");
+                    self.getShareFile();
+                });
+                menu.on("click", "#aria2_download", function () {
+                    MODE = "TXT";
+                    CORE.dataBox.init("share");
+                    // When closing download dialog, cancel all delay feteching.
+                    CORE.dataBox.onClose(_ => currentTaskId = 0);
+                    self.getShareFile();
+                });
+                showToast("初始化成功!", "MODE_SUCCESS");
             });
-            menu.on("click", "#aria2_download", function () {
-                MODE = "TXT";
-                CORE.dataBox.init("share").show();
-                self.getShareFile();
-            });
-            setMessage("初始化成功!", "MODE_SUCCESS");
         },
         //获得选中的文件
         getShareFile: function () {
-            var self = this;
-            var fid_list;
+            currentTaskId = new Date().getTime();
+
             if (yunData.SHAREPAGETYPE == "single_file_page") {
-                fid_list = "fid_list=" + JSON.stringify([yunData.FS_ID]);
-                self.setFileData(fid_list);
+                this.setFileData(yunData.FS_ID);
             } else {
-                var File = require("common:widget/data-center/data-center.js");
-                var Filename = File.get("selectedItemList");
-                var file_info = File.get("selectedList");
-                if (file_info.length == 0) {
-                    setMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
+                // TODO(Simon): Download all files by default? Maybe we can switch the button content between "导出全部" and "导出所选".
+                var selected = $(".chked").closest(".item");
+                if (selected.length == 0) {
+                    showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
                     return;
                 }
-                for (var i = 0; i < Filename.length; i++) {
-                    if (Filename[i].attr("data-extname") != "dir") {
-                        fid_list = "fid_list=" + JSON.stringify([Filename[i].attr("data-id")]);
-                        self.setFileData(fid_list);
-                    } else {
-                        self.getShareFold(Filename[i].attr("data-id"));
+
+                completedCount = 0;
+                folders = [];
+                files = [];
+
+                function getHashParameter(name) {
+                    var hash = window.location.hash;
+                    hash = hash.substr(1).split("&");
+                    for (var pair of hash) {
+                        var arr = pair.split("=");
+                        if (arr[0] == name)
+                            return decodeURIComponent(decodeURIComponent(arr[1]));
                     }
                 }
+
+                var path = getHashParameter("path");
+                var isRoot = false;
+                if (path == "/" || path == undefined) {
+                    isRoot = true;
+                    path = yunData.PATH;
+                }
+
+                // Short path, we are at root folder, so the only thing we can do is downloading all files.
+                if (isRoot) {
+                    folders.push(path);
+                }
+                else {
+                    for (var item of selected) {
+                        var $item = $(item);
+                        if ($item.data("extname") == "dir")
+                            folders.push(path + "/" + $item.find(".name-text").data("name"));
+                        else
+                            files.push($item.data("id"));
+                    }
+                }
+
+                getNextFile(currentTaskId, this.setFileData.bind(this));
             }
         },
         //设置要请求文件的POST数据
-        setFileData: function (fid_list) {
-            var data = "encrypt=0&product=share&uk=" + yunData.SHARE_UK + "&primaryid=" + yunData.SHARE_ID + "&" + fid_list;
-            if (yunData.SHARE_PUBLIC == 0) {
-                var Service = require("common:widget/commonService/commonService.js");
-                data = data + "&extra=" + encodeURIComponent(JSON.stringify({ sekey: Service.getCookie("BDCLND") }));
-            }
-            this.getFilemetas(data);
-        },
-        //获取要下载的文件夹
-        getShareFold: function (fs_id) {
-            var self = this;
-            var API = (require("common:widget/restApi/restApi.js"), require("common:widget/hash/hash.js"));
-            var path_head = yunData.PATH.slice(0, yunData.PATH.lastIndexOf("/"));
-            var path = API.get("path");
-            if (path == "/" || path == null) {
-                path = yunData.PATH;
-            } else {
-                path = path_head + path;
-            }
-            var parameter = { url: "//" + window.location.host + "/share/list?dir=" + encodeURIComponent(path) + "&bdstoken=" + yunData.MYBDSTOKEN + "&uk=" + yunData.SHARE_UK + "&shareid=" + yunData.SHARE_ID + "&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET" };
-            CONNECT.HttpSend(parameter)
-                    .done(function (json, textStatus, jqXHR) {
-                        setMessage("获取共享列表成功!", "MODE_SUCCESS");
-                        var array = json.list;
-                        console.log(json);
-                        for (var i = 0; i < array.length; i++) {
-                            if (array[i].fs_id == fs_id || API.get("path") == "/" || API.get("path") == null) {
-                                console.log(array[i]);
-                                if (array[i].isdir == 1) {
-                                    self.getRecursiveFold(array[i].path);
-                                } else {
-                                    var fid_list = "fid_list=" + JSON.stringify([array[i].fs_id]);
-                                    self.setFileData(fid_list);
-                                }
-                            }
-                        }
-                    })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
-                        setMessage("获取共享列表失败!", "MODE_FAILURE");
-                        console.log(jqXHR);
-                    });
-        },
-        //递归下载
-        getRecursiveFold: function (path) {
-            var self = this;
-            var time = 0;
-            var delay = parseInt(localStorage.getItem("rpc_delay")) || 300;
-            var parameter = { url: "//" + window.location.host + "/share/list?dir=" + encodeURIComponent(path) + "&bdstoken=" + yunData.MYBDSTOKEN + "&uk=" + yunData.SHARE_UK + "&shareid=" + yunData.SHARE_ID + "&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET" };
-            CONNECT.HttpSend(parameter)
-                    .done(function (json, textStatus, jqXHR) {
-                        var array = json.list;
-                        console.log(json);
-                        for (var i = 0; i < array.length; i++) {
-                            time = time + delay;
-                            if (array[i].isdir == 1) {
-                                delayLoopList(array[i].path, time);
-                            } else {
-                                delayLoopFile(array[i].fs_id, time);
-                            }
-                        }
-                    })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
-                        SetMessage("获取List失败!", "MODE_FAILURE");
-                        console.log(textStatus);
-                    });
-            function delayLoopList(path, time) {
-                setTimeout(function () {
-                    self.getRecursiveFold(path);
-                }, time);
-            }
-            function delayLoopFile(fs_id, time) {
-                setTimeout(function () {
-                    var fid_list = "fid_list=" + JSON.stringify([fs_id]);
-                    self.setFileData(fid_list);
+        setFileData: function (fid, callback) {
+            var data = {
+                "encrypt": "0",
+                "product": "share",
+                "uk": yunData.SHARE_UK,
+                "primaryid": yunData.SHARE_ID,
+                "fid_list": JSON.stringify([fid])
+            };
 
-                }, time);
-            }
+            if (!yunData.SHARE_PUBLIC)
+                data["extra"] = JSON.stringify({ sekey: cookies });
+
+            this.getFilemetas(data, callback);
         },
-        alertDialog: function (json, params) {
+        alertDialog: function (json, data, callback) {
             var self = this;
             var id = json.request_id;
             var div = $("<div>").attr("id", "alert_div" + id).addClass("b-panel b-dialog alert-dialog");
@@ -182,74 +207,108 @@ var SHARE = (function () {
                 $("#vcode" + id).attr("src", url + "?" + json.vcode_str + "&" + new Date().getTime());
             });
             $("#okay" + id).unbind().click(function () {
-                var input_code = $("#verification" + id).attr("value");
-                var data = params + "&vcode_input=" + input_code + "&vcode_str=" + json.vcode_str;
-                self.getFilemetas(data);
+                data["vcode_input"] = $("#verification" + id).val();
+                data["vcode_str"] = json.vcode_str;
+                self.getFilemetas(data, callback);
                 div.remove();
             });
             $("#ignore" + id).unbind().click(function () {
                 div.remove();
-                setMessage("\u5509\u002e\u002e\u002e\u002e\u002e", "MODE_CAUTION");
+                showToast("\u5509\u002e\u002e\u002e\u002e\u002e", "MODE_CAUTION");
             });
             $("#alert_dialog_close" + id).unbind().click(function () {
                 div.remove();
             });
         },
         //根据文件路径获取文件的信息
-        getFilemetas: function (data) {
-            var self = this;
-            var download = "//" + window.location.host + "/api/sharedownload?channel=chunlei&clienttype=0&web=1&app_id=" + yunData.FILEINFO[0].app_id + "&timestamp=" + yunData.TIMESTAMP + "&sign=" + yunData.SIGN + "&bdstoken=" + yunData.MYBDSTOKEN;
-            var pic = "//" + window.location.host + "/api/getcaptcha?prod=share&channel=chunlei&clienttype=0&web=1&bdstoken=" + yunData.MYBDSTOKEN + "&app_id=" + yunData.FILEINFO[0].app_id;
-            var parameter = { url: download, dataType: "json", type: "POST", data: data };
-            CONNECT.HttpSend(parameter)
-                    .done(function (json, textStatus, jqXHR) {
-                        if (json.errno == -20) {
-                            CONNECT.HttpSend({ url: pic, dataType: "json", type: "GET" })
-                            .done(function (json, textStatus, jqXHR) {
-                                if (data.indexOf("input") != -1) {
-                                    json.auth = true;
-                                }
-                                self.alertDialog(json, data);
-                                setMessage("请输入验证码,以便继续下载", "MODE_CAUTION");
-                            })
-                            .fail(function (json, textStatus, jqXHR) {
-                                setMessage("获取验证码失败?", "MODE_FAILURE");
-                            });
-
-                        } else if (json.errno == 0) {
-                            var file_list = [];
-                            for (var i = 0; i < json.list.length; i++) {
-                                var list = json.list[i];
-                                file_list.push({ "name": list.path.slice(yunData.PATH.lastIndexOf("/") + 1, list.path.length), "link": list.dlink });
-                            }
-                            if (MODE == "TXT") {
-                                CORE.dataBox.fillData(file_list);
-                            } else {
-                                var paths = CORE.parseAuth(RPC_PATH);
-                                var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
-                                self.generateParameter(rpc_list);
-                            }
-                        } else {
-                            console.log(json);
-                            setMessage("出现异常!", "MODE_FAILURE");
+        getFilemetas: function (data, callback) {
+            $.post("/api/sharedownload?" + $.param({
+                "timestamp": yunData.TIMESTAMP,
+                "sign": yunData.SIGN,
+                "bdstoken": yunData.MYBDSTOKEN,
+                "app_id": yunData.FILEINFO[0].app_id,
+                "channel": "chunlei",
+                "clienttype": 0,
+                "web": 1
+            }), data, null, "json").done(json => {
+                if (json.errno == -20) {
+                    $.get("/api/getcaptcha", {
+                        "bdstoken": yunData.MYBDSTOKEN,
+                        "app_id": yunData.FILEINFO[0].app_id,
+                        "prod": "share",
+                        "channel": "chunlei",
+                        "clienttype": 0,
+                        "web": 1
+                    }, null, "json").done(json => {
+                        if (data["vcode_input"]) {
+                            json.auth = true;
                         }
-
-                    })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
-                        setMessage("获取地址失败?", "MODE_FAILURE");
-                        console.log(jqXHR);
+                        this.alertDialog(json, data, callback);
+                        showToast("请输入验证码以继续下载", "MODE_CAUTION");
+                    }).fail(function (json, textStatus, jqXHR) {
+                        showToast("获取验证码失败?", "MODE_FAILURE");
                     });
+                } else if (json.errno == 0) {
+                    var file_list = [];
+
+                    if (yunData.SHAREPAGETYPE == "single_file_page") {
+                        var item = json.list[0];
+                        // For single file, save to filename.
+                        file_list.push({ "name": yunData.FILENAME, "link": item.dlink });
+                    }
+                    else {
+                        // For multiple files, save relates to share base folder.
+                        for (var item of json.list) {
+                            var path = item.path.substr(item.path.indexOf(yunData.FILENAME));
+                            file_list.push({ "name": path, "link": item.dlink });
+                        }
+                    }
+
+                    if (MODE == "TXT") {
+                        // Show download dialog when we got the first download link.
+                        // For delay fetching, dont't show it after task is canceled.
+                        if (currentTaskId != 0) {
+                            CORE.dataBox.show();
+                            CORE.dataBox.fillData(file_list);
+                        }
+                    } else {
+                        var paths = CORE.parseAuth(RPC_PATH);
+                        var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
+                        this.generateParameter(rpc_list);
+                    }
+
+                    if (callback)
+                        callback();
+                } else {
+                    console.log(json);
+                    showToast("出现异常!", "MODE_FAILURE");
+
+                    if (callback)
+                        callback();
+                }
+
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                showToast("获取地址失败?", "MODE_FAILURE");
+                console.log(jqXHR);
+
+                if (callback)
+                    callback();
+            });
         },
         //生成请求参数 发送给后台 进行 http请求
         generateParameter: function (rpc_list) {
             var paths = CORE.parseAuth(RPC_PATH);
             for (var i = 0; i < rpc_list.length; i++) {
                 var parameter = { url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: { Authorization: paths[0] } };
-                CONNECT.sendToBackground("rpc_data", parameter);
+                sendToBackground("rpc_data", parameter, success => {
+                    if (success)
+                        showToast("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+                    else
+                        showToast("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+                });
             }
         }
     };
 })();
-setTimeout(function () {
-    SHARE.init();
-}, 600);
+
+SHARE.init();

@@ -52,17 +52,21 @@ var HttpSendRead = function (info) {
         }
     });
 };
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log(request.method);
     console.log(request.data);
     switch (request.method) {
+        case "add_script":
+            chrome.tabs.executeScript(sender.tab.id, { file: request.data });
+            break;
         case "rpc_data":
             HttpSendRead(request.data)
                 .done(function (json, textStatus, jqXHR) {
-                    sendResponse({ method: "rpc_result", status: true });
+                    sendResponse(true);
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
-                    sendResponse({ method: "rpc_result", status: false });
+                    sendResponse(false);
                 });
             return true;
         case "config_data":
@@ -73,44 +77,36 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         case "rpc_version":
             HttpSendRead(request.data)
                 .done(function (json, textStatus, jqXHR) {
-                    sendResponse({ method: "rpc_version", status: true, data: json });
-
+                    sendResponse(json);
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
-                    sendResponse({ method: "rpc_version", status: false });
+                    sendResponse(null);
                 });
             return true;
         case "get_cookies":
-            Promise.all(function () {
-                var array = [];
-                var data = request.data;
-                for (var i = 0; i < data.length; i++) {
-                    array.push(get_cookie(data[i].site, data[i].name));
-                }
-                return array;
-            }()).then(function (value) {
-                sendResponse({ method: "send_cookies", data: value });
-            }, function () {
-                console.log("error");
-            });
+            getCookies(request.data).then(value => sendResponse(value));
             return true;
     }
 });
 
-//获取系统的cookies 使用Promise异步处理
-function get_cookie(site, name) {
-    return new Promise(function (resolve, reject) {
-        chrome.cookies.get({ "url": site, "name": name }, function (cookies) {
-            var obj = {};
-            if (cookies) {
-                obj[cookies.name] = cookies.value;
-                resolve(obj);
-            } else {
-                resolve(obj);
-            }
-        });
-    });
-}
+// Promise style `chrome.cookies.get`
+var getCookie = detail => new Promise(resolve => chrome.cookies.get(detail, resolve));
+
+//async function getCookies(details)
+//{
+//    var obj = {};
+//    for (var item of await Promise.all(details.map(item => getCookie(item))))
+//        obj[item.name] = item.value;
+//    return obj;
+//}
+
+var getCookies = details => new Promise(resolve => Promise.all(details.map(item => getCookie(item))).then(cookies => {
+    var obj = {};
+    for (var item of cookies)
+        obj[item.name] = item.value;
+    resolve(obj);
+}));
+
 //弹出chrome通知
 function showNotification(id, opt) {
     if (!chrome.notifications)
@@ -121,6 +117,7 @@ function showNotification(id, opt) {
         chrome.notifications.clear(id, function () { });
     }, 5000);
 }
+
 //软件版本更新提示
 var manifest = chrome.runtime.getManifest();
 var previousVersion = localStorage.getItem("version");

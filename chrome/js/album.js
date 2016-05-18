@@ -8,7 +8,6 @@ var ALBUM =(function(){
     遇到文件就下载 遇到文件夹继续获取文件夹里面的内容
 
     */
-    var setMessage =CORE.setMessage;
     //两种导出模式 RPC模式 和 TXT模式
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
@@ -21,7 +20,7 @@ var ALBUM =(function(){
             var self=this;
             info = disk.ui.album != undefined ? true : false;
             self.getALLFileList();
-            CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
+            CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
             menu.on("click",".rpc_export_list",function(){
                 MODE="RPC";
                 RPC_PATH=$(this).attr("data-id");
@@ -64,22 +63,22 @@ var ALBUM =(function(){
             }
 
             var parameter = {url: url, dataType: "json", type: "GET"};
-            CONNECT.HttpSend(parameter)
-                    .done(function(json, textStatus, jqXHR) {
-                        setMessage("初始化成功!", "MODE_SUCCESS");
-                        FileList=json.list;
-                    })
-                    .fail(function(jqXHR, textStatus, errorThrown) {
-                        setMessage("获取全部列表失败!", "MODE_FAILURE");
-                        console.log(textStatus);
-                    });
+            HttpSend(parameter)
+                .done(function(json, textStatus, jqXHR) {
+                    showToast("初始化成功!", "MODE_SUCCESS");
+                    FileList=json.list;
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    showToast("获取全部列表失败!", "MODE_FAILURE");
+                    console.log(textStatus);
+                });
         },
         //获得选中的文件
         getShareFile:function(){
             var self = this;
             var file_info = $("#fileItems .on");
             if (file_info.length == 0) {
-                setMessage("先选择一下你要下载的文件哦", "MODE_CAUTION");
+                showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
                 return;
             }
             var file_list=[];
@@ -104,7 +103,7 @@ var ALBUM =(function(){
             var paths=CORE.parseAuth(RPC_PATH);
             for (var i = 0; i < rpc_list.length; i++) {
                 var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: {Authorization: paths[0]}};
-                CONNECT.sendToBackground("rpc_data",parameter);
+                sendToBackground("rpc_data",parameter);
             }
 
         }

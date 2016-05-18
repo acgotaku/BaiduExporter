@@ -8,7 +8,6 @@ var OLDHOME =(function(){
     遇到文件就下载 遇到文件夹继续获取文件夹里面的内容
 
     */
-    var setMessage =CORE.setMessage;
     //两种导出模式 RPC模式 和 TXT模式
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
@@ -17,7 +16,7 @@ var OLDHOME =(function(){
         init:function(){
             var menu=CORE.addMenu.init("home");
             var self=this;
-            CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "BAIDUID"}]);
+            CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "BAIDUID" }]);
             menu.on("click",".rpc_export_list",function(){
                 MODE="RPC";
                 RPC_PATH=$(this).attr("data-id");
@@ -29,7 +28,7 @@ var OLDHOME =(function(){
                 CORE.dataBox.init("home").show();
                 self.getSelectFile();
             });
-            setMessage("初始化成功!", "MODE_SUCCESS");
+            showToast("初始化成功!", "MODE_SUCCESS");
         },
         //获得选中的文件
         getSelectFile:function(){
@@ -41,7 +40,7 @@ var OLDHOME =(function(){
             var selectedFile = File.get("selectedItemList");
             var length = selectedFile.length;
             if (length == 0) {
-                setMessage("先选择一下你要下载的文件哦", "MODE_FAILURE");
+                showToast("先选择一下你要下载的文件哦", "MODE_FAILURE");
                 return;
             }
             for (var i = 0; i < length; i++) {
@@ -57,9 +56,9 @@ var OLDHOME =(function(){
         getSelectFold:function(fs_id){
             var self=this;
             var parameter = {url: "//"+window.location.host+"/api/list?dir="+encodeURIComponent(self.getCurrentPath()), dataType: "json", type: "GET"};
-            CONNECT.HttpSend(parameter)
+            HttpSend(parameter)
                     .done(function(json, textStatus, jqXHR) {
-                        setMessage("获取列表成功!", "MODE_SUCCESS");
+                        showToast("获取列表成功!", "MODE_SUCCESS");
                         var array=json.list;
                         for(var i=0;i<array.length;i++){
                             if(array[i].fs_id == fs_id){
@@ -72,7 +71,7 @@ var OLDHOME =(function(){
                         }
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
-                        setMessage("获取List失败!", "MODE_FAILURE");
+                        showToast("获取List失败!", "MODE_FAILURE");
                         console.log(jqXHR);
                     });
         },
@@ -82,7 +81,7 @@ var OLDHOME =(function(){
             var self=this;
             var delay=parseInt(localStorage.getItem("rpc_delay"))||0;
             var parameter = {url: "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), dataType: "json", type: "GET"};
-            CONNECT.HttpSend(parameter)
+            HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
                     var array=json.list;
                     console.log(json);
@@ -97,7 +96,7 @@ var OLDHOME =(function(){
                     }
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
-                    setMessage("获取List失败! code:92", "MODE_FAILURE");
+                    showToast("获取List失败! code:92", "MODE_FAILURE");
                     console.log(jqXHR);
                 });
             function delayLoopList(path,time){
@@ -121,9 +120,9 @@ var OLDHOME =(function(){
                 path="";
             }
             var parameter = {url: "//"+window.location.host+"/api/filemetas?target="+encodeURIComponent("["+JSON.stringify(target)+"]")+"&dlink=1&bdstoken="+yunData.MYBDSTOKEN+"&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET"};
-            CONNECT.HttpSend(parameter)
+            HttpSend(parameter)
                 .done(function(json, textStatus, jqXHR) {
-                    setMessage("获取文件信息成功!", "MODE_SUCCESS");
+                    showToast("获取文件信息成功!", "MODE_SUCCESS");
                     var file=json.info;
                     var file_list = [];
                     //备用下载地址
@@ -142,7 +141,7 @@ var OLDHOME =(function(){
                     }
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
-                    setMessage("获取File失败!", "MODE_FAILURE");
+                    showToast("获取File失败!", "MODE_FAILURE");
                     console.log(jqXHR);
                 });
         },
@@ -151,7 +150,7 @@ var OLDHOME =(function(){
             var paths=CORE.parseAuth(RPC_PATH);
             for(var i=0;i<rpc_list.length;i++){
                 var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: {Authorization: paths[0]}};
-                CONNECT.sendToBackground("rpc_data",parameter);
+                sendToBackground("rpc_data",parameter);
             }
 
         },
@@ -167,7 +166,7 @@ var OLDHOME =(function(){
                 maxlevel=path.split("/").length-1;
             }
             if(level>maxlevel){
-                setMessage("文件夹层数超过完整路径", "MODE_CAUTION");
+                showToast("文件夹层数超过完整路径", "MODE_CAUTION");
                 level=maxlevel;
             }
             if(level == -1){

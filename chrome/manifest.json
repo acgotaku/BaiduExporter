@@ -5,7 +5,7 @@
   },
   "content_scripts": [
     {
-      "js": [ "js/baidu.js" ],
+      "js": [ "js/connect.js", "js/core.js", "js/jquery-2.2.3.min.js", "js/inject.js" ],
       "css": [ "css/setting.css" ],
       "matches": [ "*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*" ],
       "run_at": "document_end"
@@ -24,18 +24,7 @@
     "48": "images/logo48.png",
     "128": "images/logo128.png"
   },
-  "externally_connectable": {
-    "matches": [ "*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*" ]
-  },
-  "web_accessible_resources": [
-    "js/core.js",
-    "js/home.js",
-    "js/oldhome.js",
-    "js/connect.js",
-    "js/share.js",
-    "js/convert.js",
-    "js/album.js"
-  ],
+  "web_accessible_resources": [ "js/baidu.js" ],
   "manifest_version": 2,
   "permissions": [ "cookies", "tabs", "notifications", "*://*.baidu.com/*", "activeTab", "contextMenus", "storage", "clipboardWrite" ],
   "name": "__MSG_appName__",

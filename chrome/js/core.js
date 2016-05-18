@@ -1,3 +1,43 @@
+if (typeof browser != "undefined") {
+    chrome = browser;
+
+    if (!chrome.storage.sync)
+        chrome.storage.sync = chrome.storage.local;
+}
+
+chrome.storage.sync.get(null, function (items) {
+    for (var key in items) {
+        localStorage.setItem(key, items[key]);
+        //console.log(key + items[key]);
+    }
+});
+
+function saveSyncData(data, value) {
+    var obj = new Object();
+    obj[data] = value;
+    chrome.storage.sync.set(obj, function () {
+        // console.log(data + ' saved');
+    });
+}
+
+window.addEventListener("message", function (event) {
+    if (event.source != window)
+        return;
+    if (event.data.type && (event.data.type == "config_data")) {
+        for (var key in event.data.data) {
+            localStorage.setItem(key, event.data.data[key]);
+            if (event.data.data["rpc_sync"] == true) {
+                saveSyncData(key, event.data.data[key]);
+            } else {
+                chrome.storage.sync.clear();
+            }
+        }
+    }
+    if (event.data.type && (event.data.type == "clear_data")) {
+        chrome.storage.sync.clear();
+    }
+}, false);
+
 var CORE = (function () {
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
@@ -7,39 +47,6 @@ var CORE = (function () {
     var newVersion = typeof manifest == "object" ? true : false;
     return {
         init: function () {
-
-        },
-        //封装的百度的Toast提示消息
-        //Type类型有
-        //caution  警告  failure  失败  loading 加载 success 成功
-        //MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
-        setMessage: function (msg, type) {
-            if (typeof require == "undefined") {
-                Utilities.useToast({
-                    toastMode: disk.ui.Toast[type],
-                    msg: msg,
-                    sticky: false
-                });
-            } else {
-                var Toast;
-                if (newVersion) {
-                    Toast = require("disk-system:widget/context/context.js").instanceForSystem;
-                    if (type.startsWith("MODE")) {
-                        type = type.split("_")[1].toLowerCase();
-                    }
-                    Toast.ui.tip({
-                        mode: type,
-                        msg: msg
-                    });
-                } else {
-                    Toast = require("common:widget/toast/toast.js");
-                    Toast.obtain.useToast({
-                        toastMode: Toast.obtain[type],
-                        msg: msg,
-                        sticky: false
-                    });
-                }
-            }
 
         },
         // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
@@ -79,12 +86,9 @@ var CORE = (function () {
             }
             return [auth_str, path, options];
         },
-        //names format  [{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]
+        // names format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
         requestCookies: function (names) {
-            CONNECT.sendToBackground("get_cookies", names);
-        },
-        setCookies: function (value) {
-            cookies = value;
+            sendToBackground("get_cookies", names, value => cookies = value);
         },
         //获取 http header信息
         getHeader: function (type) {
@@ -101,12 +105,9 @@ var CORE = (function () {
                 }
             }
             if (cookies) {
-                var baidu_cookies = cookies;
                 var format_cookies = [];
-                for (i = 0; i < baidu_cookies.length; i++) {
-                    for (var key in baidu_cookies[i]) {
-                        format_cookies.push(key + "=" + baidu_cookies[i][key]);
-                    }
+                for (var key in cookies) {
+                    format_cookies.push(key + "=" + cookies[key]);
                 }
                 addheader.push("Cookie: " + format_cookies.join(";"));
             }
@@ -286,7 +287,7 @@ var CORE = (function () {
                     }
                 }
                 config_data["rpc_list"] = JSON.stringify(rpc_list);
-                CONNECT.sendToBackground("config_data", config_data);
+                sendToBackground("config_data", config_data);
                 window.postMessage({ type: "config_data", data: config_data }, "*");
             },
             //根据配置数据 更新 设置菜单
@@ -334,7 +335,12 @@ var CORE = (function () {
             if (paths[0] && paths[0].startsWith("Basic")) {
                 parameter["headers"] = { "Authorization": paths[0] };
             }
-            CONNECT.sendToBackground("rpc_version", parameter);
+            sendToBackground("rpc_version", parameter, version => {
+                if (version)
+                    $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + response.data.result.version);
+                else
+                    $("#send_test").html("错误,请查看是否开启Aria2");
+            });
         },
         //把要下载的link和name作为数组对象传过来
         aria2Data: function (file_list, token, options) {
@@ -373,38 +379,22 @@ var CORE = (function () {
         //文本模式的导出数据框
         dataBox: {
             init: function (type) {
-                if ($("#download_ui").length == 0) {
-                    var download_ui = $("<div>").attr("id", "download_ui").append('<div class="top"><a href="javascript:;" title="关闭" id="aria2_download_close" class="close"></a><h3><em></em>ARIA2导出</h3></div>');
-                    var content_ui = $("<div>").addClass("content").attr("id", "content_ui").appendTo(download_ui);
-                    download_ui.appendTo($("body"));
-                    content_ui.empty();
-                    var download_menu = $("<div>").css({ "margin-bottom": "10px" }).appendTo(content_ui);
-                    var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({ "download": "aria2c.down", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
-                    var idm_btn = $("<a>").attr("id", "idm_btn").attr({ "download": "idm.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                    var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({ "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
-                    var copy_txt_btn = $("<a>").attr("id", "copy_txt_btn").attr({ "href": "javascript:void(0);", "data": "" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(download_menu);
-                    var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px" }).appendTo(content_ui);
-                    CORE.setCenter($("#download_ui"));
-                    $("#download_ui").on("click", "#aria2_download_close", function () {
-                        download_ui.hide();
-                    });
-                    $("#download_ui").on("click", "#copy_txt_btn", function () {
-                        CONNECT.copyText($("#copy_txt_btn").attr("data"));
-                    });
+                if ($("#download_ui").length != 0)
+                    return this;
 
-                    // Edge does support `a[download]`, but it ignores the file name, so use `msSaveBlob()` instead
-                    if (navigator.msSaveBlob) {
-                        $("#aria2c_btn, #idm_btn, #download_txt_btn").click(function (e) {
-                            e.preventDefault();
-
-                            var $this = $(this);
-                            navigator.msSaveBlob(new Blob([$this.data("href")]), $this.attr("download"));
-                        });
-                    }
-                    else {
-                        $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
-                    }
-                } else {
+                var download_ui = $("<div>").attr("id", "download_ui").append('<div class="top"><a href="javascript:;" title="关闭" id="aria2_download_close" class="close"></a><h3><em></em>ARIA2导出</h3></div>');
+                var content_ui = $("<div>").addClass("content").attr("id", "content_ui").appendTo(download_ui);
+                download_ui.hide().appendTo($("body"));
+                content_ui.empty();
+                var download_menu = $("<div>").css({ "margin-bottom": "10px" }).appendTo(content_ui);
+                var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({ "download": "aria2c.down", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
+                var idm_btn = $("<a>").attr("id", "idm_btn").attr({ "download": "idm.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({ "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+                var copy_txt_btn = $("<a>").attr("id", "copy_txt_btn").attr({ "href": "javascript:void(0);", "data": "" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(download_menu);
+                var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px" }).appendTo(content_ui);
+                CORE.setCenter($("#download_ui"));
+                $("#download_ui").on("click", "#aria2_download_close", function () {
+                    // Clean up when closing download dialog.
                     if (navigator.msSaveBlob)
                         $("#aria2c_btn, #idm_btn, #download_txt_btn").data("href", "")
                     else
@@ -412,11 +402,31 @@ var CORE = (function () {
 
                     $("#copy_txt_btn").attr("data", "");
                     $("#download_link").val("");
+
+                    download_ui.hide();
+                });
+                $("#download_ui").on("click", "#copy_txt_btn", function () {
+                    copyText($("#copy_txt_btn").attr("data"));
+                });
+
+                // Edge does support `a[download]`, but it ignores the file name, so use `msSaveBlob()` instead
+                if (navigator.msSaveBlob) {
+                    $("#aria2c_btn, #idm_btn, #download_txt_btn").click(function (e) {
+                        e.preventDefault();
+
+                        var $this = $(this);
+                        navigator.msSaveBlob(new Blob([$this.data("href")]), $this.attr("download"));
+                    });
                 }
-                return this;
+                else {
+                    $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
+                }
             },
             show: function () {
                 $("#download_ui").show();
+            },
+            onClose: function (callback) {
+                $("#download_ui").on("click", "#aria2_download_close", callback);
             },
             //在数据框里面填充数据
             fillData: function (file_list) {
