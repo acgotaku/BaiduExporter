@@ -37,8 +37,8 @@
                     "channel": "chunlei",
                     "clienttype": 0,
                     "web": 1
-                }, null, "json").done(json => {
-                    setTimeout(() => getNextFile(taskId), delay);
+                }, null, "json").done(function (json) {
+                    setTimeout(function () { getNextFile(taskId), delay });
 
                     if (json.errno != 0) {
                         showToast("获取共享列表失败!", "MODE_FAILURE");
@@ -56,11 +56,15 @@
                     showToast("获取共享列表失败!", "MODE_FAILURE");
                     console.log(xhr);
 
-                    setTimeout(() => getNextFile(taskId), delay);
+                    setTimeout(function () { getNextFile(taskId), delay });
                 });
             }
             else if (files.length != 0) {
                 setFileData(files);
+                downloader.reset();
+            }
+            else {
+                showToast("一个文件都没有哦", "MODE_CAUTION");
                 downloader.reset();
             }
         }
@@ -141,7 +145,7 @@
     }
 
     //设置要请求文件的POST数据
-    function setFileData(fid, callback) {
+    function setFileData(fid) {
         var data = {
             "encrypt": "0",
             "product": "share",
@@ -153,10 +157,10 @@
         if (!yunData.SHARE_PUBLIC)
             data["extra"] = JSON.stringify({ sekey: cookies });
 
-        getFilemetas(data, callback);
+        getFilemetas(data);
     }
 
-    function alertDialog(json, data, callback) {
+    function alertDialog(json, data) {
         var id = json.request_id;
         var div = $("<div>").attr("id", "alert_div" + id).addClass("b-panel b-dialog alert-dialog");
         var html = [
@@ -204,7 +208,7 @@
         $("#okay" + id).unbind().click(function () {
             data["vcode_input"] = $("#verification" + id).val();
             data["vcode_str"] = json.vcode_str;
-            getFilemetas(data, callback);
+            getFilemetas(data);
             div.remove();
         });
         $("#ignore" + id).unbind().click(function () {
@@ -217,7 +221,7 @@
     }
 
     //根据文件路径获取文件的信息
-    function getFilemetas(data, callback) {
+    function getFilemetas(data) {
         $.post("/api/sharedownload?" + $.param({
             "timestamp": yunData.TIMESTAMP,
             "sign": yunData.SIGN,
@@ -226,7 +230,7 @@
             "channel": "chunlei",
             "clienttype": 0,
             "web": 1
-        }), data, null, "json").done(json => {
+        }), data, null, "json").done(function (json) {
             if (json.errno == -20) {
                 $.get("/api/getcaptcha", {
                     "bdstoken": yunData.MYBDSTOKEN,
@@ -235,11 +239,11 @@
                     "channel": "chunlei",
                     "clienttype": 0,
                     "web": 1
-                }, null, "json").done(json => {
+                }, null, "json").done(function (json) {
                     if (data["vcode_input"]) {
                         json.auth = true;
                     }
-                    alertDialog(json, data, callback);
+                    alertDialog(json, data);
                     showToast("请输入验证码以继续下载", "MODE_CAUTION");
                 }).fail(function (json, textStatus, jqXHR) {
                     showToast("获取验证码失败?", "MODE_FAILURE");
@@ -269,22 +273,13 @@
                     var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
                     generateParameter(rpc_list);
                 }
-
-                if (callback)
-                    callback();
             } else {
-                console.log(json);
                 showToast("出现异常!", "MODE_FAILURE");
-
-                if (callback)
-                    callback();
+                console.log(json);
             }
         }).fail(function (jqXHR, textStatus, errorThrown) {
             showToast("获取地址失败?", "MODE_FAILURE");
             console.log(jqXHR);
-
-            if (callback)
-                callback();
         });
     }
 
@@ -293,7 +288,7 @@
         var paths = CORE.parseAuth(RPC_PATH);
         for (var i = 0; i < rpc_list.length; i++) {
             var parameter = { url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: { Authorization: paths[0] } };
-            sendToBackground("rpc_data", parameter, success => {
+            sendToBackground("rpc_data", parameter, function (success) {
                 if (success)
                     showToast("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
                 else
@@ -306,7 +301,7 @@
     CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
 
     // Get `BDCLND` cookie for private share.
-    sendToBackground("get_cookies", [{ url: "http://pan.baidu.com/", name: "BDCLND" }], value => {
+    sendToBackground("get_cookies", [{ url: "http://pan.baidu.com/", name: "BDCLND" }], function (value) {
         cookies = decodeURIComponent(value["BDCLND"]);
 
         var menu = CORE.addMenu.init("share");

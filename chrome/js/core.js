@@ -44,7 +44,7 @@ var CORE = (function () {
     const version = "0.7.4";
     const update_date = "2016/05/18";
     var cookies = null;
-    var newVersion = typeof manifest == "object" ? true : false;
+    var newVersion = document.querySelector("link[rel='shortcut icon']").href != "http://pan.baidu.com/res/static/images/favicon.ico";
     return {
         init: function () {
 
