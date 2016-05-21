@@ -148,12 +148,12 @@ var CORE = (function () {
                     return $("#export_menu");
                 }
                 var aria2_btn = $("<span>").attr("id", "export_menu");
-                var list = $("<div>").addClass("menu").attr("id", "aria2_list").css("display", "none").appendTo(aria2_btn);
+                var list = $("<div>").addClass("menu").attr("id", "aria2_list").hide().appendTo(aria2_btn);
                 var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
                 if (type == "home") {
                     if (newVersion) {
-                        aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").attr("href", "javascript:void(0);").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool").after($("<span>").addClass("text").text("导出下载")))));
+                        aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool"), $("<span>").addClass("text").text("导出下载"))));
                         $(".g-dropdown-button").eq(3).after(aria2_btn);
                     } else {
                         aria2_btn.addClass("icon-btn-device").append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
@@ -167,26 +167,19 @@ var CORE = (function () {
                     aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $("#albumFileSaveKey, #emphsizeButton").parent().prepend(aria2_btn);
                 }
-                aria2_btn[0].addEventListener("mouseover", function () {
+                aria2_btn.mouseenter(function () {
                     list.show();
                 });
-                aria2_btn[0].addEventListener("mouseout", function () {
+                aria2_btn.mouseleave(function () {
                     list.hide();
                 });
-                config[0].addEventListener("click", function () {
+                config.click(function () {
                     if ($("#setting_div").length == 0) {
                         CORE.setting.init();
                     }
                     $("#setting_divtopmsg").html("");
                     $("#setting_div").show();
                 });
-                try {
-                    aria2_btn.parent()[0].removeChild = function () {
-                        console.log("Remove me? Naive!");
-                    };
-                } catch (e) {
-                    console.log("Unable to hook removeChild");
-                }
                 this.update();
                 return aria2_btn;
             },
@@ -455,7 +448,7 @@ var CORE = (function () {
                             " out=" + file_list[i].name,
                             " >"
                         ].join("\r\n"));
-                        down_txt.push([file_list[i].link, " "].join("\n"));
+                        down_txt.push(file_list[i].link + "\n");
                     }
 
                     if (navigator.msSaveBlob) {

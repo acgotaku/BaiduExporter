@@ -11,6 +11,17 @@
     //两种导出模式 RPC模式 和 TXT模式
     var MODE = "RPC";
     var RPC_PATH = "http://localhost:6800/jsonrpc";
+
+    function getHashParameter(name) {
+        var hash = window.location.hash;
+        hash = hash.substr(1).split("&");
+        for (var pair of hash) {
+            var arr = pair.split("=");
+            if (arr[0] == name)
+                return decodeURIComponent(decodeURIComponent(arr[1]));
+        }
+    }
+
     var Downloader = (function () {
         var delay;
 
@@ -22,18 +33,18 @@
             if (taskId != currentTaskId)
                 return;
 
-            completedCount++;
-            showToast("正在获取下载地址... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
-
             if (folders.length != 0) {
+                completedCount++;
+                showToast("正在获取文件列表... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
+
                 var path = folders.pop();
-                $.get("/api/list", {
+                $.getJSON("/api/list", {
                     "dir": path,
                     "bdstoken": yunData.MYBDSTOKEN,
                     "channel": "chunlei",
                     "clienttype": 0,
                     "web": 1
-                }, null, "json").done(function (json) {
+                }).done(function (json) {
                     setTimeout(function () { getNextFile(taskId), delay });
 
                     if (json.errno != 0) {
@@ -46,7 +57,8 @@
                         if (item.isdir)
                             folders.push(item.path);
                         else
-                            files.push(item.fs_id);
+                            // files.push(item.fs_id);
+                            files.push(item.path);
                     }
                 }).fail(function (xhr) {
                     showToast("获取共享列表失败!", "MODE_FAILURE");
@@ -56,6 +68,8 @@
                 });
             }
             else if (files.length != 0) {
+                showToast("正在获取下载地址... ", "MODE_SUCCESS");
+
                 setFileData(files);
                 downloader.reset();
             }
@@ -93,21 +107,58 @@
 
     function setFileData(files) {
         // var type = files.length == 1 ? "dlink" : "batch";
-        var type = "dlink";
-        $.get("/api/download", {
-            "type": type,
-            "fidlist": JSON.stringify(files),
+        //$.get("/api/download", {
+        //    "type": "dlink",
+        //    "fidlist": JSON.stringify(files),
+        //    "timestamp": yunData.timestamp,
+        //    "sign": btoa(new Function("return " + yunData.sign2)()(yunData.sign3, yunData.sign1)),
+        //    "bdstoken": yunData.MYBDSTOKEN,
+        //    "channel": "chunlei",
+        //    "clienttype": 0,
+        //    "web": 1,
+        //    "app_id": 250528
+        //}, null, "json").done(function (json) {
+        //    if (json.errno != 0) {
+        //        showToast("出现异常!", "MODE_FAILURE");
+        //        console.log(json);
+        //        return;
+        //    }
+
+        //}).fail(function (jqXHR, textStatus, errorThrown) {
+        //    showToast("获取地址失败", "MODE_FAILURE");
+        //    console.log(jqXHR);
+        //});
+
+        $.getJSON("/api/filemetas", {
+            "target": JSON.stringify(files),
+            "dlink": 1,
             "bdstoken": yunData.MYBDSTOKEN,
             "channel": "chunlei",
             "clienttype": 0,
-            "web": 1
-        }, null, "json").done(function (json) {
+            "web": 1,
+        }).done(function (json) {
             if (json.errno != 0) {
                 showToast("出现异常!", "MODE_FAILURE");
                 console.log(json);
                 return;
             }
 
+            var file_list = [];
+            for (var item of json.info) {
+                file_list.push({ name: item.path.substr(pathPrefixLength), link: item.dlink });
+            }
+
+            if (MODE == "TXT") {
+                CORE.dataBox.show();
+                CORE.dataBox.fillData(file_list);
+            } else {
+                var paths = CORE.parseAuth(RPC_PATH);
+                var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
+                self.generateParameter(rpc_list);
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            showToast("获取地址失败", "MODE_FAILURE");
+            console.log(jqXHR);
         });
     }
 
@@ -128,14 +179,22 @@
                 if (item.isdir)
                     Downloader.addFolder(item.path);
                 else
-                    Downloader.addFile(item.fs_id);
+                    // Downloader.addFile(item.fs_id);
+                    Downloader.addFile(item.path);
             }
 
             Downloader.start();
         }
     });
 
+    var pathPrefixLength;
+
     function getSelected() {
+        var path = getHashParameter("list/path");
+        if (path != undefined)
+            pathPrefixLength = path.length + 1;
+        else
+            pathPrefixLength = 0;
         window.postMessage({ "type": "get_selected" }, "*");
     }
 
@@ -156,20 +215,18 @@
     // Init
     CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "BAIDUID" }]);
 
-    setTimeout(function () {
-        var menu = CORE.addMenu.init("home");
-        menu.on("click", ".rpc_export_list", function () {
-            MODE = "RPC";
-            RPC_PATH = $(this).data("id");
-            getSelected();
-        });
-        menu.on("click", "#aria2_download", function () {
-            MODE = "TXT";
-            CORE.dataBox.init("home");
-            // When closing download dialog, cancel all delay feteching.
-            CORE.dataBox.onClose(Downloader.reset);
-            getSelected();
-        });
-        showToast("初始化成功!", "success");
-    }, 600);
+    var menu = CORE.addMenu.init("home");
+    menu.on("click", ".rpc_export_list", function () {
+        MODE = "RPC";
+        RPC_PATH = $(this).data("id");
+        getSelected();
+    });
+    menu.on("click", "#aria2_download", function () {
+        MODE = "TXT";
+        CORE.dataBox.init("home");
+        // When closing download dialog, cancel all delay feteching.
+        CORE.dataBox.onClose(Downloader.reset);
+        getSelected();
+    });
+    showToast("初始化成功!", "success");
 })();

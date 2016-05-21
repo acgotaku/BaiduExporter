@@ -52,6 +52,17 @@
         if (event.data.type == "show_toast") {
             var request = event.data.data;
             showToast(request.message, request.type);
+
+            var button = $("#export_menu");
+            if (button.length != 0) {
+                try {
+                    button.parent()[0].removeChild = function () {
+                        console.log("Remove me? Naive!");
+                    };
+                } catch (e) {
+                    console.log("Unable to hook removeChild");
+                }
+            }
         }
     });
 

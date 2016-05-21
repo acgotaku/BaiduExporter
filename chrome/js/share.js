@@ -13,6 +13,16 @@
     var RPC_PATH = "http://localhost:6800/jsonrpc";
     var cookies;
 
+    function getHashParameter(name) {
+        var hash = window.location.hash;
+        hash = hash.substr(1).split("&");
+        for (var pair of hash) {
+            var arr = pair.split("=");
+            if (arr[0] == name)
+                return decodeURIComponent(decodeURIComponent(arr[1]));
+        }
+    }
+
     var Downloader = (function () {
         var delay;
 
@@ -24,12 +34,12 @@
             if (taskId != currentTaskId)
                 return;
 
-            completedCount++;
-            showToast("正在获取下载地址... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
-
             if (folders.length != 0) {
+                completedCount++;
+                showToast("正在获取文件列表... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
+
                 var path = folders.pop();
-                $.get("/share/list", {
+                $.getJSON("/share/list", {
                     "dir": path,
                     "bdstoken": yunData.MYBDSTOKEN,
                     "uk": yunData.SHARE_UK,
@@ -37,7 +47,7 @@
                     "channel": "chunlei",
                     "clienttype": 0,
                     "web": 1
-                }, null, "json").done(function (json) {
+                }).done(function (json) {
                     setTimeout(function () { getNextFile(taskId), delay });
 
                     if (json.errno != 0) {
@@ -60,6 +70,8 @@
                 });
             }
             else if (files.length != 0) {
+                showToast("正在获取下载地址... ", "MODE_SUCCESS");
+
                 setFileData(files);
                 downloader.reset();
             }
@@ -95,6 +107,8 @@
         return downloader;
     })();
 
+    var pathPrefixLength = 0;
+
     //获得选中的文件
     function getShareFile() {
         Downloader.reset();
@@ -109,22 +123,14 @@
                 return;
             }
 
-            function getHashParameter(name) {
-                var hash = window.location.hash;
-                hash = hash.substr(1).split("&");
-                for (var pair of hash) {
-                    var arr = pair.split("=");
-                    if (arr[0] == name)
-                        return decodeURIComponent(decodeURIComponent(arr[1]));
-                }
-            }
-
             var path = getHashParameter("path");
             var isRoot = false;
             if (path == "/" || path == undefined) {
                 isRoot = true;
                 path = yunData.PATH;
             }
+
+            pathPrefixLength = path.length + 1;
 
             // Short path, we are at root folder, so the only thing we can do is downloading all files.
             if (isRoot) {
@@ -232,14 +238,14 @@
             "web": 1
         }), data, null, "json").done(function (json) {
             if (json.errno == -20) {
-                $.get("/api/getcaptcha", {
+                $.getJSON("/api/getcaptcha", {
                     "bdstoken": yunData.MYBDSTOKEN,
                     "app_id": yunData.FILEINFO[0].app_id,
                     "prod": "share",
                     "channel": "chunlei",
                     "clienttype": 0,
                     "web": 1
-                }, null, "json").done(function (json) {
+                }).done(function (json) {
                     if (data["vcode_input"]) {
                         json.auth = true;
                     }
@@ -254,13 +260,12 @@
                 if (yunData.SHAREPAGETYPE == "single_file_page") {
                     var item = json.list[0];
                     // For single file, save to filename.
-                    file_list.push({ "name": yunData.FILENAME, "link": item.dlink });
+                    file_list.push({ name: yunData.FILENAME, link: item.dlink });
                 }
                 else {
                     // For multiple files, save relates to share base folder.
                     for (var item of json.list) {
-                        var path = item.path.substr(item.path.indexOf(yunData.FILENAME));
-                        file_list.push({ "name": path, "link": item.dlink });
+                        file_list.push({ name: item.path.substr(pathPrefixLength), link: item.dlink });
                     }
                 }
 
@@ -278,7 +283,7 @@
                 console.log(json);
             }
         }).fail(function (jqXHR, textStatus, errorThrown) {
-            showToast("获取地址失败?", "MODE_FAILURE");
+            showToast("获取地址失败", "MODE_FAILURE");
             console.log(jqXHR);
         });
     }
