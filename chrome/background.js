@@ -103,7 +103,8 @@ var getCookie = detail => new Promise(resolve => chrome.cookies.get(detail, reso
 var getCookies = details => new Promise(resolve => Promise.all(details.map(item => getCookie(item))).then(cookies => {
     var obj = {};
     for (var item of cookies)
-        obj[item.name] = item.value;
+        if (item != null)
+            obj[item.name] = item.value;
     resolve(obj);
 }));
 

@@ -25,6 +25,15 @@
                 msg: message
             });
         };
+
+        window.addEventListener("message", function (event) {
+            if (event.source != window)
+                return;
+
+            if (event.data.type == "get_selected") {
+                window.postMessage({ type: "selected", data: Context.list.getSelected() }, "*");
+            }
+        });
     } else {
         var Toast = require("common:widget/toast/toast.js");
         showToast = function (message, type) {

@@ -391,7 +391,8 @@ var CORE = (function () {
                 var idm_btn = $("<a>").attr("id", "idm_btn").attr({ "download": "idm.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
                 var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({ "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
                 var copy_txt_btn = $("<a>").attr("id", "copy_txt_btn").attr({ "href": "javascript:void(0);", "data": "" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(download_menu);
-                var download_link = $("<textarea>").attr("wrap", "off").attr("id", "download_link").css({ "width": "100%", "overflow": "scroll", "height": "180px" }).appendTo(content_ui);
+                // Disable spellcheck and resize for textarea.
+                var download_link = $("<textarea>").attr({ "id": "download_link", "wrap": "off", "spellcheck": false }).css({ "width": "100%", "overflow": "scroll", "height": "180px", "resize": "none" }).appendTo(content_ui);
                 CORE.setCenter($("#download_ui"));
                 $("#download_ui").on("click", "#aria2_download_close", function () {
                     // Clean up when closing download dialog.
@@ -458,9 +459,9 @@ var CORE = (function () {
                     }
 
                     if (navigator.msSaveBlob) {
-                        $("#aria2c_btn").data("href", aria2c_txt.join(""));
-                        $("#idm_btn").data("href", idm_txt.join(""));
-                        $("#download_txt_btn").data("href", down_txt.join(""));
+                        $("#aria2c_btn").data("href", $("#aria2c_btn").data("href") + aria2c_txt.join(""));
+                        $("#idm_btn").data("href", $("#idm_btn").data("href") + idm_txt.join(""));
+                        $("#download_txt_btn").data("href", $("#download_txt_btn").data("href") + down_txt.join(""));
                     }
                     else {
                         $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
