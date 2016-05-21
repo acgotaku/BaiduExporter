@@ -48,7 +48,7 @@
                     "clienttype": 0,
                     "web": 1
                 }).done(function (json) {
-                    setTimeout(function () { getNextFile(taskId), delay });
+                    setTimeout(function () { getNextFile(taskId) }, delay);
 
                     if (json.errno != 0) {
                         showToast("获取共享列表失败!", "MODE_FAILURE");
@@ -66,7 +66,7 @@
                     showToast("获取共享列表失败!", "MODE_FAILURE");
                     console.log(xhr);
 
-                    setTimeout(function () { getNextFile(taskId), delay });
+                    setTimeout(function () { getNextFile(taskId) }, delay);
                 });
             }
             else if (files.length != 0) {

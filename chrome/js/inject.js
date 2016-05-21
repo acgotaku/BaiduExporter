@@ -38,6 +38,8 @@ onload(function () {
             requestAddScript("oldhome");
     else if (window.location.href.indexOf("/pcloud/album/") != -1)
         requestAddScript("album");
-    else
+    else {
         requestAddScript("share");
+        requestAddScript("convert");
+    }
 });
