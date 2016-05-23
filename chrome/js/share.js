@@ -12,6 +12,7 @@
     var MODE = "RPC";
     var RPC_PATH = "http://localhost:6800/jsonrpc";
     var cookies;
+    var pathPrefixLength = 0;
 
     function getHashParameter(name) {
         var hash = window.location.hash;
@@ -27,7 +28,9 @@
         var delay;
 
         var currentTaskId = 0;
+        // Paths of folders to be processed.
         var folders = [];
+        // Ids of files to be processed.
         var files = [];
         var completedCount = 0;
         function getNextFile(taskId) {
@@ -51,7 +54,7 @@
                     setTimeout(function () { getNextFile(taskId) }, delay);
 
                     if (json.errno != 0) {
-                        showToast("获取共享列表失败!", "MODE_FAILURE");
+                        showToast("未知错误", "MODE_FAILURE");
                         console.log(json);
                         return;
                     }
@@ -63,7 +66,7 @@
                             files.push(item.fs_id);
                     }
                 }).fail(function (xhr) {
-                    showToast("获取共享列表失败!", "MODE_FAILURE");
+                    showToast("网络请求失败", "MODE_FAILURE");
                     console.log(xhr);
 
                     setTimeout(function () { getNextFile(taskId) }, delay);
@@ -106,8 +109,6 @@
 
         return downloader;
     })();
-
-    var pathPrefixLength = 0;
 
     //获得选中的文件
     function getShareFile() {
@@ -239,20 +240,27 @@
         }), data, null, "json").done(function (json) {
             if (json.errno == -20) {
                 $.getJSON("/api/getcaptcha", {
+                    "prod": "share",
                     "bdstoken": yunData.MYBDSTOKEN,
                     "app_id": yunData.FILEINFO[0].app_id,
-                    "prod": "share",
                     "channel": "chunlei",
                     "clienttype": 0,
                     "web": 1
                 }).done(function (json) {
+                    if (json.errno != 0) {
+                        showToast("未知错误", "MODE_FAILURE");
+                        console.log(json);
+                        return;
+                    }
+
                     if (data["vcode_input"]) {
                         json.auth = true;
                     }
                     alertDialog(json, data);
                     showToast("请输入验证码以继续下载", "MODE_CAUTION");
-                }).fail(function (json, textStatus, jqXHR) {
-                    showToast("获取验证码失败?", "MODE_FAILURE");
+                }).fail(function (xhr) {
+                    showToast("获取验证码失败", "MODE_FAILURE");
+                    console.log(xhr);
                 });
             } else if (json.errno == 0) {
                 var file_list = [];
@@ -279,12 +287,12 @@
                     generateParameter(rpc_list);
                 }
             } else {
-                showToast("出现异常!", "MODE_FAILURE");
+                showToast("未知错误", "MODE_FAILURE");
                 console.log(json);
             }
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-            showToast("获取地址失败", "MODE_FAILURE");
-            console.log(jqXHR);
+        }).fail(function (xhr) {
+            showToast("网络请求失败", "MODE_FAILURE");
+            console.log(xhr);
         });
     }
 

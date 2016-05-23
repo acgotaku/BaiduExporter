@@ -26,7 +26,9 @@
         var delay;
 
         var currentTaskId = 0;
+        // Paths of folders to be processed.
         var folders = [];
+        // Paths of files to be processed.
         var files = [];
         var completedCount = 0;
         function getNextFile(taskId) {
@@ -48,7 +50,7 @@
                     setTimeout(function () { getNextFile(taskId) }, delay);
 
                     if (json.errno != 0) {
-                        showToast("获取共享列表失败!", "MODE_FAILURE");
+                        showToast("未知错误", "MODE_FAILURE");
                         console.log(json);
                         return;
                     }
@@ -61,7 +63,7 @@
                             files.push(item.path);
                     }
                 }).fail(function (xhr) {
-                    showToast("获取共享列表失败!", "MODE_FAILURE");
+                    showToast("网络请求失败", "MODE_FAILURE");
                     console.log(xhr);
 
                     setTimeout(function () { getNextFile(taskId) }, delay);
@@ -106,7 +108,7 @@
     })();
 
     function setFileData(files) {
-        // var type = files.length == 1 ? "dlink" : "batch";
+        //var type = files.length == 1 ? "dlink" : "batch";
         //$.get("/api/download", {
         //    "type": "dlink",
         //    "fidlist": JSON.stringify(files),
@@ -119,14 +121,14 @@
         //    "app_id": 250528
         //}, null, "json").done(function (json) {
         //    if (json.errno != 0) {
-        //        showToast("出现异常!", "MODE_FAILURE");
+        //        showToast("未知错误", "MODE_FAILURE");
         //        console.log(json);
         //        return;
         //    }
-
-        //}).fail(function (jqXHR, textStatus, errorThrown) {
-        //    showToast("获取地址失败", "MODE_FAILURE");
-        //    console.log(jqXHR);
+        //
+        //}).fail(function (xhr) {
+        //    showToast("未知错误", "MODE_FAILURE");
+        //    console.log(xhr);
         //});
 
         $.getJSON("/api/filemetas", {
@@ -138,7 +140,7 @@
             "web": 1,
         }).done(function (json) {
             if (json.errno != 0) {
-                showToast("出现异常!", "MODE_FAILURE");
+                showToast("未知错误", "MODE_FAILURE");
                 console.log(json);
                 return;
             }
@@ -154,11 +156,11 @@
             } else {
                 var paths = CORE.parseAuth(RPC_PATH);
                 var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
-                self.generateParameter(rpc_list);
+                generateParameter(rpc_list);
             }
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-            showToast("获取地址失败", "MODE_FAILURE");
-            console.log(jqXHR);
+        }).fail(function (xhr) {
+            showToast("网络请求失败", "MODE_FAILURE");
+            console.log(xhr);
         });
     }
 
