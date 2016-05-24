@@ -31,12 +31,9 @@ onload(function () {
     s.src = chrome.runtime.getURL("js/baidu.js");
     document.body.appendChild(s);
 
-    if (window.location.href.indexOf("/disk/home") != -1)
-        if (document.querySelector("link[rel='shortcut icon']").href != "http://pan.baidu.com/res/static/images/favicon.ico")
-            requestAddScript("home");
-        else
-            requestAddScript("oldhome");
-    else if (window.location.href.indexOf("/pcloud/album/") != -1)
+    if (window.location.href.includes("/disk/home"))
+        requestAddScript("home");
+    else if (window.location.href.includes("/pcloud/album/"))
         requestAddScript("album");
     else
         requestAddScript("share");

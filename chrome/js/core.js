@@ -152,14 +152,8 @@ var CORE = (function () {
                 var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
                 if (type == "home") {
-                    if (newVersion) {
-                        aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool"), $("<span>").addClass("text").text("导出下载"))));
-                        $(".g-dropdown-button").eq(3).after(aria2_btn);
-                    } else {
-                        aria2_btn.addClass("icon-btn-device").append($("<span>").text("导出下载").addClass("text").before($("<span>").addClass("ico")).after($("<span>").addClass("ico-more")));
-
-                        $(".icon-btn-device").after(aria2_btn);
-                    }
+                    aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool"), $("<span>").addClass("text").text("导出下载"))));
+                    $(".g-dropdown-button").eq(3).after(aria2_btn);
                 } else if (type == "share") {
                     aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $('span a[class="new-dbtn"]').parent().prepend(aria2_btn);

@@ -5,15 +5,7 @@
     // MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
     var showToast;
 
-    if (typeof require == "undefined") {
-        showToast = function (message, type) {
-            Utilities.useToast({
-                toastMode: disk.ui.Toast[type],
-                msg: message,
-                sticky: false
-            })
-        };
-    } else if (typeof manifest == "object") {
+    if (typeof manifest == "object") {
         // New version
         var Context = require("system-core:context/context.js").instanceForSystem;
         showToast = function (message, type) {
