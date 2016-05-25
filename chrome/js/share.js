@@ -128,7 +128,7 @@
             if (path == "/" || path == undefined)
                 return [{ isdir: true, path: yunData.PATH, id: yunData.FS_ID }];
 
-            return selected.map(function (item) {
+            return selected.map(function (index, item) {
                 item = $(item);
                 return {
                     isdir: item.data("extname") == "dir",
@@ -338,12 +338,14 @@
             getShareFile();
         });
 
-        // Hook transfering files function for multiple file share page
-        if (yunData.SHAREPAGETYPE != "single_file_page") {
-            var s = document.createElement("script");
-            s.src = chrome.runtime.getURL("js/convert.js");
-            document.body.appendChild(s);
-        }
+        setTimeout(function () {
+            // Hook transfering files function for multiple file share page
+            if (yunData.SHAREPAGETYPE != "single_file_page") {
+                var s = document.createElement("script");
+                s.src = chrome.runtime.getURL("js/convert.js");
+                document.body.appendChild(s);
+            }
+        }, 1000);
 
         showToast("初始化成功!", "MODE_SUCCESS");
     });

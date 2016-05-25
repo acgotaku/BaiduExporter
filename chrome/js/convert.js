@@ -154,7 +154,7 @@ var CONVERT = (function () {
             if (path == "/" || path == undefined)
                 return [{ isdir: true, path: yunData.PATH, id: yunData.FS_ID }];
 
-            return selected.map(function (item) {
+            return selected.map(function (index, item) {
                 item = $(item);
                 return {
                     isdir: item.data("extname") == "dir",
