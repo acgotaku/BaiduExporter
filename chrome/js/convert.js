@@ -2,178 +2,358 @@ var CONVERT = (function () {
     //网盘分享页面转存
     /*
     */
+    const LIMIT = 2000;
+
     const prefix = "/我的资源";
-    var BUFFER_SIZE = 8;
-    var POLLING_INTERVAL = 100;
-    var pendingSend = 0;
-    var list = {};
+    var pathPrefixLength = 0;
 
-    return {
-        //绑定事件
-        init: function () {
-            var self = this;
-            var menu = self.addMenu();
-            menu.on("click", function (event) {
-                event.preventDefault();
-                self.getConvertFile();
-                return false;
-
-            });
-            var file_lists = yunData.getContext().file_list.list;
-            for (var i = 0; i < file_lists.length; i++) {
-                var file_list = file_lists[i];
-                list[file_list.fs_id] = file_list.path;
-            }
-            showToast("初始化成功!", "MODE_SUCCESS");
-        },
-        addMenu: function () {
-            //添加批量转存按钮
-            var convert_btn = $("<span>").addClass("icon-btn-device").css("float", "none");
-            convert_btn.addClass("new-dbtn").append('<em class="global-icon-download"></em><b>批量转存</b>');
-            $('span a[class="new-dbtn"]').parent().prepend(convert_btn);
-            return convert_btn;
-        },
-        //获得选中的文件
-        getConvertFile: function () {
-            var self = this;
-            if (yunData.SHAREPAGETYPE == "single_file_page") {
-                showToast("单个文件你转存个毛!", "MODE_CAUTION");
-            } else {
-                var File = require("common:widget/data-center/data-center.js");
-                var Filename = File.get("selectedItemList");
-                var file_info = File.get("selectedList");
-                if (file_info.length == 0) {
-                    showToast("先选择一下你要转存的文件夹哦", "MODE_CAUTION");
-                    return;
-                }
-                for (var i = 0; i < Filename.length; i++) {
-                    var fs_id = parseInt(Filename[i].attr("data-id"));
-                    self.saveConvertFile({ "fs_id": fs_id, "path": list[fs_id] });
-                }
-            }
-        },
-        //检测这个文件夹是否存在
-        removeFold: function (path) {
-            var data = "filelist=" + encodeURIComponent('[\"' + path + '\"]');
-            var parameter = { url: "//" + window.location.host + "/api/filemanager?" + "opera=delete&async=2&channel=chunlei&clienttype=0&web=1&app_id=" + yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN, dataType: "json", type: "POST", data: data };
-            HttpSend(parameter)
-                .done(function (json, textStatus, jqXHR) {
-                    if (json.errno == 12) {
-                        console.log("删除失败!");
-                    } else if (json.erron == 0) {
-                        console.log("删除成功");
-                    } else {
-                        console.log("未知错误" + json);
-                    }
-                });
-        },
-        checkFold: function (path) {
-            if (path.length <= 1) {
-                return null;
-            }
-            var parameter = { url: "//" + window.location.host + "/api/list?dir=" + encodeURIComponent(path), dataType: "json", type: "GET" };
-            return HttpSend(parameter);
-        },
-        saveConvertFile: function (item) {
-            var self = this;
-            var data = "filelist=" + encodeURIComponent("[\"" + item.path + "\"]") + "&path=" + encodeURIComponent(prefix + item.path.substring(0, item.path.lastIndexOf("/")));
-            var convert = "//" + window.location.host + "/share/transfer?async=1&channel=chunlei&clienttype=0&web=1&ondup=overwrite&app_id=" + yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN + "&shareid=" + yunData.SHARE_ID + "&from=" + yunData.SHARE_UK;
-            var parameter = { url: convert, dataType: "json", type: "POST", data: data };
-            HttpSend(parameter)
-                    .done(function (json, textStatus, jqXHR) {
-                        if (json.errno == 2) {
-                            console.log("folder miss" + item.path);
-                        } else if (json.errno == 0) {
-                            showToast("转存成功!", "MODE_SUCCESS");
-                            console.log("转存成功:" + item.path);
-                        } else if (json.errno == 12) {
-                            if (json.limit) {
-                                showToast("文件超过5000,分解转存!", "MODE_SUCCESS");
-                                console.log("文件超过5000,分解转存!" + item.path);
-                                self.createFold(item.path, function () {
-                                    self.getRecursiveFold(item);
-                                });
-                            }
-                        } else if (json.errno == 111) { //当前还有未完成的任务，需完成后才能操作
-                            showToast("保存的有点太快了!", "MODE_FAILURE");
-                            console.log("111", item.path);
-                        } else {
-                            console.log("some error" + json);
-                            showToast("转存出现异常!", "MODE_FAILURE");
-                        }
-
-                    })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
-                        showToast("转存失败?", "MODE_FAILURE");
-                        console.log(jqXHR);
-                    });
-
-        },
-        //创建转存文件需要的文件夹
-        createFold: function (path, callback) {
-            var self = this;
-            var file_path = path;
-            path = prefix + path;
-            var data = "path=" + encodeURIComponent(path) + "&isdir=1&size=&block_list=%5B%5D&method=post";
-            var convert = "//" + window.location.host + "/api/create?a=commit&channel=chunlei&clienttype=0&web=1&app_id=" + yunData.FILEINFO[0].app_id + "&bdstoken=" + yunData.MYBDSTOKEN;
-            var parameter = { url: convert, dataType: "json", type: "POST", data: data };
-            self.checkFold(path)
-                .done(function (json, textStatus, jqXHR) {
-                    if (json.errno === -9) {
-                        HttpSend(parameter).done(function (json, textStatus, jqXHR) {
-                            showToast("创建文件夹成功!", "MODE_SUCCESS");
-                            console.log("创建文件夹" + json.path);
-                            callback(file_path);
-                            if (json.path !== path && /\(\d+\)/.exec(json.path.substr(path.length))) {
-                                setTimeout(function () {
-                                    self.removeFold(json.path);
-                                }, POLLING_INTERVAL * 50);
-                            }
-                        });
-                    } else {
-                        callback(file_path);
-                    }
-                })
-                .fail(function (jqXHR, textStatus, errorThrown) {
-                    showToast("创建文件夹失败!", "MODE_FAILURE");
-                    console.log(jqXHR);
-                });
-        },
-        //递归下载
-        getRecursiveFold: function (item) {
-            var self = this;
-            var parameter = { url: "//" + window.location.host + "/share/list?dir=" + encodeURIComponent(item.path) + "&bdstoken=" + yunData.MYBDSTOKEN + "&uk=" + yunData.SHARE_UK + "&shareid=" + yunData.SHARE_ID + "&channel=chunlei&clienttype=0&web=1", dataType: "json", type: "GET" };
-            HttpSend(parameter)
-                    .done(function (json, textStatus, jqXHR) {
-                        var array = json.list;
-                        for (var i = 0; i < array.length; i++) {
-                            delayLoop({ "fs_id": array[i].fs_id, "path": array[i].path }, i);
-                        }
-                    })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
-                        showToast("获取List失败!", "MODE_FAILURE");
-                        console.log(jqXHR);
-                    });
-            function delayLoop(item, i) {
-                setTimeout(function () {
-                    self.saveConvertFile(item);
-                }, POLLING_INTERVAL * i);
-            }
-        },
-        //得到当前文件夹的路径
-        getCurrentPath: function () {
-            var API = (require("common:widget/restApi/restApi.js"), require("common:widget/hash/hash.js"));
-            var path_head = yunData.PATH.slice(0, yunData.PATH.lastIndexOf("/"));
-            var path = API.get("path");
-            if (path == "/" || path == null) {
-                path = yunData.PATH;
-            } else {
-                path = path_head + path;
-            }
-            return path;
+    function getHashParameter(name) {
+        var hash = window.location.hash;
+        hash = hash.substr(1).split("&");
+        for (var pair of hash) {
+            var arr = pair.split("=");
+            if (arr[0] == name)
+                return decodeURIComponent(decodeURIComponent(arr[1]));
         }
-    };
+    }
+
+    // 中心思想
+    // 1. 直接转存整个文件夹, if
+    //     1a. 成功 -> 结束
+    //     1b. 错误12：文件过多, then
+    //        1b1. 在自己的库里创建文件夹
+    //        1b2. 获取文件夹内容，对每个项目, if
+    //            1b1a. 是文件夹 -> 跳到 1.
+    //            1b1b. 是文件 -> 根据转存限制进行批量转存
+
+    var Downloader = (function () {
+        var delay;
+
+        var currentTaskId = 0;
+        var savePath;
+        // Paths of folders to be processed.
+        var folders = [];
+        // Paths of files to be processed.
+        var files = [];
+        var completedCount = 0;
+        function getNextFile(taskId) {
+            if (taskId != currentTaskId)
+                return;
+
+            if (files.length != 0) {
+                // Use `files.splice(0, LIMIT)` to get and remove
+                // the first `LIMIT` items (or all if length < LIMIT) from `files`.
+                saveConvertFile(files.splice(0, LIMIT), savePath, function () {
+                    setTimeout(function () { getNextFile(taskId) }, delay);
+                });
+            }
+            else if (folders.length != 0) {
+                completedCount++;
+                showToast("正在获取文件列表... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
+
+                var path = folders.pop();
+                saveConvertFile(path, savePath, function (error) {
+                    if (error == 12) {
+                        setTimeout(function () {
+                            createFold(savePath + path.substr(pathPrefixLength), function () {
+                                setTimeout(function () {
+                                    $.getJSON("/share/list", {
+                                        "dir": path,
+                                        "bdstoken": yunData.MYBDSTOKEN,
+                                        "uk": yunData.SHARE_UK,
+                                        "shareid": yunData.SHARE_ID,
+                                        "channel": "chunlei",
+                                        "clienttype": 0,
+                                        "web": 1
+                                    }).done(function (json) {
+                                        setTimeout(function () { getNextFile(taskId) }, delay);
+
+                                        if (json.errno != 0) {
+                                            showToast("未知错误", "MODE_FAILURE");
+                                            console.log(json);
+                                            return;
+                                        }
+
+                                        for (var item of json.list) {
+                                            if (item.isdir)
+                                                folders.push(item.path);
+                                            else
+                                                files.push(item.path);
+                                        }
+                                    }).fail(function (xhr) {
+                                        showToast("网络请求失败", "MODE_FAILURE");
+                                        console.log(xhr);
+
+                                        setTimeout(function () { getNextFile(taskId) }, delay);
+                                    });
+                                }, delay);
+                            });
+                        }, delay);
+                    }
+                });
+            }
+            else {
+                showToast("分批转存完成！", "MODE_SUCCESS");
+                downloader.reset();
+            }
+        }
+
+        var downloader = {};
+
+        downloader.setSavePath = function (path) {
+            savePath = path;
+        };
+
+        downloader.addFolder = function (path) {
+            folders.push(path);
+        };
+
+        downloader.setFolders = function (paths) {
+            folders = paths;
+        }
+
+        downloader.addFile = function (path) {
+            files.push(fileId);
+        };
+
+        downloader.setFiles = function (paths) {
+            files = paths;
+        }
+
+        downloader.start = function () {
+            delay = parseInt(localStorage.getItem("rpc_delay")) || 300;
+            currentTaskId = new Date().getTime();
+            getNextFile(currentTaskId);
+        }
+
+        downloader.reset = function () {
+            currentTaskId = 0;
+            folders = [];
+            files = [];
+            completedCount = 0;
+        };
+
+        return downloader;
+    })();
+
+    function getSelected() {
+        if (yunData.SHAREPAGETYPE == "single_file_page") {
+            return [{ isdir: false, path: yunData.PATH, id: yunData.FS_ID }];
+        }
+        else {
+            // TODO(Simon): Download all files by default?
+            // Maybe we can switch the button content between "导出全部" and "导出所选".
+            var selected = $(".chked").closest(".item");
+            if (selected.length == 0)
+                return [];
+
+            var path = getHashParameter("path");
+
+            // Short path, we are at root folder,
+            // so the only thing we can do is downloading all files.
+            if (path == "/" || path == undefined)
+                return [{ isdir: true, path: yunData.PATH, id: yunData.FS_ID }];
+
+            return selected.map(function (item) {
+                item = $(item);
+                return {
+                    isdir: item.data("extname") == "dir",
+                    path: path + "/" + item.find(".name-text").data("name"),
+                    id: item.data("id")
+                };
+            });
+        }
+    }
+
+    //获得选中的文件
+    function getConvertFile(savePath) {
+        var selected = getSelected();
+        if (selected.length == 0)
+            showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
+
+        var selected = $(".chked").closest(".item");
+        if (selected.length == 0) {
+            showToast("请选择一下你要保存的文件哦", "MODE_CAUTION");
+            return;
+        }
+        else {
+            // First try transfering all selected items together before using Downloader.
+            if (selected.length < LIMIT) {
+                saveConvertFile(selected.map(item => item.path), savePath, function (error) {
+                    if (error == 12) {
+                        Downloader.setFolders(folders);
+                        Downloader.setFiles(files);
+
+                        Downloader.setSavePath(savePath);
+                        Downloader.start();
+                    }
+                });
+            }
+            else {
+                for (var item of selected) {
+                    if (item.isdir)
+                        Downloader.addFolder(item.path);
+                    else
+                        Downloader.addFile(item.path);
+                }
+
+                Downloader.setSavePath(savePath);
+                Downloader.start();
+            }
+        }
+    }
+
+    function removeFold(path) {
+        $.post("/api/filemanager?" + $.param({
+            "opera": "delete",
+            "async": 2,
+            "bdstoken": yunData.MYBDSTOKEN,
+            "app_id": yunData.FILEINFO[0].app_id,
+            "channel": "chunlei",
+            "clienttype": 0,
+            "web": 1
+        }), {
+            "filelist": JSON.stringify([path])
+        }, null, "json").done(function (json) {
+            if (json.errno == 12)
+                console.log("删除失败!");
+            else if (json.erron == 0)
+                console.log("删除成功");
+            else {
+                showToast("未知错误", "MODE_FAILURE");
+                console.log(json);
+            }
+        }).fail(function (xhr) {
+            showToast("网络请求失败", "MODE_FAILURE");
+            console.log(xhr);
+        });
+    }
+
+    function saveConvertFile(files, path, callback) {
+        $.post("/share/transfer?" + $.param({
+            "async": 1,
+            "ondup": "overwrite",
+            "shareid": yunData.SHARE_ID,
+            "from": yunData.SHARE_UK,
+            "bdstoken": yunData.MYBDSTOKEN,
+            "app_id": yunData.FILEINFO[0].app_id,
+            "channel": "chunlei",
+            "clienttype": 0,
+            "web": 1
+        }), {
+            "filelist": JSON.stringify(files),
+            "path": path + files[0].substr(pathPrefixLength, files[0].lastIndexOf("/"))
+        }, null, "json").done(function (json) {
+            callback(json.errno, files, path);
+            switch (json.errno) {
+                case 0:
+                    showToast("转存成功!", "MODE_SUCCESS");
+                    // TODO(Simon): Track progress, avoid error 111.
+                    break;
+                case 2:
+                    console.log("folder miss" + path);
+                    break;
+                case 12:
+                    showToast("文件过多，正在分批转存。", "MODE_CAUTION");
+                    break;
+                case 111: //当前还有未完成的任务，需完成后才能操作
+                    showToast("保存的有点太快了!", "MODE_FAILURE");
+                    break;
+                default:
+                    showToast("未知错误", "MODE_FAILURE");
+                    console.log(json);
+                    break;
+            }
+        }).fail(function (xhr) {
+            showToast("网络请求失败", "MODE_FAILURE");
+            console.log(xhr);
+        });
+    }
+
+    //创建转存文件需要的文件夹
+    function createFold(path, callback) {
+        var file_path = path;
+        path = prefix + path;
+
+        //检测这个文件夹是否存在
+        $.getJSON("/api/list", { "dir": path }).done(function (json) {
+            if (json.errno == -9) {
+                $.post("/api/create?" + $.param({
+                    "a": "commit",
+                    "bdstoken": yunData.MYBDSTOKEN,
+                    "app_id": yunData.FILEINFO[0].app_id,
+                    "channel": "chunlei",
+                    "clienttype": 0,
+                    "web": 1
+                }), {
+                    "path": path,
+                    "isdir": 1,
+                    "size": "",
+                    "block_list": "%5B%5D",
+                    "method": "post"
+                }, null, "json").done(function (json) {
+                    showToast("创建文件夹成功!", "MODE_SUCCESS");
+                    callback(file_path);
+
+                    if (json.path != path && /\(\d+\)/.exec(json.path.substr(path.length))) {
+                        setTimeout(function () {
+                            removeFold(json.path);
+                        }, POLLING_INTERVAL * 50);
+                    }
+                });
+            } else {
+                callback(file_path);
+            }
+        }).fail(function (xhr) {
+            showToast("网络请求失败", "MODE_FAILURE");
+            console.log(xhr);
+        });
+    }
+
+    // Hook OK button for transfering files.
+    (function () {
+        var e = require;
+        var i = $;
+
+        var moveSaveDialog = require("common:widget/moveSaveDialog/moveSaveDialog.js");
+        var s = e("common:widget/toast/toast.js"),
+            n = e("common:widget/panel/panel.js");
+        moveSaveDialog.prototype._init = function () {
+            var e = this;
+            i("#" + this._mCloseId2 + ", #" + this._mCloseId1).click(function () {
+                "function" == typeof e.cancleBack && e.cancleBack(e._getSavePath()),
+                e.visible(!1)
+            }),
+            i("#" + this._mMoveId).click(function () {
+                var t = i(".plus-create-folder input").val();
+
+                // This line edited.
+                return void 0 === t && (getConvertFile(e._getSavePath()),
+
+                e._saveTransferPath(),
+                e.visible(!1)),
+                e.FILE_NAME_REG.test(t) ? (s.obtain.useToast({
+                    toastMode: s.obtain.MODE_CAUTION,
+                    msg: "文件名不能包含以下字符：<,>,|,*,?,,/",
+                    sticky: !1
+                }),
+                !1) : void 0
+            }),
+            i("#" + this._mNewDirId).click(function () {
+                e.creatNewFolder()
+            }),
+            i(".move-dialog").delegate(".save-path-item", "mouseover", function () {
+                i(this).addClass("save-path-hover")
+            }).delegate(".save-path-item", "mouseout", function () {
+                i(this).removeClass("save-path-hover")
+            }),
+            i(".move-dialog").delegate(".save-path-item", "click", function () {
+                i(this).hasClass("check") ? i(this).removeClass("check") : (i(this).addClass("check"),
+                d.obtain.resetSelectedPath())
+            }),
+            i(window).bind("resize", function () {
+                e.setGravity(n.CENTER)
+            })
+        };
+    })();
 })();
-setTimeout(function () {
-    CONVERT.init();
-}, 800);

@@ -110,41 +110,48 @@
         return downloader;
     })();
 
+    function getSelected() {
+        if (yunData.SHAREPAGETYPE == "single_file_page") {
+            return [{ isdir: false, path: yunData.PATH, id: yunData.FS_ID }];
+        }
+        else {
+            // TODO(Simon): Download all files by default?
+            // Maybe we can switch the button content between "导出全部" and "导出所选".
+            var selected = $(".chked").closest(".item");
+            if (selected.length == 0)
+                return [];
+
+            var path = getHashParameter("path");
+
+            // Short path, we are at root folder,
+            // so the only thing we can do is downloading all files.
+            if (path == "/" || path == undefined)
+                return [{ isdir: true, path: yunData.PATH, id: yunData.FS_ID }];
+
+            return selected.map(function (item) {
+                item = $(item);
+                return {
+                    isdir: item.data("extname") == "dir",
+                    path: path + "/" + item.find(".name-text").data("name"),
+                    id: item.data("id")
+                };
+            });
+        }
+    }
+
     //获得选中的文件
     function getShareFile() {
         Downloader.reset();
 
-        if (yunData.SHAREPAGETYPE == "single_file_page") {
-            setFileData([yunData.FS_ID]);
-        } else {
-            // TODO(Simon): Download all files by default? Maybe we can switch the button content between "导出全部" and "导出所选".
-            var selected = $(".chked").closest(".item");
-            if (selected.length == 0) {
-                showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
-                return;
-            }
-
-            var path = getHashParameter("path");
-            var isRoot = false;
-            if (path == "/" || path == undefined) {
-                isRoot = true;
-                path = yunData.PATH;
-            }
-
-            pathPrefixLength = path.length + 1;
-
-            // Short path, we are at root folder, so the only thing we can do is downloading all files.
-            if (isRoot) {
-                Downloader.addFolder(path);
-            }
-            else {
-                for (var item of selected) {
-                    var $item = $(item);
-                    if ($item.data("extname") == "dir")
-                        Downloader.addFolder(path + "/" + $item.find(".name-text").data("name"));
-                    else
-                        Downloader.addFile($item.data("id"));
-                }
+        var selected = getSelected();
+        if (selected.length == 0)
+            showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
+        else {
+            for (var item of selected) {
+                if (item.isdir)
+                    Downloader.addFolder(item.path);
+                else
+                    Downloader.addFile(item.id);
             }
 
             Downloader.start();
@@ -330,6 +337,14 @@
             CORE.dataBox.onClose(Downloader.reset);
             getShareFile();
         });
+
+        // Hook transfering files function for multiple file share page
+        if (yunData.SHAREPAGETYPE != "single_file_page") {
+            var s = document.createElement("script");
+            s.src = chrome.runtime.getURL("js/convert.js");
+            document.body.appendChild(s);
+        }
+
         showToast("初始化成功!", "MODE_SUCCESS");
     });
 })();
