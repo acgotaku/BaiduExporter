@@ -28,8 +28,6 @@
         var currentTaskId = 0;
         // Paths of folders to be processed.
         var folders = [];
-        //x // Paths of files to be processed.
-        //x var files = [];
         // { id: path } of files to be processed.
         var files = {};
         var completedCount = 0;
@@ -61,7 +59,6 @@
                         if (item.isdir)
                             folders.push(item.path);
                         else
-                            //x files.push(item.fs_id);
                             files[item.fs_id] = item.path;
                     }
                 }).fail(function (xhr) {
@@ -102,7 +99,6 @@
         downloader.reset = function () {
             currentTaskId = 0;
             folders = [];
-            //x files = [];
             files = {};
             completedCount = 0;
         };
@@ -146,38 +142,6 @@
             showToast("网络请求失败", "MODE_FAILURE");
             console.log(xhr);
         });
-
-        //x $.getJSON("/api/filemetas", {
-        //x     "target": JSON.stringify(files),
-        //x     "dlink": 1,
-        //x     "bdstoken": yunData.MYBDSTOKEN,
-        //x     "channel": "chunlei",
-        //x     "clienttype": 0,
-        //x     "web": 1,
-        //x }).done(function (json) {
-        //x     if (json.errno != 0) {
-        //x         showToast("未知错误", "MODE_FAILURE");
-        //x         console.log(json);
-        //x         return;
-        //x     }
-
-        //x     var file_list = [];
-        //x     for (var item of json.info) {
-        //x         file_list.push({ name: item.path.substr(pathPrefixLength), link: item.dlink.replace("chkbd=0", "chkbd=1&chkpc=et").replace("chkv=0", "chkv=1") });
-        //x     }
-
-        //x     if (MODE == "TXT") {
-        //x         CORE.dataBox.show();
-        //x         CORE.dataBox.fillData(file_list);
-        //x     } else {
-        //x         var paths = CORE.parseAuth(RPC_PATH);
-        //x         var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
-        //x         generateParameter(rpc_list);
-        //x     }
-        //x }).fail(function (xhr) {
-        //x     showToast("网络请求失败", "MODE_FAILURE");
-        //x     console.log(xhr);
-        //x });
     }
 
     window.addEventListener("message", function (event) {
@@ -197,7 +161,6 @@
                 if (item.isdir)
                     Downloader.addFolder(item.path);
                 else
-                    //x Downloader.addFile(item.path);
                     Downloader.addFile(item.fs_id, item.path);
             }
 
