@@ -231,7 +231,7 @@
     }
 
     // Init
-    CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "BAIDUID" }]);
+    CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
 
     var menu = CORE.addMenu.init("home");
     menu.on("click", ".rpc_export_list", function () {
