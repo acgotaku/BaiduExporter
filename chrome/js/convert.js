@@ -1,4 +1,11 @@
-var CONVERT = (function () {
+(function () {
+    // Baidu will add these querystring for us
+    //"bdstoken": yunData.MYBDSTOKEN,
+    //"app_id": yunData.FILEINFO[0].app_id,
+    //"channel": "chunlei",
+    //"clienttype": 0,
+    //"web": 1
+
     //网盘分享页面转存
     /*
     */
@@ -51,19 +58,18 @@ var CONVERT = (function () {
                 showToast("正在获取文件列表... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
 
                 var path = folders.pop();
-                saveConvertFile(path, savePath, function (error) {
+                saveConvertFile([path], savePath, function (error) {
+                    if (error == 0) {
+                        setTimeout(function () { getNextFile(taskId) }, delay);
+                    }
                     if (error == 12) {
                         setTimeout(function () {
-                            createFold(savePath + path.substr(pathPrefixLength), function () {
+                            createFold(savePath + "/" + path.substr(pathPrefixLength), function () {
                                 setTimeout(function () {
                                     $.getJSON("/share/list", {
                                         "dir": path,
-                                        "bdstoken": yunData.MYBDSTOKEN,
                                         "uk": yunData.SHARE_UK,
-                                        "shareid": yunData.SHARE_ID,
-                                        "channel": "chunlei",
-                                        "clienttype": 0,
-                                        "web": 1
+                                        "shareid": yunData.SHARE_ID
                                     }).done(function (json) {
                                         setTimeout(function () { getNextFile(taskId) }, delay);
 
@@ -150,9 +156,12 @@ var CONVERT = (function () {
 
             // Short path, we are at root folder,
             // so the only thing we can do is downloading all files.
-            if (path == "/" || path == undefined)
+            if (path == "/" || path == undefined) {
+                pathPrefixLength = 1;
                 return [{ isdir: true, path: yunData.PATH, id: yunData.FS_ID }];
+            }
 
+            pathPrefixLength = path.length + 1;
             return selected.map(function (index, item) {
                 item = $(item);
                 return {
@@ -164,53 +173,45 @@ var CONVERT = (function () {
         }
     }
 
+    function startDownloader(selected, savePath) {
+        for (var item of selected) {
+            if (item.isdir)
+                Downloader.addFolder(item.path);
+            else
+                Downloader.addFile(item.path);
+        }
+
+        Downloader.setSavePath(savePath);
+        Downloader.start();
+    }
+
     //获得选中的文件
     function getConvertFile(savePath) {
         var selected = getSelected();
-        if (selected.length == 0)
-            showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
-
-        var selected = $(".chked").closest(".item");
         if (selected.length == 0) {
             showToast("请选择一下你要保存的文件哦", "MODE_CAUTION");
             return;
         }
-        else {
-            // First try transfering all selected items together before using Downloader.
-            if (selected.length < LIMIT) {
-                saveConvertFile(selected.map(item => item.path), savePath, function (error) {
-                    if (error == 12) {
-                        Downloader.setFolders(folders);
-                        Downloader.setFiles(files);
 
-                        Downloader.setSavePath(savePath);
-                        Downloader.start();
-                    }
-                });
-            }
-            else {
-                for (var item of selected) {
-                    if (item.isdir)
-                        Downloader.addFolder(item.path);
-                    else
-                        Downloader.addFile(item.path);
+        // First try transfering all selected items together before using Downloader.
+        if (selected.length < LIMIT) {
+            saveConvertFile(selected.map(item => item.path), savePath, function (error) {
+                if (error == 0)
+                    showToast("转存成功!", "MODE_SUCCESS");
+                else if (error == 12) {
+                    startDownloader(selected, savePath);
                 }
-
-                Downloader.setSavePath(savePath);
-                Downloader.start();
-            }
+            });
+        }
+        else {
+            startDownloader(selected, savePath);
         }
     }
 
     function removeFold(path) {
         $.post("/api/filemanager?" + $.param({
             "opera": "delete",
-            "async": 2,
-            "bdstoken": yunData.MYBDSTOKEN,
-            "app_id": yunData.FILEINFO[0].app_id,
-            "channel": "chunlei",
-            "clienttype": 0,
-            "web": 1
+            "async": 2
         }), {
             "filelist": JSON.stringify([path])
         }, null, "json").done(function (json) {
@@ -228,25 +229,20 @@ var CONVERT = (function () {
         });
     }
 
-    function saveConvertFile(files, path, callback) {
+    function saveConvertFile(files, savePath, callback) {
+        var path = savePath + "/" + files[0].substr(pathPrefixLength, files[0].lastIndexOf("/"));
         $.post("/share/transfer?" + $.param({
             "async": 1,
             "ondup": "overwrite",
             "shareid": yunData.SHARE_ID,
-            "from": yunData.SHARE_UK,
-            "bdstoken": yunData.MYBDSTOKEN,
-            "app_id": yunData.FILEINFO[0].app_id,
-            "channel": "chunlei",
-            "clienttype": 0,
-            "web": 1
+            "from": yunData.SHARE_UK
         }), {
             "filelist": JSON.stringify(files),
-            "path": path + files[0].substr(pathPrefixLength, files[0].lastIndexOf("/"))
+            "path": path
         }, null, "json").done(function (json) {
             callback(json.errno, files, path);
             switch (json.errno) {
                 case 0:
-                    showToast("转存成功!", "MODE_SUCCESS");
                     // TODO(Simon): Track progress, avoid error 111.
                     break;
                 case 2:
@@ -275,17 +271,12 @@ var CONVERT = (function () {
         $.getJSON("/api/list", { "dir": path }).done(function (json) {
             if (json.errno == -9) {
                 $.post("/api/create?" + $.param({
-                    "a": "commit",
-                    "bdstoken": yunData.MYBDSTOKEN,
-                    "app_id": yunData.FILEINFO[0].app_id,
-                    "channel": "chunlei",
-                    "clienttype": 0,
-                    "web": 1
+                    "a": "commit"
                 }), {
                     "path": path,
                     "isdir": 1,
                     "size": "",
-                    "block_list": "%5B%5D",
+                    "block_list": "[]",
                     "method": "post"
                 }, null, "json").done(function (json) {
                     showToast("创建文件夹成功!", "MODE_SUCCESS");

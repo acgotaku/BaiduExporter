@@ -153,7 +153,7 @@
 
             var selectedFile = event.data.data;
             if (selectedFile.length == 0) {
-                showToast("先选择一下你要下载的文件哦", "failure");
+                showToast("请选择一下你要保存的文件哦", "failure");
                 return;
             }
 

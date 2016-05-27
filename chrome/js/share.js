@@ -125,9 +125,12 @@
 
             // Short path, we are at root folder,
             // so the only thing we can do is downloading all files.
-            if (path == "/" || path == undefined)
+            if (path == "/" || path == undefined) {
+                pathPrefixLength = 1;
                 return [{ isdir: true, path: yunData.PATH, id: yunData.FS_ID }];
+            }
 
+            pathPrefixLength = path.length + 1;
             return selected.map(function (index, item) {
                 item = $(item);
                 return {
@@ -144,18 +147,19 @@
         Downloader.reset();
 
         var selected = getSelected();
-        if (selected.length == 0)
-            showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
-        else {
-            for (var item of selected) {
-                if (item.isdir)
-                    Downloader.addFolder(item.path);
-                else
-                    Downloader.addFile(item.id);
-            }
-
-            Downloader.start();
+        if (selected.length == 0) {
+            showToast("请选择一下你要保存的文件哦", "MODE_CAUTION");
+            return;
         }
+
+        for (var item of selected) {
+            if (item.isdir)
+                Downloader.addFolder(item.path);
+            else
+                Downloader.addFile(item.id);
+        }
+
+        Downloader.start();
     }
 
     //设置要请求文件的POST数据

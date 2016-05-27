@@ -1,9 +1,10 @@
+var showToast;
+
 (function () {
     // 封装的百度的Toast提示消息
     // Type类型有
     // caution       警告  failure       失败  loading      加载 success      成功
     // MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
-    var showToast;
 
     if (typeof manifest == "object") {
         // New version

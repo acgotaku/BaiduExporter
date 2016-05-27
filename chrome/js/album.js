@@ -78,7 +78,7 @@ var ALBUM =(function(){
             var self = this;
             var file_info = $("#fileItems .on");
             if (file_info.length == 0) {
-                showToast("先选择一下你要下载的文件哦", "MODE_CAUTION");
+                showToast("请选择一下你要保存的文件哦", "MODE_CAUTION");
                 return;
             }
             var file_list=[];
