@@ -12,6 +12,8 @@ var HOME =function(){
     //两种导出模式 RPC模式 和 TXT模式
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
+    var encode = new Function("return " + yunData.sign2)();
+    var sign = btoa(encode(yunData.sign3, yunData.sign1)) ;
     var list = require("system-core:context/context.js").instanceForSystem.list;
     return {
         //绑定事件
@@ -48,14 +50,27 @@ var HOME =function(){
                 if (selectedFile[i].isdir == 1) {
                     self.getSelectFold(selectedFile[i].fs_id);
                 }else{
-                    self.getFilemetas(selectedFile[i].path);
+                    self.getFileById(selectedFile[i].fs_id,selectedFile[i].server_filename);
                 }
             }
         },
         //获取选择的文件夹
         getSelectFold:function(fs_id){
             var self=this;
-            var parameter = {url: "//"+window.location.host+"/api/list?dir="+encodeURIComponent(self.getCurrentPath()), dataType: "json", type: "GET"};
+            var params= new URLSearchParams();
+            params.append("order","time");
+            params.append("desc","1");
+            params.append("showempty","0");
+            params.append("web","1");
+            params.append("page","1");
+            params.append("num","1000");
+            params.append("dir",self.getCurrentPath());
+            params.append("bdstoken",yunData.MYBDSTOKEN);
+            params.append("type","dlink");
+            params.append("channel","chunlei");
+            params.append("app_id","250528");
+            params.append("clienttype","0");
+            var parameter = {url: "//"+window.location.host+"/api/list?"+params.toString(), dataType: "json", type: "GET"};
             CONNECT.HttpSend(parameter)
             .done(function(json, textStatus, jqXHR) {
                 setMessage("获取列表成功!", "success");
@@ -65,7 +80,7 @@ var HOME =function(){
                         if(array[i].isdir == 1){
                             self.getRecursiveFold(array[i].path);
                         }else{
-                            self.getFilemetas(array[i].path);
+                            self.getFileById(array[i].fs_id,array[i].server_filename,array[i].path);
                         }
                     }
                 }
@@ -80,7 +95,21 @@ var HOME =function(){
             var time=0;
             var self=this;
             var delay=parseInt(localStorage.getItem("rpc_delay"))||0;
-            var parameter = {url: "//"+window.location.host+"/api/list?dir="+encodeURIComponent(path), dataType: "json", type: "GET"};
+            var params= new URLSearchParams();
+            params.append("order","time");
+            params.append("desc","1");
+            params.append("showempty","0");
+            params.append("web","1");
+            params.append("page","1");
+            params.append("num","1000");
+            params.append("dir",path);
+            params.append("bdstoken",yunData.MYBDSTOKEN);
+            params.append("type","dlink");
+            params.append("channel","chunlei");
+            params.append("app_id","250528");
+            params.append("clienttype","0");
+
+            var parameter = {url: "//"+window.location.host+"/api/list?"+params.toString(), dataType: "json", type: "GET"};
             CONNECT.HttpSend(parameter)
             .done(function(json, textStatus, jqXHR) {
                 var array=json.list;
@@ -91,7 +120,7 @@ var HOME =function(){
                     if(array[i].isdir == 1){
                         delayLoopList(path,time);
                     }else{
-                        delayLoopFile(path,time);
+                        delayLoopFile(array[i].fs_id, array[i].server_filename,array[i].path ,time);
                     }
                 }
             })
@@ -105,13 +134,55 @@ var HOME =function(){
                 },time);
 
             }
-            function delayLoopFile(path,time){
+            function delayLoopFile(fs_id,server_filename,path,time){
                 setTimeout(function(){
-                    self.getFilemetas(path);
+                    self.getFileById(fs_id,server_filename,path);
                 },time);
             }
         },
         //根据文件路径获取文件的信息
+        getFileById:function(fs_id,file_name,file_path){
+            var self=this;
+            var params= new URLSearchParams();
+            params.append("sign",sign);
+            params.append("timestamp",yunData.timestamp);
+            params.append("fidlist",("["+fs_id +"]"));
+            params.append("bdstoken",yunData.MYBDSTOKEN);
+            params.append("type","dlink");
+            params.append("channel","chunlei");
+            params.append("web","1");
+            params.append("app_id","250528");
+            params.append("clienttype","0");
+            var curr_path=self.getCurrentPath();
+            if(curr_path == null || curr_path =="/"){
+                curr_path="";
+            }
+            var parameter = {url: "//"+window.location.host+"/api/download?" + params.toString() , dataType: "json", type: "GET"};
+            console.log(parameter);
+            CONNECT.HttpSend(parameter)
+            .done(function(json, textStatus, jqXHR) {
+                setMessage("获取文件信息成功!", "success");
+                var file=json.dlink;
+                var file_list = [];
+                //备用下载地址
+              //  var dlink ="http://"+"d.pcs.baidu.com"+"/rest/2.0/pcs/file?app_id=250528&method=download&check_blue=1&ec=1&path="+encodeURIComponent(target)+"&psl=216&taskcount=1&urlcount=3&p2sspd=86016";
+
+                    //这里文件名的操作是为了下载到相应的路径中去
+                var name = file_path == undefined ? file_name :file_path.slice(curr_path.length+1,file_path.length);
+                file_list.push({"name":self.getPath() + name, "link":file[0].dlink});
+                if(MODE =="TXT"){
+                    CORE.dataBox.fillData(file_list);
+                }else{
+                    var paths=CORE.parseAuth(RPC_PATH);
+                    var rpc_list =CORE.aria2Data(file_list,paths[0], paths[2]);
+                    self.generateParameter(rpc_list);
+                }
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                setMessage("获取File失败!", "failure");
+                console.log(jqXHR);
+            });
+        },
         getFilemetas:function(target){
             var self=this;
             var path=self.getCurrentPath();
