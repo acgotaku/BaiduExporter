@@ -4,7 +4,6 @@ var CONVERT = (function () {
     */
     const LIMIT = 2000;
 
-    const prefix = "/我的资源";
     var pathPrefixLength = 0;
 
     function getHashParameter(name) {
@@ -272,9 +271,6 @@ var CONVERT = (function () {
 
     //创建转存文件需要的文件夹
     function createFold(path, callback) {
-        var file_path = path;
-        path = prefix + path;
-
         //检测这个文件夹是否存在
         $.getJSON("/api/list", { "dir": path }).done(function (json) {
             if (json.errno == -9) {
@@ -293,7 +289,7 @@ var CONVERT = (function () {
                     "method": "post"
                 }, null, "json").done(function (json) {
                     showToast("创建文件夹成功!", "MODE_SUCCESS");
-                    callback(file_path);
+                    callback(path);
 
                     if (json.path != path && /\(\d+\)/.exec(json.path.substr(path.length))) {
                         setTimeout(function () {
@@ -302,7 +298,7 @@ var CONVERT = (function () {
                     }
                 });
             } else {
-                callback(file_path);
+                callback(path);
             }
         }).fail(function (xhr) {
             showToast("网络请求失败", "MODE_FAILURE");

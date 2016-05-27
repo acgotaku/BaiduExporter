@@ -28,8 +28,10 @@
         var currentTaskId = 0;
         // Paths of folders to be processed.
         var folders = [];
-        // Paths of files to be processed.
-        var files = [];
+        //x // Paths of files to be processed.
+        //x var files = [];
+        // { id: path } of files to be processed.
+        var files = {};
         var completedCount = 0;
         function getNextFile(taskId) {
             if (taskId != currentTaskId)
@@ -59,8 +61,8 @@
                         if (item.isdir)
                             folders.push(item.path);
                         else
-                            // files.push(item.fs_id);
-                            files.push(item.path);
+                            //x files.push(item.fs_id);
+                            files[item.fs_id] = item.path;
                     }
                 }).fail(function (xhr) {
                     showToast("网络请求失败", "MODE_FAILURE");
@@ -87,8 +89,8 @@
             folders.push(path);
         };
 
-        downloader.addFile = function (fileId) {
-            files.push(fileId);
+        downloader.addFile = function (id, path) {
+            files[id] = path;
         };
 
         downloader.start = function () {
@@ -100,7 +102,8 @@
         downloader.reset = function () {
             currentTaskId = 0;
             folders = [];
-            files = [];
+            //x files = [];
+            files = {};
             completedCount = 0;
         };
 
@@ -108,37 +111,17 @@
     })();
 
     function setFileData(files) {
-        //var type = files.length == 1 ? "dlink" : "batch";
-        //$.get("/api/download", {
-        //    "type": "dlink",
-        //    "fidlist": JSON.stringify(files),
-        //    "timestamp": yunData.timestamp,
-        //    "sign": btoa(new Function("return " + yunData.sign2)()(yunData.sign3, yunData.sign1)),
-        //    "bdstoken": yunData.MYBDSTOKEN,
-        //    "channel": "chunlei",
-        //    "clienttype": 0,
-        //    "web": 1,
-        //    "app_id": 250528
-        //}, null, "json").done(function (json) {
-        //    if (json.errno != 0) {
-        //        showToast("未知错误", "MODE_FAILURE");
-        //        console.log(json);
-        //        return;
-        //    }
-        //
-        //}).fail(function (xhr) {
-        //    showToast("未知错误", "MODE_FAILURE");
-        //    console.log(xhr);
-        //});
-
-        $.getJSON("/api/filemetas", {
-            "target": JSON.stringify(files),
-            "dlink": 1,
+        $.get("/api/download", {
+            "type": "dlink",
+            "fidlist": JSON.stringify(Object.keys(files)),
+            "timestamp": yunData.timestamp,
+            "sign": btoa(new Function("return " + yunData.sign2)()(yunData.sign3, yunData.sign1)),
             "bdstoken": yunData.MYBDSTOKEN,
             "channel": "chunlei",
             "clienttype": 0,
             "web": 1,
-        }).done(function (json) {
+            "app_id": 250528
+        }, null, "json").done(function (json) {
             if (json.errno != 0) {
                 showToast("未知错误", "MODE_FAILURE");
                 console.log(json);
@@ -146,8 +129,9 @@
             }
 
             var file_list = [];
-            for (var item of json.info) {
-                file_list.push({ name: item.path.substr(pathPrefixLength), link: item.dlink });
+            for (var item of json.dlink) {
+                var path = files[item.fs_id];
+                file_list.push({ name: path.substr(pathPrefixLength), link: item.dlink });
             }
 
             if (MODE == "TXT") {
@@ -162,6 +146,38 @@
             showToast("网络请求失败", "MODE_FAILURE");
             console.log(xhr);
         });
+
+        //x $.getJSON("/api/filemetas", {
+        //x     "target": JSON.stringify(files),
+        //x     "dlink": 1,
+        //x     "bdstoken": yunData.MYBDSTOKEN,
+        //x     "channel": "chunlei",
+        //x     "clienttype": 0,
+        //x     "web": 1,
+        //x }).done(function (json) {
+        //x     if (json.errno != 0) {
+        //x         showToast("未知错误", "MODE_FAILURE");
+        //x         console.log(json);
+        //x         return;
+        //x     }
+
+        //x     var file_list = [];
+        //x     for (var item of json.info) {
+        //x         file_list.push({ name: item.path.substr(pathPrefixLength), link: item.dlink.replace("chkbd=0", "chkbd=1&chkpc=et").replace("chkv=0", "chkv=1") });
+        //x     }
+
+        //x     if (MODE == "TXT") {
+        //x         CORE.dataBox.show();
+        //x         CORE.dataBox.fillData(file_list);
+        //x     } else {
+        //x         var paths = CORE.parseAuth(RPC_PATH);
+        //x         var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
+        //x         generateParameter(rpc_list);
+        //x     }
+        //x }).fail(function (xhr) {
+        //x     showToast("网络请求失败", "MODE_FAILURE");
+        //x     console.log(xhr);
+        //x });
     }
 
     window.addEventListener("message", function (event) {
@@ -181,8 +197,8 @@
                 if (item.isdir)
                     Downloader.addFolder(item.path);
                 else
-                    // Downloader.addFile(item.fs_id);
-                    Downloader.addFile(item.path);
+                    //x Downloader.addFile(item.path);
+                    Downloader.addFile(item.fs_id, item.path);
             }
 
             Downloader.start();
