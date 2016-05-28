@@ -6,7 +6,15 @@ var showToast;
     // caution       警告  failure       失败  loading      加载 success      成功
     // MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
 
-    if (typeof manifest == "object") {
+    if (typeof require == "undefined") {
+        showToast = function (message, type) {
+            Utilities.useToast({
+                toastMode: disk.ui.Toast[type],
+                msg: message,
+                sticky: false
+            })
+        };
+    } else if (typeof manifest == "object") {
         // New version
         var Context = require("system-core:context/context.js").instanceForSystem;
         showToast = function (message, type) {
@@ -59,5 +67,16 @@ var showToast;
         }
     });
 
-    window.postMessage({ type: "yunData", data: JSON.stringify(yunData) }, "*");
+    if (window.yunData)
+        window.postMessage({ type: "yunData", data: JSON.stringify(window.yunData) }, "*");
+    else if (window.disk.ui.album) {
+        var real = window.disk.ui.album.prototype.buildListView;
+        window.disk.ui.album.prototype.buildListView = function (list) {
+            window.postMessage({ type: "yunData", data: JSON.stringify(list) }, "*");
+            real.call(this, list);
+        }
+    }
+    else if (disk.util.ViewShareUtils) {
+        window.postMessage({ type: "yunData", data: disk.util.ViewShareUtils.viewShareData }, "*");
+    }
 })();

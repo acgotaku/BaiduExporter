@@ -1,5 +1,5 @@
-var ALBUM =(function(){
-    //网盘相册页面导出
+(function () {
+    //网盘专辑页面导出
     /*
     基本步骤是首先设定导出模式,文本模式的话
     只需要初始化文本框即可,RPC模式要设置好 RPC地址
@@ -9,107 +9,64 @@ var ALBUM =(function(){
 
     */
     //两种导出模式 RPC模式 和 TXT模式
-    var MODE="RPC";
-    var RPC_PATH="http://localhost:6800/jsonrpc";
-    var FileList=null;
-    var info = null;
-    return {
-        //绑定事件
-        init:function(){
-            var menu=CORE.addMenu.init("album");
-            var self=this;
-            info = disk.ui.album != undefined ? true : false;
-            self.getALLFileList();
-            CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
-            menu.on("click",".rpc_export_list",function(){
-                MODE="RPC";
-                RPC_PATH=$(this).attr("data-id");
-                if(info){
-                    self.getShareFile();
-                }else{
-                    self.getFilemetas();
-                }
+    var MODE = "RPC";
+    var RPC_PATH = "http://localhost:6800/jsonrpc";
+    var isSingleShare = window.location.pathname.includes("file");
 
-
-            });
-            menu.on("click","#aria2_download",function(){
-                MODE="TXT";
-                CORE.dataBox.init("share").show();
-                if(info){
-                    self.getShareFile();
-                }else{
-                    self.getFilemetas();
-                }
-            });
-        },
-
-        getFilemetas:function(){
-            var self = this;
-            var file_list=[];
-            file_list.push({"name":FileList.server_filename,"link":FileList.dlink});
-            self.selectMode(file_list);
-
-        },
-        //获得全部文件的信息
-        getALLFileList:function(){
-            var album_id=disk.getParam("album_id") ;
-            var query_uk= disk.getParam("uk") ;
-            var url = null;
-            if(info){
-                url = "//"+window.location.host+disk.ui.album.RestAPI.listFile + "?album_id=" + album_id+ "&query_uk=" + query_uk + "&start=" + ($(".page-input").eq(0).val() - 1) * 60 + "&limit=" + 60;
-            }else{
-                FileList = JSON.parse(disk.util.ViewShareUtils.viewShareData);
-                return;
-            }
-
-            var parameter = {url: url, dataType: "json", type: "GET"};
-            HttpSend(parameter)
-                .done(function(json, textStatus, jqXHR) {
-                    showToast("初始化成功!", "MODE_SUCCESS");
-                    FileList=json.list;
-                })
-                .fail(function(jqXHR, textStatus, errorThrown) {
-                    showToast("获取全部列表失败!", "MODE_FAILURE");
-                    console.log(textStatus);
-                });
-        },
-        //获得选中的文件
-        getShareFile:function(){
-            var self = this;
-            var file_info = $("#fileItems .on");
-            if (file_info.length == 0) {
+    // 获得选中的文件
+    function getShareFile() {
+        var file_list = [];
+        if (isSingleShare) {
+            file_list.push({ name: yunData.server_filename, link: yunData.dlink });
+        }
+        else {
+            var selected = $("#fileItems .on");
+            if (selected.length == 0) {
                 showToast("请选择一下你要保存的文件哦", "MODE_CAUTION");
                 return;
             }
-            var file_list=[];
-            for(var i = 0; i < file_info.length; i++){
-                var num = file_info.eq(i).attr("_position");
-                file_list.push({"name":FileList[num].server_filename,"link":FileList[num].dlink});
-            }
-            self.selectMode(file_list);
-        },
-        selectMode:function(file_list){
-            var self =this;
-            if(MODE =="TXT"){
-                CORE.dataBox.fillData(file_list);
-            }else{
-                var paths=CORE.parseAuth(RPC_PATH);
-                var rpc_list =CORE.aria2Data(file_list,paths[0], paths[2]);
-                self.generateParameter(rpc_list);
-            }
-        },
-        //生成请求参数 发送给后台 进行 http请求
-        generateParameter:function(rpc_list){
-            var paths=CORE.parseAuth(RPC_PATH);
-            for (var i = 0; i < rpc_list.length; i++) {
-                var parameter = {url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: {Authorization: paths[0]}};
-                sendToBackground("rpc_data",parameter);
-            }
 
+            for (var item of selected) {
+                var data = yunData[$(item).attr("_position")];
+                file_list.push({ name: data.server_filename, link: data.dlink });
+            }
         }
 
-    };
+        if (MODE == "TXT") {
+            CORE.dataBox.show();
+            CORE.dataBox.fillData(file_list);
+        } else {
+            var paths = CORE.parseAuth(RPC_PATH);
+            var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
+            generateParameter(rpc_list);
+        }
+    }
+
+    //生成请求参数 发送给后台 进行 http请求
+    function generateParameter(rpc_list) {
+        var paths = CORE.parseAuth(RPC_PATH);
+        for (var i = 0; i < rpc_list.length; i++) {
+            var parameter = { url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: { Authorization: paths[0] } };
+            sendToBackground("rpc_data", parameter, function (success) {
+                if (success)
+                    showToast("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+                else
+                    showToast("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+            });
+        }
+    }
+
+    CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
+
+    var menu = CORE.addMenu.init("album");
+    menu.on("click", ".rpc_export_list", function () {
+        MODE = "RPC";
+        RPC_PATH = $(this).data("id");
+        getShareFile();
+    });
+    menu.on("click", "#aria2_download", function () {
+        MODE = "TXT";
+        CORE.dataBox.init("share");
+        getShareFile();
+    });
 })();
-setTimeout(function(){
-    ALBUM.init();
-},600);
