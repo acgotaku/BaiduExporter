@@ -89,8 +89,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
 });
 
-// Promise style `chrome.cookies.get`
-var getCookie = detail => new Promise(resolve => chrome.cookies.get(detail, resolve));
+// Promise style `chrome.cookies.get()`
+function getCookie(detail) {
+    return new Promise(function (resolve) {
+        chrome.cookies.get(detail, resolve);
+    });
+};
 
 //async function getCookies(details)
 //{
@@ -100,20 +104,23 @@ var getCookie = detail => new Promise(resolve => chrome.cookies.get(detail, reso
 //    return obj;
 //}
 
-var getCookies = details => new Promise(resolve => Promise.all(details.map(item => getCookie(item))).then(cookies => {
-    var obj = {};
-    for (var item of cookies)
-        if (item != null)
-            obj[item.name] = item.value;
-    resolve(obj);
-}));
+function getCookies(details) {
+    var list = details.map(item => getCookie(item));
+    Promise.all(list).then(function (cookies) {
+        var obj = {};
+        for (var item of cookies)
+            if (item != null)
+                obj[item.name] = item.value;
+        resolve(obj);
+    });
+}
 
 //弹出chrome通知
 function showNotification(id, opt) {
     if (!chrome.notifications)
         return;
 
-    var notification = chrome.notifications.create(id, opt, function (notifyId) { return notifyId; });
+    chrome.notifications.create(id, opt, function () { });
     setTimeout(function () {
         chrome.notifications.clear(id, function () { });
     }, 5000);
