@@ -20,7 +20,7 @@ var HOME =function(){
         init:function(){
             var menu=CORE.addMenu.init("home");
             var self=this;
-            CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "BAIDUID"}]);
+            CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
             var rpcList = $(".rpc_export_list");
             for (var i = rpcList.length - 1; i >= 0; i--) {
                 rpcList[i].addEventListener("click",function() {
