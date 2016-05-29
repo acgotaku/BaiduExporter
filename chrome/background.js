@@ -105,13 +105,15 @@ function getCookie(detail) {
 //}
 
 function getCookies(details) {
-    var list = details.map(item => getCookie(item));
-    Promise.all(list).then(function (cookies) {
-        var obj = {};
-        for (var item of cookies)
-            if (item != null)
+    return new Promise(function (resolve) {
+        var list = details.map(item => getCookie(item));
+        Promise.all(list).then(function (cookies) {
+            var obj = {};
+            for (var item of cookies)
+                if (item != null)
                 obj[item.name] = item.value;
-        resolve(obj);
+            resolve(obj);
+        });
     });
 }
 
