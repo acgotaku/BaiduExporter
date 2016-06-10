@@ -86,6 +86,14 @@ var CORE=(function(){
         setCookies:function(value){
             cookies=value;
         },
+        getCookie:function(key){
+            for(var i=0,len = cookies.length;i<len;i++){
+                if(cookies[i] && cookies[i][key]){
+                    return cookies[i][key];
+                }
+            }
+            return null;
+        },
         //获取 http header信息
         getHeader:function(type){
             var addheader = [];
