@@ -13,14 +13,18 @@ var HOME =function(){
     var MODE="RPC";
     var RPC_PATH="http://localhost:6800/jsonrpc";
     var encode = new Function("return " + yunData.sign2)();
-    var sign = btoa(encode(yunData.sign3, yunData.sign1)) ;
+    var sign = btoa(encode(yunData.sign5, yunData.sign1)) ;
     var list = require("system-core:context/context.js").instanceForSystem.list;
     return {
         //绑定事件
         init:function(){
             var menu=CORE.addMenu.init("home");
             var self=this;
-            CORE.requestCookies([{"site": "http://pan.baidu.com/", "name": "BDUSS"},{"site": "http://pcs.baidu.com/", "name": "pcsett"}]);
+            CORE.requestCookies([
+                {"site": "http://pan.baidu.com/", "name": "BDUSS"},
+                {"site": "http://pan.baidu.com/", "name": "BAIDUID"},
+                {"site": "http://pcs.baidu.com/", "name": "pcsett"}
+            ]);
             var rpcList = $(".rpc_export_list");
             for (var i = rpcList.length - 1; i >= 0; i--) {
                 rpcList[i].addEventListener("click",function() {
@@ -142,6 +146,28 @@ var HOME =function(){
         },
         //根据文件路径获取文件的信息
         getFileById:function(fs_id,file_name,file_path){
+            //计算logid
+            var a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/~！@#￥%……&", s = String.fromCharCode, u = function (n) {
+                if (n.length < 2) {
+                    var e = n.charCodeAt(0);
+                    return 128 > e ? n : 2048 > e ? s(192 | e >>> 6) + s(128 | 63 & e) : s(224 | e >>> 12 & 15) + s(128 | e >>> 6 & 63) + s(128 | 63 & e)
+                }
+                var e = 65536 + 1024 * (n.charCodeAt(0) - 55296) + (n.charCodeAt(1) - 56320);
+                return s(240 | e >>> 18 & 7) + s(128 | e >>> 12 & 63) + s(128 | e >>> 6 & 63) + s(128 | 63 & e)
+            }, f = /[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g, l = function (n) {
+                return (n + "" + Math.random()).replace(f, u)
+            }, d = function (n) {
+                var e = [0, 2, 1][n.length % 3], o = n.charCodeAt(0) << 16 | (n.length > 1 ? n.charCodeAt(1) : 0) << 8 | (n.length > 2 ? n.charCodeAt(2) : 0), t = [a.charAt(o >>> 18), a.charAt(o >>> 12 & 63), e >= 2 ? "=" : a.charAt(o >>> 6 & 63), e >= 1 ? "=" : a.charAt(63 & o)];
+                return t.join("")
+            }, g = function (n) {
+                return n.replace(/[\s\S]{1,3}/g, d)
+            }, m = function () {
+                return g(l((new Date).getTime()))
+            }, h = function (n, e) {
+                return e ? m(String(n)).replace(/[+\/]/g, function (n) {
+                    return "+" == n ? "-" : "_"
+                }).replace(/=/g, "") : m(String(n))
+            };
             var self=this;
             var params= new URLSearchParams();
             params.append("sign",sign);
@@ -153,6 +179,7 @@ var HOME =function(){
             params.append("web","1");
             params.append("app_id","250528");
             params.append("clienttype","0");
+            params.append("logid", h(CORE.getCookie('BAIDUID')));
             var curr_path=self.getCurrentPath();
             if(curr_path == null || curr_path =="/"){
                 curr_path="";
