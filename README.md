@@ -1,4 +1,4 @@
-# BaiduExporter
+# BaiduExporter （暂停更新）
 
 可以方便的把百度网盘的下载地址导出到 aria2/aria2-rpc，支持 YAAW。
 
