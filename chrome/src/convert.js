@@ -12,11 +12,9 @@
     const LIMIT = 2000;
 
     var pathPrefixLength = 0;
-
     function showToast(message, type){
         window.postMessage({ type: "show_toast", data: { message: message, type: type } }, "*");
     }
-    
     function getHashParameter(name) {
         var hash = window.location.hash;
         hash = hash.substr(1).split("&");

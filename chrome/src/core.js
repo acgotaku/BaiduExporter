@@ -1,6 +1,6 @@
 var CORE = (function () {
-    const version = "0.8.1";
-    const update_date = "2016/05/28";
+    const version = "0.8.2";
+    const update_date = "2016/07/15";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
     var cookies = null;
@@ -51,7 +51,7 @@ var CORE = (function () {
                 if (event.data.type && (event.data.type == "config_data")) {
                     for (var key in event.data.data) {
                         localStorage.setItem(key, event.data.data[key]);
-                        if (event.data.data["rpc_sync"] == true) {
+                        if (event.data.data["rpc_sync"] === true) {
                             saveSyncData(key, event.data.data[key]);
                         } else {
                             chrome.storage.sync.clear();
@@ -127,7 +127,7 @@ var CORE = (function () {
                 }
                 var aria2_btn = $("<span>").attr("id", "export_menu");
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").hide().appendTo(aria2_btn);
-                var aria2_download = $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
+                $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
                 if (type == "home") {
                     aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-device-tool"), $("<span>").addClass("text").text("导出下载"))));
@@ -252,7 +252,7 @@ var CORE = (function () {
                     }
                 }
                 config_data["rpc_list"] = JSON.stringify(rpc_list);
-                sendToBackground("config_data", config_data);
+                CORE.sendToBackground("config_data", config_data);
                 window.postMessage({ type: "config_data", data: config_data }, "*");
             },
             //根据配置数据 更新 设置菜单
@@ -386,18 +386,17 @@ var CORE = (function () {
             init: function (type) {
                 if ($("#download_ui").length != 0)
                     return this;
-                var self = this;
                 var download_ui = $("<div>").attr("id", "download_ui").append('<div class="top"><a href="javascript:;" title="关闭" id="aria2_download_close" class="close"></a><h3><em></em>ARIA2导出</h3></div>');
                 var content_ui = $("<div>").addClass("content").attr("id", "content_ui").appendTo(download_ui);
                 download_ui.hide().appendTo($("body"));
                 content_ui.empty();
                 var download_menu = $("<div>").css({ "margin-bottom": "10px" }).appendTo(content_ui);
-                var aria2c_btn = $("<a>").attr("id", "aria2c_btn").attr({ "download": "aria2c.down", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
-                var idm_btn = $("<a>").attr("id", "idm_btn").attr({ "download": "idm.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
-                var download_txt_btn = $("<a>").attr("id", "download_txt_btn").attr({ "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
-                var copy_txt_btn = $("<a>").attr("id", "copy_txt_btn").attr({ "href": "javascript:void(0);", "data": "" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(download_menu);
+                $("<a>").attr("id", "aria2c_btn").attr({ "download": "aria2c.down", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
+                $("<a>").attr("id", "idm_btn").attr({ "download": "idm.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+                $("<a>").attr("id", "download_txt_btn").attr({ "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+                $("<a>").attr("id", "copy_txt_btn").attr({ "href": "javascript:void(0);", "data": "" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(download_menu);
                 // Disable spellcheck and resize for textarea.
-                var download_link = $("<textarea>").attr({ "id": "download_link", "wrap": "off", "spellcheck": false }).css({ "width": "100%", "overflow": "scroll", "height": "180px", "resize": "none" }).appendTo(content_ui);
+                $("<textarea>").attr({ "id": "download_link", "wrap": "off", "spellcheck": false }).css({ "width": "100%", "overflow": "scroll", "height": "180px", "resize": "none" }).appendTo(content_ui);
                 CORE.setCenter($("#download_ui"));
                 $("#download_ui").on("click", "#aria2_download_close", function () {
                     // Clean up when closing download dialog.

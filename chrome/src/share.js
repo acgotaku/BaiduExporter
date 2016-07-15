@@ -98,7 +98,7 @@
             delay = parseInt(localStorage.getItem("rpc_delay")) || 300;
             currentTaskId = new Date().getTime();
             getNextFile(currentTaskId);
-        }
+        };
 
         downloader.reset = function () {
             currentTaskId = 0;
@@ -286,7 +286,7 @@
                 }
                 else {
                     // For multiple files, save relates to share base folder.
-                    for (var i =0;i<json.list.length;i++) {
+                    for (var i = 0;i<json.list.length;i++) {
                         var item = json.list[i];
                         file_list.push({ name: item.path.substr(pathPrefixLength), link: item.dlink });
                     }
@@ -346,7 +346,6 @@
             CORE.dataBox.onClose(Downloader.reset);
             getShareFile();
         });
-        /*
         setTimeout(function () {
             // Hook transfering files function for multiple file share page
             if (yunData.SHAREPAGETYPE != "single_file_page") {
@@ -355,7 +354,6 @@
                 document.body.appendChild(s);
             }
         }, 1000);
-        */
         CORE.showToast("初始化成功!", "MODE_SUCCESS");
     });
 })();
