@@ -327,6 +327,7 @@
 
     // Init
     var CORE = require("./core");
+    CORE.init();
     CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
 
     // Get `BDCLND` cookie for private share.

@@ -1,6 +1,6 @@
 var CORE = (function () {
-    const version = "0.8.2";
-    const update_date = "2016/07/15";
+    const version = "0.8.3";
+    const update_date = "2016/07/17";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
     var cookies = null;
