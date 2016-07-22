@@ -1,6 +1,6 @@
 var CORE = (function () {
-    const version = "0.8.3";
-    const update_date = "2016/07/17";
+    const version = "0.8.4";
+    const update_date = "2016/07/22";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
     var cookies = null;
@@ -99,7 +99,7 @@ var CORE = (function () {
         //解析 RPC地址 返回验证数据 和地址
         parseAuth: function (url) {
             var parseURL = new URL(url);
-            var auth_str = (parseURL.username != "") ? (parseURL.username + ":" +parseURL.password) : null;
+            var auth_str = (parseURL.username != "") ? (parseURL.username + ":" +decodeURI(parseURL.password)) : null;
             var options = [];
             if (auth_str) {
                 if (auth_str.indexOf("token:") != 0) {
