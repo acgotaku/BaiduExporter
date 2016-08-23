@@ -1,1 +1,140 @@
-!function(t){function e(s){if(i[s])return i[s].exports;var o=i[s]={exports:{},id:s,loaded:!1};return t[s].call(o.exports,o,o.exports,e),o.loaded=!0,o.exports}var i={};return e.m=t,e.c=i,e.p="",e(0)}([function(t,e){var i;!function(){if("undefined"==typeof window.require)i=function(t,e){Utilities.useToast({toastMode:disk.ui.Toast[e],msg:t,sticky:!1})};else if("object"==typeof manifest){var t=window.require("system-core:context/context.js").instanceForSystem;i=function(e,i){i.startsWith("MODE")&&(i=i.split("_")[1].toLowerCase()),t.ui.tip({mode:i,msg:e})},window.addEventListener("message",function(e){e.source==window&&"get_selected"==e.data.type&&window.postMessage({type:"selected",data:t.list.getSelected()},"*")})}else{var e=window.require("common:widget/toast/toast.js");i=function(t,i){e.obtain.useToast({toastMode:e.obtain[i],msg:t,sticky:!1})}}if(window.addEventListener("message",function(t){if(t.source==window&&"show_toast"==t.data.type){var e=t.data.data;i(e.message,e.type);var s=$("#export_menu");if(0!=s.length)try{s.parent()[0].removeChild=function(){console.log("Remove me? Naive!")}}catch(o){console.log("Unable to hook removeChild")}}}),window.yunData)if(window.yunData.sign2){var s=window.require("disk-system:widget/data/yunData.js").get();window.postMessage({type:"yunData",data:JSON.stringify(s)},"*")}else window.postMessage({type:"yunData",data:JSON.stringify(window.yunData)},"*");else if(window.disk.ui.album){var o=window.disk.ui.album.prototype.buildListView;window.disk.ui.album.prototype.buildListView=function(t){window.postMessage({type:"yunData",data:JSON.stringify(t)},"*"),o.call(this,t)}}else disk.util.ViewShareUtils&&window.postMessage({type:"yunData",data:disk.util.ViewShareUtils.viewShareData},"*")}()}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports) {
+
+	var showToast;
+
+	(function () {
+	    // 封装的百度的Toast提示消息
+	    // Type类型有
+	    // caution       警告  failure       失败  loading      加载 success      成功
+	    // MODE_CAUTION  警告  MODE_FAILURE  失败  MODE_LOADING 加载 MODE_SUCCESS 成功
+
+	    if (typeof window.require == "undefined") {
+	        showToast = function (message, type) {
+	            Utilities.useToast({
+	                toastMode: disk.ui.Toast[type],
+	                msg: message,
+	                sticky: false
+	            })
+	        };
+	    } else if (typeof manifest == "object") {
+	        // New version
+	        var Context = window.require("system-core:context/context.js").instanceForSystem;
+	        Context.log.send=function(e){};
+	        showToast = function (message, type) {
+	            if (type.startsWith("MODE")) {
+	                type = type.split("_")[1].toLowerCase();
+	            }
+	            Context.ui.tip({
+	                mode: type,
+	                msg: message
+	            });
+	        };
+
+	        window.addEventListener("message", function (event) {
+	            if (event.source != window)
+	                return;
+
+	            if (event.data.type == "get_selected") {
+	                window.postMessage({ type: "selected", data: Context.list.getSelected() }, "*");
+	            }
+	        });
+	    } else {
+	        var Toast = window.require("common:widget/toast/toast.js");
+	        showToast = function (message, type) {
+	            Toast.obtain.useToast({
+	                toastMode: Toast.obtain[type],
+	                msg: message,
+	                sticky: false
+	            });
+	        };
+	    }
+
+	    window.addEventListener("message", function (event) {
+	        if (event.source != window)
+	            return;
+
+	        if (event.data.type == "show_toast") {
+	            var request = event.data.data;
+	            showToast(request.message, request.type);
+
+	            var button = $("#export_menu");
+	            if (button.length != 0) {
+	                try {
+	                    button.parent()[0].removeChild = function () {
+	                        console.log("Remove me? Naive!");
+	                    };
+	                    Object.defineProperty(button.parent()[0], "removeChild", { writable: false} );
+	                } catch (e) {
+	                    console.log("Unable to hook removeChild");
+	                }
+	            }
+	        }
+	    });
+
+	    if (window.yunData) {
+	        if (window.yunData.sign2) {
+	            var yunData = window.require('disk-system:widget/data/yunData.js').get();
+	            window.postMessage({ type: "yunData", data: JSON.stringify(yunData) }, "*");
+	        }
+	        else {
+	            window.postMessage({ type: "yunData", data: JSON.stringify(window.yunData) }, "*");
+	        }
+	    }
+	    else if (window.disk.ui.album) {
+	        var real = window.disk.ui.album.prototype.buildListView;
+	        window.disk.ui.album.prototype.buildListView = function (list) {
+	            window.postMessage({ type: "yunData", data: JSON.stringify(list) }, "*");
+	            real.call(this, list);
+	        }
+	    }
+	    else if (disk.util.ViewShareUtils) {
+	        window.postMessage({ type: "yunData", data: disk.util.ViewShareUtils.viewShareData }, "*");
+	    }
+	})();
+
+/***/ }
+/******/ ]);

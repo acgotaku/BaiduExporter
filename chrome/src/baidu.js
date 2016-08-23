@@ -17,6 +17,7 @@ var showToast;
     } else if (typeof manifest == "object") {
         // New version
         var Context = window.require("system-core:context/context.js").instanceForSystem;
+        Context.log.send=function(e){};
         showToast = function (message, type) {
             if (type.startsWith("MODE")) {
                 type = type.split("_")[1].toLowerCase();
@@ -60,6 +61,7 @@ var showToast;
                     button.parent()[0].removeChild = function () {
                         console.log("Remove me? Naive!");
                     };
+                    Object.defineProperty(button.parent()[0], "removeChild", { writable: false} );
                 } catch (e) {
                     console.log("Unable to hook removeChild");
                 }
