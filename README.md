@@ -16,7 +16,7 @@
 
 全面支持 Chrome, Firefox, Edge 和 Safari：
 
-* [Chrome](https://chrome.google.com/webstore/detail/baiduexporter/mjaenbjdjmgolhoafkohbhhbaiedbkno)
+* Chrome : Click **Settings** -> **Extensions** -> Check **Developer mode**-> **Load unpacked extension**, navigate to the `chrome` folder, click OK.
 * [Firefox](https://addons.mozilla.org/zh-CN/firefox/addon/baiduexporter)
 * [Firefox(XPI)](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/firefox/BaiduExporter.xpi)：下载后打开 Firefox，Ctrl/Command + O 打开选择文件对话框选中 XPI 包即可安装。
 * [Safari](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/safari/BaiduExporter.safariextz)：下载后双击安装即可。
