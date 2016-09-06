@@ -339,9 +339,12 @@ var CORE = (function () {
                 return header;
             } else if (type == "idm_txt") {
                 for (i = 0; i < addheader.length; i++) {
-                    header += " header=" + (addheader[i]) + " \n";
+                    if(addheader[i].indexOf("Referer") != 0){
+                        header +=  (addheader[i].split(": ")[0].toLowerCase()+": "+addheader[i].split(": ")[1]) + "\n";
+                    }
                 }
-                return header;
+                
+                return header.replace(/\n$/, "");
             } else {
                 return addheader;
             }
@@ -456,9 +459,9 @@ var CORE = (function () {
                         idm_txt.push([
                             "<",
                             file_list[i].link,
-                            " cookie: " + CORE.getHeader("idm_txt"),
-                            " out=" + file_list[i].name,
-                            " >"
+                            CORE.getHeader("idm_txt"),
+                            "out=" + file_list[i].name,
+                            ">"
                         ].join("\r\n"));
                         down_txt.push(file_list[i].link + "\n");
                     }
@@ -470,7 +473,7 @@ var CORE = (function () {
                     }
                     else {
                         $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
-                        $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("")));
+                        $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("\r\n")));
                         $("#download_txt_btn").attr("href", $("#download_txt_btn").attr("href") + encodeURIComponent(down_txt.join("")));
                     }
                     $("#copy_txt_btn").attr("data", $("#copy_txt_btn").attr("data") + down_txt.join(""));
