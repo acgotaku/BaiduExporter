@@ -109,19 +109,19 @@
 
         return downloader;
     })();
+    window.addEventListener("message", function (event) {
+        if (event.source != window)
+            return;
 
-    function getSelected() {
-        if (yunData.SHAREPAGETYPE == "single_file_page") {
-            return [{ isdir: false, path: yunData.PATH, id: yunData.FS_ID }];
-        }
-        else {
-            // TODO(Simon): Download all files by default?
-            // Maybe we can switch the button content between "导出全部" and "导出所选".
-            var selected = $(".chked").closest(".item");
-            if (selected.length == 0)
-                return [];
+        if (event.data.type == "selected") {
+            Downloader.reset();
 
-            var path = getHashParameter("path");
+            var selectedFile = event.data.data;
+            if (selectedFile.length == 0) {
+                CORE.showToast("请选择一下你要保存的文件哦", "failure");
+                return;
+            }
+            var path = getHashParameter("parentPath");
 
             // Short path, we are at root folder,
             // so the only thing we can do is downloading all files.
@@ -133,36 +133,32 @@
             }else{
                 pathPrefixLength = path.length + 1;
             }
-            return selected.map(function (index, item) {
-                item = $(item);
-                return {
-                    isdir: item.data("extname") == "dir",
-                    path: path + "/" + item.find(".name-text").data("name"),
-                    id: item.data("id")
-                };
-            });
+
+            for (var i = 0; i < selectedFile.length; i++) {
+                var item = selectedFile[i];
+                if (item.isdir)
+                    Downloader.addFolder(item.path);
+                else
+                    Downloader.addFile(item.fs_id, path + "/" + item.server_filename);
+            }
+
+            Downloader.start();
+        }
+    });
+    function getSelected() {
+        if (yunData.SHAREPAGETYPE == "single_file_page") {
+            return [{ isdir: false, path: yunData.PATH, id: yunData.FS_ID }];
+        }
+        else {
+            // TODO(Simon): Download all files by default?
+            // Maybe we can switch the button content between "导出全部" and "导出所选".
+            window.postMessage({ "type": "get_selected" }, "*");
         }
     }
 
     //获得选中的文件
     function getShareFile() {
-        Downloader.reset();
-
-        var selected = getSelected();
-        if (selected.length == 0) {
-            CORE.showToast("请选择一下你要保存的文件哦", "MODE_CAUTION");
-            return;
-        }
-
-        for (var i =0;i<selected.length;i++) {
-            var item = selected[i];
-            if (item.isdir)
-                Downloader.addFolder(item.path);
-            else
-                Downloader.addFile(item.id);
-        }
-
-        Downloader.start();
+        getSelected();
     }
 
     //设置要请求文件的POST数据

@@ -1,4 +1,5 @@
-#setting_div, #download_ui {
+#setting_div,
+#download_ui {
     border: 3px solid #999;
     background: #FFF;
     width: 600px;
@@ -23,21 +24,21 @@
     display: inline-block;
 }
 
-    .save-button em {
-        position: absolute;
-        left: 10px;
-        top: 8px;
-    }
+.save-button em {
+    position: absolute;
+    left: 10px;
+    top: 8px;
+}
 
-    .save-button b {
-        color: #666;
-        padding-right: 10px;
-        height: 34px;
-        line-height: 34px;
-        text-decoration: none;
-        display: block;
-        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMUAAAAiCAYAAADveR3KAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwLBCo75CTjigAAAT5JREFUeNrt2Ttug0AUheEzPAqn4tGwEPbAmtkDO0AyqRCNoYsLGMZNjBUEkVJF1vxfSYN0NVfn3hkzL4uz86yv+114T/M8K47jt//Hf/u4XBTGsaLPrlPTNMqzjNMFr93GUWVZKmqaRlVVKU1TqgKvTdOkuq4VSVKSJHLOURV4LUkSSVJAKYCfaApgJ5LE6ARIMsaQFMBpUqwkBbAlBEkBsGgDx54TE00BHO0Ubl2pBLxngoCkAM6TgtsnQIZFGzhGUwDfnrt1tP8AeDs+hSFJAZyOT6QE8LpwIimAnW2nsKQFfG8GHu+AX5LCrqtWkgIgKYDTpiAlgNctLEkBMD4BNAXwJ9s7BXsFfGfZKYCTpMizTMMwqCgKqgGv9X2vPMtk2rZ13fWq2zhSFXivLEsZa61bloVqwHvGGJkg0APD/WsWsNiZMwAAAABJRU5ErkJggg==') no-repeat right 0;
-    }
+.save-button b {
+    color: #666;
+    padding-right: 10px;
+    height: 34px;
+    line-height: 34px;
+    text-decoration: none;
+    display: block;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMUAAAAiCAYAAADveR3KAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwLBCo75CTjigAAAT5JREFUeNrt2Ttug0AUheEzPAqn4tGwEPbAmtkDO0AyqRCNoYsLGMZNjBUEkVJF1vxfSYN0NVfn3hkzL4uz86yv+114T/M8K47jt//Hf/u4XBTGsaLPrlPTNMqzjNMFr93GUWVZKmqaRlVVKU1TqgKvTdOkuq4VSVKSJHLOURV4LUkSSVJAKYCfaApgJ5LE6ARIMsaQFMBpUqwkBbAlBEkBsGgDx54TE00BHO0Ubl2pBLxngoCkAM6TgtsnQIZFGzhGUwDfnrt1tP8AeDs+hSFJAZyOT6QE8LpwIimAnW2nsKQFfG8GHu+AX5LCrqtWkgIgKYDTpiAlgNctLEkBMD4BNAXwJ9s7BXsFfGfZKYCTpMizTMMwqCgKqgGv9X2vPMtk2rZ13fWq2zhSFXivLEsZa61bloVqwHvGGJkg0APD/WsWsNiZMwAAAABJRU5ErkJggg==') no-repeat right 0;
+}
 
 .top .close {
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwLAhwxiWDnUwAAAP9JREFUOMvtkE1uwjAQhd9UkSxl4RvAIr5VOABVfIDS8lP6J2DZRSJygHKNchFnEW4wi0hZTVdYSVpIu6sQb+c39ud5D7jq34m6hojINs9RlgcMhwOM4hhaa3+PmeVjt/Pz2/EYROTnwbcfiIiZZbXeYP+5R1kewMyitfZ+4RwiYzCK4xbsxw2bmzQfW5sgTTN/ns+mCMOQeiN34z9MZyic815kDO4nd60amro5WzARWZsgMsbDrE1OwnqBzCzHmABQOIc0zcDM8mdgt8P3LEdkDArnsFpvTkKD38COndV1Lcun5xa0Gz/ogy0fF1BKEQAopaiqKnl5fTsLverS9QXS7puw76aeiwAAAABJRU5ErkJggg==') no-repeat scroll 0 0 transparent;
@@ -49,7 +50,8 @@
     position: absolute;
 }
 
-.top h3, .close {
+.top h3,
+.close {
     height: 42px;
     line-height: 40px;
 }
@@ -74,9 +76,11 @@
     box-shadow: 0 0 3px #C6C6C6;
     -webkit-box-shadow: 0 0 3px #C6C6C6;
 }
-
+tr>td:first-child{
+    width: 110px;
+}
 .input-large {
-    width: 85%;
+    width: 80%;
 }
 
 .input-medium {
@@ -144,11 +148,13 @@ a {
     display: inline-block;
 }
 
-    .button:hover, .button:visited, .button:active {
-        background: #fafafa;
-        color: #333;
-        text-decoration: none;
-    }
+.button:hover,
+.button:visited,
+.button:active {
+    background: #fafafa;
+    color: #333;
+    text-decoration: none;
+}
 
 .save-button .menu {
     position: absolute;
@@ -162,18 +168,18 @@ a {
     z-index: 100;
 }
 
-    .save-button .menu a {
-        height: 24px;
-        line-height: 24px;
-        display: block;
-        color: #666;
-    }
+.save-button .menu a {
+    height: 24px;
+    line-height: 24px;
+    display: block;
+    color: #666;
+}
 
-        .save-button .menu a:hover {
-            background: #e4eefe;
-            cursor: pointer;
-            text-decoration: none;
-        }
+.save-button .menu a:hover {
+    background: #e4eefe;
+    cursor: pointer;
+    text-decoration: none;
+}
 
 #download_ui > .content {
     padding: 10px 20px;
