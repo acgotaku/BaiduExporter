@@ -158,7 +158,20 @@
 
     //获得选中的文件
     function getShareFile() {
-        getSelected();
+        Downloader.reset();
+
+        var selected = getSelected();
+        if (selected) {
+            for (var i =0;i<selected.length;i++) {
+                var item = selected[i];
+                if (item.isdir)
+                    Downloader.addFolder(item.path);
+                else
+                    Downloader.addFile(item.id);
+            }
+
+            Downloader.start();
+        }
     }
 
     //设置要请求文件的POST数据
