@@ -453,7 +453,8 @@ var CORE = (function () {
                             " out=" + file_list[i].name,
                             " continue=true",
                             " max-connection-per-server=10",
-                            "  split=10",
+                            " split=10",
+                            " min-split-size=1M",
                             "\n"
                         ].join("\n"));
                         idm_txt.push([
