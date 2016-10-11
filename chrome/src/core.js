@@ -130,19 +130,22 @@ var CORE = (function () {
                 $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
                 if (type == "home") {
-                    aria2_btn.addClass("g-dropdown-button button-open").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"), $("<span>").addClass("text").text("导出下载"))));
+                    aria2_btn.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"), $("<span>").addClass("text").text("导出下载"))));
                     $(".g-dropdown-button").eq(3).after(aria2_btn);
                 } else if (type == "share") {
-                    aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
+                    // aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
+                    aria2_btn.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"), $("<span>").addClass("text").text("导出下载"))));
                     $('a[data-button-id="b3"]').parent().prepend(aria2_btn);
                 } else if (type == "album") {
                     aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $("#albumFileSaveKey, #emphsizeButton").parent().prepend(aria2_btn);
                 }
                 aria2_btn.mouseenter(function () {
+                    aria2_btn.toggleClass("button-open");
                     list.show();
                 });
                 aria2_btn.mouseleave(function () {
+                    aria2_btn.toggleClass("button-open");
                     list.hide();
                 });
                 config.click(function () {
