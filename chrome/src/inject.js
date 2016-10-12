@@ -8,8 +8,8 @@ function requestAddScript(name) {
     });
 }
 
-$(function () {
-    window.addEventListener("message", function (event) {
+$(function() {
+    window.addEventListener("message", function(event) {
         if (event.source != window)
             return;
 
@@ -25,9 +25,15 @@ $(function () {
                 requestAddScript("share");
         }
     });
-    window.addEventListener("load", function(){
+
+    function addBaiduJS() {
         var s = document.createElement("script");
         s.src = chrome.runtime.getURL("js/baidu.js");
         document.body.appendChild(s);
-    });
+    }
+    if (document.readyState === "complete") {
+        addBaiduJS();
+    } else {
+        window.addEventListener('load', addBaiduJS);
+    }
 });
