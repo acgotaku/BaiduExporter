@@ -134,6 +134,7 @@ var CORE = (function () {
                     $(".g-dropdown-button").eq(3).after(aria2_btn);
                 } else if (type == "share") {
                     // aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
+                    $(".bar").css("position","absolute");
                     aria2_btn.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"), $("<span>").addClass("text").text("导出下载"))));
                     $('a[data-button-id="b3"]').parent().prepend(aria2_btn);
                 } else if (type == "album") {

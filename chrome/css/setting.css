@@ -195,3 +195,6 @@ a {
     display: table;
     background-color: rgb(250, 250, 250);
 }
+#aria2_list{
+    z-index: 9999;
+}
