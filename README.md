@@ -34,11 +34,7 @@
 
 ## Tips
 
-想加快百度网盘的加载请用各种屏蔽插件 添加 `*monitor.jpg?xcode` 和 `http://127.0.0.1:1000*/guanjia*` 规则.  
-详见 : [Issue 142](https://github.com/acgotaku/BaiduExporter/issues/142) 和 [Issue 140](https://github.com/acgotaku/BaiduExporter/issues/140)
-
-关于限速，目前请使用这个 UA：
-`netdisk;Chrome Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36`
+不想每次开启Chrome都提示禁用请看这个帖子：[Guide on Packaging and Import Baidu Exporter to Chrome](https://hencolle.com/2016/10/16/baidu_exporter/)
 
 ## License
 
