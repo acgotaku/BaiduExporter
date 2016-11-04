@@ -177,7 +177,7 @@
     var pathPrefixLength;
 
     function getSelected() {
-        var path = getHashParameter("list/path");
+        var path = getHashParameter("path");
         if (path == undefined || path == "/") {
             pathPrefixLength = 1;
         } else {
