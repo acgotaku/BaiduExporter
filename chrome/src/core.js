@@ -466,7 +466,7 @@ var CORE = (function () {
                             file_list[i].link,
                             CORE.getHeader("idm_txt"),
                             "out=" + file_list[i].name,
-                            ">\n"
+                            ">\r\n"
                         ].join("\r\n"));
                         down_txt.push(file_list[i].link + "\n");
                     }
