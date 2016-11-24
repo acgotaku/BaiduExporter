@@ -1,1 +1,768 @@
-!function(t){function a(n){if(e[n])return e[n].exports;var o=e[n]={exports:{},id:n,loaded:!1};return t[n].call(o.exports,o,o.exports,a),o.loaded=!0,o.exports}var e={};return a.m=t,a.c=e,a.p="",a(0)}([function(t,a,e){!function(){function t(t){var a=window.location.hash;a=a.substr(1).split("&");for(var e=0;e<a.length;e++){var n=a[e],o=n.split("=");if(o[0]==t)return decodeURIComponent(decodeURIComponent(o[1]))}}function a(t){$.get("/api/download",{type:"dlink",fidlist:JSON.stringify(Object.keys(t)),timestamp:yunData.timestamp,sign:s,bdstoken:yunData.MYBDSTOKEN,channel:"chunlei",clienttype:0,web:1,app_id:250528},null,"json").done(function(a){if(0!=a.errno)return c.showToast("未知错误","MODE_FAILURE"),void console.log(a);for(var e=[],n=0;n<a.dlink.length;n++){var d=a.dlink[n],s=t[d.fs_id];e.push({name:s.substr(l),link:d.dlink})}if("TXT"==r)c.dataBox.show(),c.dataBox.fillData(e);else{var p=c.parseAuth(i),u=c.aria2Data(e,p[0],p[2]);o(u)}}).fail(function(t){c.showToast("网络请求失败","MODE_FAILURE"),console.log(t)})}function n(){var a=t("path");l=void 0==a||"/"==a?1:a.length+1,window.postMessage({type:"get_selected"},"*")}function o(t){for(var a=c.parseAuth(i),e=0;e<t.length;e++){var n={url:a[1],dataType:"json",type:"POST",data:JSON.stringify(t[e]),headers:{Authorization:a[0]}};c.sendToBackground("rpc_data",n,function(t){t?c.showToast("下载成功!赶紧去看看吧~","MODE_SUCCESS"):c.showToast("下载失败!是不是没有开启aria2?","MODE_FAILURE")})}}var r="RPC",i="http://localhost:6800/jsonrpc",d=function(){function t(s){if(s==n)if(0!=o.length){i++,c.showToast("正在获取文件列表... "+i+"/"+(i+o.length-1),"MODE_SUCCESS");var l=o.pop();$.getJSON("/api/list",{dir:l,bdstoken:yunData.MYBDSTOKEN,channel:"chunlei",clienttype:0,web:1}).done(function(a){if(setTimeout(function(){t(s)},e),0!=a.errno)return c.showToast("未知错误","MODE_FAILURE"),void console.log(a);for(var n=0;n<a.list.length;n++){var i=a.list[n];i.isdir?o.push(i.path):r[i.fs_id]=i.path}}).fail(function(a){c.showToast("网络请求失败","MODE_FAILURE"),console.log(a),setTimeout(function(){t(s)},e)})}else 0!=r.length?(c.showToast("正在获取下载地址... ","MODE_SUCCESS"),a(r),d.reset()):(c.showToast("一个文件都没有哦","MODE_CAUTION"),d.reset())}var e,n=0,o=[],r={},i=0,d={};return d.addFolder=function(t){o.push(t)},d.addFile=function(t,a){r[t]=a},d.start=function(){e=parseInt(localStorage.getItem("rpc_delay"))||300,n=(new Date).getTime(),t(n)},d.reset=function(){n=0,o=[],r={},i=0},d}(),s=btoa(new Function("return "+yunData.sign2)()(yunData.sign3,yunData.sign1));window.addEventListener("message",function(t){if(t.source==window&&"selected"==t.data.type){d.reset();var a=t.data.data;if(0==a.length)return void c.showToast("请选择一下你要保存的文件哦","failure");for(var e=0;e<a.length;e++){var n=a[e];n.isdir?d.addFolder(n.path):d.addFile(n.fs_id,n.path)}d.start()}});var l,c=e(1);c.init(),c.requestCookies([{url:"http://pan.baidu.com/",name:"BDUSS"},{url:"http://pcs.baidu.com/",name:"pcsett"}]);var p=c.addMenu.init("home");p.on("click",".rpc_export_list",function(){r="RPC",i=$(this).data("id"),n()}),p.on("click","#aria2_download",function(){r="TXT",c.dataBox.init("home"),c.dataBox.onClose(d.reset),n()}),c.showToast("初始化成功!","success")}()},function(t,a){var e=function(){const t="netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia",a="http://pan.baidu.com/disk/home";var n=null;return{init:function(){this.startListen(),"undefined"!=typeof browser&&(chrome=browser,chrome.storage.sync||(chrome.storage.sync=chrome.storage.local)),chrome.storage.sync.get(null,function(t){for(var a in t)localStorage.setItem(a,t[a])})},escapeString:function(t){if(-1!=navigator.platform.indexOf("Win"))return t;var a="'"+t.replace("'","'\\''")+"'";return a},setCenter:function(t){var a=$(window).width(),e=$(window).height(),n=$(document).scrollTop(),o=(a-t.width())/2,r=(e-t.height())/2+n;t.css({left:o+"px",top:r+"px"})},startListen:function(){function t(t,a){var e=new Object;e[t]=a,chrome.storage.sync.set(e,function(){})}window.addEventListener("message",function(a){if(a.source==window){if(a.data.type&&"config_data"==a.data.type)for(var e in a.data.data)localStorage.setItem(e,a.data.data[e]),a.data.data.rpc_sync===!0?t(e,a.data.data[e]):chrome.storage.sync.clear();a.data.type&&"clear_data"==a.data.type&&chrome.storage.sync.clear()}},!1)},sendToBackground:function(t,a,e){chrome.runtime.sendMessage({method:t,data:a},e)},showToast:function(t,a){window.postMessage({type:"show_toast",data:{message:t,type:a}},"*")},getVersion:function(){var t={jsonrpc:"2.0",method:"aria2.getVersion",id:1,params:[]},a=$("#rpc_url_1").val(),e=this.parseAuth(a);e[0]&&e[0].startsWith("token")&&t.params.unshift(e[0]);var n={url:e[1],dataType:"json",type:"POST",data:JSON.stringify(t)};e[0]&&e[0].startsWith("Basic")&&(n.headers={Authorization:e[0]}),this.sendToBackground("rpc_version",n,function(t){t?$("#send_test").html("ARIA2版本为： "+t.result.version):$("#send_test").html("错误,请查看是否开启Aria2")})},parseAuth:function(t){var a=new URL(t),e=""!=a.username?a.username+":"+decodeURI(a.password):null,n=[];e&&0!=e.indexOf("token:")&&(e="Basic "+btoa(e));var o=a.hash.substr(1);o&&o.split("&").forEach(function(t){t=t.split("="),t[0].length>1&&n.push([t[0],2==t.length?t[1]:"enabled"])});var r=a.origin+a.pathname;return[e,r,n]},addMenu:{init:function(t){if(0!=$("#export_menu").length)return $("#export_menu");var a=$("<span>").attr("id","export_menu"),n=$("<div>").addClass("menu").attr("id","aria2_list").hide().appendTo(a);$("<a>").text("导出下载").addClass("g-button-menu").attr("id","aria2_download").appendTo(n);var o=$("<a>").text("设置").addClass("g-button-menu").appendTo(n);return"home"==t?(a.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"),$("<span>").addClass("text").text("导出下载")))),$(".g-dropdown-button").eq(3).after(a)):"share"==t?($(".bar").css("position","absolute"),a.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"),$("<span>").addClass("text").text("导出下载")))),$('a[data-button-id="b3"]').parent().prepend(a)):"album"==t&&(a.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>'),$("#albumFileSaveKey, #emphsizeButton").parent().prepend(a)),a.mouseenter(function(){a.toggleClass("button-open"),n.show()}),a.mouseleave(function(){a.toggleClass("button-open"),n.hide()}),o.click(function(){0==$("#setting_div").length&&e.setting.init(),$("#setting_divtopmsg").html(""),$("#setting_div").show()}),this.update(),a},update:function(){$(".rpc_export_list").remove();for(var t=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');t.length>0;){var a=t.pop();$("<a class='rpc_export_list'>").addClass("g-button-menu").attr("data-id",a.url).text(a.name).prependTo($("#aria2_list"))}}},setting:{init:function(){var t=this,a=document.createElement("div");if(a.id="setting_div",0!=$("#setting_div").length)return a.id;var n=['<div class="top"><div title="关闭" id="setting_div_close" class="close"></div><h3>导出设置</h3></div>','<div style=" margin: 20px 10px 10px 10px; ">','<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>','<table id="setting_div_table" >',"<tbody>",'<tr><td><label>开启配置同步:</label></td><td><input id="rpc_sync" type="checkbox"></td></tr>','<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>','<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>','<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>','<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>','<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>','<tr><td colspan="2"><div style="color: #656565;">Headers<label style="margin-left: 65px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td></tr>','<tr><td><label>headers ：</label></td><td><textarea id="setting_aria2_headers" ></textarea></td></tr>',"</tbody>","</table>",'<div style="margin-top:10px;">','<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a><br/> Version:0.8.8 更新日期: 2016/11/04 </div>','<div style="margin-left:50px; display:inline-block"><a href="javascript:;" id="apply" class="button">应用</a><a href="javascript:;" id="reset" class="button">重置</a></div>',"</div>","</div>"];return a.innerHTML=n.join(""),document.body.appendChild(a),$("#setting_divtopmsg").html(""),t.update(),$("#setting_div").on("click",function(a){switch(a.target.id){case"setting_div_close":$("#setting_div").hide();break;case"apply":t.save(),setTimeout(function(){e.addMenu.update()},60),$("#setting_divtopmsg").html("设置已保存.");break;case"reset":localStorage.clear(),window.postMessage({type:"clear_data"},"*"),$("#setting_divtopmsg").html("设置已重置."),t.update();break;case"send_test":e.getVersion();break;case"add_rpc":var n=$(".rpc_list").length+1,o='<tr class="rpc_list"><td><input id="rpc_name_'+n+'" type="text" value="ARIA2 RPC '+n+'" class="input-medium">：</td><td><input id="rpc_url_'+n+'" type="text" class="input-large"></td></tr>';$(o).insertAfter($(".rpc_list").eq(n-2))}}),e.setCenter($("#setting_div")),a.id},save:function(){var t={};t.UA=document.getElementById("setting_aria2_useragent_input").value,t.rpc_delay=$("#rpc_delay").val(),t.referer=$("#setting_aria2_referer_input").val(),t.rpc_dir=$("#setting_aria2_dir").val(),t.rpc_fold=$("#rpc_fold").val(),t.rpc_headers=$("#setting_aria2_headers").val(),t.rpc_sync=$("#rpc_sync").prop("checked");for(var a=[],n=0;n<$(".rpc_list").length;n++){var o=n+1;""!=$("#rpc_url_"+o).val()&&""!=$("#rpc_name_"+o).val()&&a.push({name:$("#rpc_name_"+o).val(),url:$("#rpc_url_"+o).val()})}t.rpc_list=JSON.stringify(a),e.sendToBackground("config_data",t),window.postMessage({type:"config_data",data:t},"*")},update:function(){$("#rpc_delay").val(localStorage.getItem("rpc_delay")||"300"),$("#rpc_fold").val(localStorage.getItem("rpc_fold")||"0");var e=localStorage.getItem("rpc_sync");"false"==e?$("#rpc_sync").prop("checked",!1):$("#rpc_sync").prop("checked",!0),$("#setting_aria2_dir").val(localStorage.getItem("rpc_dir")),$("#setting_aria2_useragent_input").val(localStorage.getItem("UA")||t),$("#setting_aria2_referer_input").val(localStorage.getItem("referer")||a),$("#setting_aria2_headers").val(localStorage.getItem("rpc_headers"));var n=JSON.parse(localStorage.getItem("rpc_list")||'[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');$(".rpc_list").remove();for(var o in n){var r=+o+1,i=1==r?'<a id="add_rpc" href="javascript:;" >ADD RPC</a>':"",d='<tr class="rpc_list"><td><input id="rpc_name_'+r+'" type="text" value="'+n[o].name+'" class="input-medium">：</td><td><input id="rpc_url_'+r+'" type="text" class="input-large" value="'+n[o].url+'">'+i+"</td></tr>";$(".rpc_list").length>0?$(d).insertAfter($(".rpc_list").eq(r-2)):$(d).prependTo($("#setting_div_table>tbody"))}}},copyText:function(t){var a=document.createElement("textarea");document.body.appendChild(a),a.style.position="fixed",a.style.left="0",a.style.top="0",a.value=t,a.focus(),a.select();var e=document.execCommand("copy");a.remove(),console.log(e),e?this.showToast("拷贝成功~","MODE_SUCCESS"):this.showToast("拷贝失败 QAQ","MODE_FAILURE")},requestCookies:function(t){this.sendToBackground("get_cookies",t,function(t){n=t})},getHeader:function(e){var o=[],r=localStorage.getItem("UA")||t,i=localStorage.getItem("headers"),d=localStorage.getItem("referer")||a;if(o.push("User-Agent: "+r),o.push("Referer: "+d),i)for(var s=i.split("\n"),l=0;l<s.length;l++)o.push(s[l]);if(n){var c=[];for(var p in n)c.push(p+"="+n[p]);o.push("Cookie: "+c.join(";"))}var u="";if("aria2c_line"==e){for(l=0;l<o.length;l++)u+=" --header "+JSON.stringify(o[l]);return u}if("aria2c_txt"==e){for(l=0;l<o.length;l++)u+=" header="+o[l]+" \n";return u}if("idm_txt"==e){for(l=0;l<o.length;l++)0!=o[l].indexOf("Referer")&&(u+=o[l].split(": ")[0].toLowerCase()+": "+o[l].split(": ")[1]+"\n");return u.replace(/\n$/,"")}return o},aria2Data:function(t,a,e){var n=[],o=this;if(t.length>0)for(var r=t.length,i=0;r>i;i++){var d={jsonrpc:"2.0",method:"aria2.addUri",id:(new Date).getTime(),params:[[t[i].link],{out:t[i].name,dir:localStorage.getItem("rpc_dir")||null,header:o.getHeader()}]};if(console.log(e),e.length>0){var s=d.params[d.params.length-1];e.forEach(function(t){s[t[0]]=t[1]})}a&&0==a.indexOf("token:")&&d.params.unshift(a),n.push(d),console.log(d)}return n},dataBox:{init:function(t){if(0!=$("#download_ui").length)return this;var a=$("<div>").attr("id","download_ui").append('<div class="top"><a href="javascript:;" title="关闭" id="aria2_download_close" class="close"></a><h3><em></em>ARIA2导出</h3></div>'),n=$("<div>").addClass("content").attr("id","content_ui").appendTo(a);a.hide().appendTo($("body")),n.empty();var o=$("<div>").css({"margin-bottom":"10px"}).appendTo(n);$("<a>").attr("id","aria2c_btn").attr({download:"aria2c.down",target:"_blank"}).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(o),$("<a>").attr("id","idm_btn").attr({download:"idm.ef2",target:"_blank"}).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(o),$("<a>").attr("id","download_txt_btn").attr({download:"download_link.txt",target:"_blank"}).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(o),$("<a>").attr("id","copy_txt_btn").attr({href:"javascript:void(0);",data:""}).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(o),$("<textarea>").attr({id:"download_link",wrap:"off",spellcheck:!1}).css({width:"100%",overflow:"scroll",height:"180px",resize:"none"}).appendTo(n),e.setCenter($("#download_ui")),$("#download_ui").on("click","#aria2_download_close",function(){navigator.msSaveBlob?$("#aria2c_btn, #idm_btn, #download_txt_btn").data("href",""):$("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href","data:text/plain;charset=utf-8,"),$("#copy_txt_btn").attr("data",""),$("#download_link").val(""),a.hide()}),$("#download_ui").on("click","#copy_txt_btn",function(){e.copyText($("#copy_txt_btn").attr("data"))}),navigator.msSaveBlob?$("#aria2c_btn, #idm_btn, #download_txt_btn").click(function(t){t.preventDefault();var a=$(this);navigator.msSaveBlob(new Blob([a.data("href")]),a.attr("download"))}):$("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href","data:text/plain;charset=utf-8,")},show:function(){$("#download_ui").show()},onClose:function(t){$("#download_ui").on("click","#aria2_download_close",t)},fillData:function(t){var a=[],n=[],o=[],r=[];if(t.length>0){for(var i=t.length,d=0;i>d;d++){var s=-1!=navigator.platform.indexOf("Win")?JSON.stringify(t[d].name):e.escapeString(t[d].name);a.push("aria2c -c -s10 -k1M -x10 --enable-rpc=false -o "+s+e.getHeader("aria2c_line")+" "+JSON.stringify(t[d].link)+"\n"),n.push([t[d].link,e.getHeader("aria2c_txt")," out="+t[d].name," continue=true"," max-connection-per-server=10"," split=10"," min-split-size=1M","\n"].join("\n")),o.push(["<",t[d].link,e.getHeader("idm_txt"),"out="+t[d].name,">\r\n"].join("\r\n")),r.push(t[d].link+"\n")}navigator.msSaveBlob?($("#aria2c_btn").data("href",$("#aria2c_btn").data("href")+n.join("")),$("#idm_btn").data("href",$("#idm_btn").data("href")+o.join("")),$("#download_txt_btn").data("href",$("#download_txt_btn").data("href")+r.join(""))):($("#aria2c_btn").attr("href",$("#aria2c_btn").attr("href")+encodeURIComponent(n.join(""))),$("#idm_btn").attr("href",$("#idm_btn").attr("href")+encodeURIComponent(o.join("\r\n"))),$("#download_txt_btn").attr("href",$("#download_txt_btn").attr("href")+encodeURIComponent(r.join("")))),$("#copy_txt_btn").attr("data",$("#copy_txt_btn").attr("data")+r.join("")),$("#download_link").val($("#download_link").val()+a.join(""))}}}}}();t.exports=e}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	    //网盘主页导出
+	    /*
+	     基本步骤是首先设定导出模式,文本模式的话
+	     只需要初始化文本框即可,RPC模式要设置好 RPC地址
+	     然后开始分析选中的文件 获取当前文件夹的所以文件id
+	     然后进行比较,如果是文件 直接进行下载 如果是文件夹则递归查找
+	     遇到文件就下载 遇到文件夹继续获取文件夹里面的内容
+
+	     */
+	    //两种导出模式 RPC模式 和 TXT模式
+	    var MODE = "RPC";
+	    var RPC_PATH = "http://localhost:6800/jsonrpc";
+
+	    function getHashParameter(name) {
+	        var hash = window.location.hash;
+	        hash = hash.substr(1).split("&");
+	        for (var i = 0; i < hash.length; i++) {
+	            var pair = hash[i];
+	            var arr = pair.split("=");
+	            if (arr[0] == name)
+	                return decodeURIComponent(decodeURIComponent(arr[1]));
+	        }
+	    }
+
+	    var Downloader = (function() {
+	        var delay;
+
+	        var currentTaskId = 0;
+	        // Paths of folders to be processed.
+	        var folders = [];
+	        // { id: path } of files to be processed.
+	        var files = {};
+	        var completedCount = 0;
+
+	        function getNextFile(taskId) {
+	            if (taskId != currentTaskId)
+	                return;
+
+	            if (folders.length != 0) {
+	                completedCount++;
+	                CORE.showToast("正在获取文件列表... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
+
+	                var path = folders.pop();
+	                $.getJSON("/api/list", {
+	                    "dir": path,
+	                    "bdstoken": yunData.MYBDSTOKEN,
+	                    "channel": "chunlei",
+	                    "clienttype": 0,
+	                    "web": 1
+	                }).done(function(json) {
+	                    setTimeout(function() { getNextFile(taskId) }, delay);
+
+	                    if (json.errno != 0) {
+	                        CORE.showToast("未知错误", "MODE_FAILURE");
+	                        console.log(json);
+	                        return;
+	                    }
+
+	                    for (var i = 0; i < json.list.length; i++) {
+	                        var item = json.list[i];
+	                        if (item.isdir)
+	                            folders.push(item.path);
+	                        else
+	                            files[item.fs_id] = item.path;
+	                    }
+	                }).fail(function(xhr) {
+	                    CORE.showToast("网络请求失败", "MODE_FAILURE");
+	                    console.log(xhr);
+
+	                    setTimeout(function() { getNextFile(taskId) }, delay);
+	                });
+	            } else if (files.length != 0) {
+	                CORE.showToast("正在获取下载地址... ", "MODE_SUCCESS");
+
+	                setFileData(files);
+	                downloader.reset();
+	            } else {
+	                CORE.showToast("一个文件都没有哦", "MODE_CAUTION");
+	                downloader.reset();
+	            }
+	        }
+
+	        var downloader = {};
+
+	        downloader.addFolder = function(path) {
+	            folders.push(path);
+	        };
+
+	        downloader.addFile = function(id, path) {
+	            files[id] = path;
+	        };
+
+	        downloader.start = function() {
+	            delay = parseInt(localStorage.getItem("rpc_delay")) || 300;
+	            currentTaskId = new Date().getTime();
+	            getNextFile(currentTaskId);
+	        }
+
+	        downloader.reset = function() {
+	            currentTaskId = 0;
+	            folders = [];
+	            files = {};
+	            completedCount = 0;
+	        };
+
+	        return downloader;
+	    })();
+
+	    var sign = btoa(new Function("return " + yunData.sign2)()(yunData.sign3, yunData.sign1));
+
+	    function setFileData(files) {
+	        $.get("/api/download", {
+	            "type": "dlink",
+	            "fidlist": JSON.stringify(Object.keys(files)),
+	            "timestamp": yunData.timestamp,
+	            "sign": sign,
+	            "bdstoken": yunData.MYBDSTOKEN,
+	            "channel": "chunlei",
+	            "clienttype": 0,
+	            "web": 1,
+	            "app_id": 250528
+	        }, null, "json").done(function(json) {
+	            if (json.errno != 0) {
+	                CORE.showToast("未知错误", "MODE_FAILURE");
+	                console.log(json);
+	                return;
+	            }
+
+	            var file_list = [];
+	            for (var i = 0; i < json.dlink.length; i++) {
+	                var item = json.dlink[i];
+	                var path = files[item.fs_id];
+	                file_list.push({ name: path.substr(pathPrefixLength), link: item.dlink });
+	            }
+
+	            if (MODE == "TXT") {
+	                CORE.dataBox.show();
+	                CORE.dataBox.fillData(file_list);
+	            } else {
+	                var paths = CORE.parseAuth(RPC_PATH);
+	                var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
+	                generateParameter(rpc_list);
+	            }
+	        }).fail(function(xhr) {
+	            CORE.showToast("网络请求失败", "MODE_FAILURE");
+	            console.log(xhr);
+	        });
+	    }
+
+	    window.addEventListener("message", function(event) {
+	        if (event.source != window)
+	            return;
+
+	        if (event.data.type == "selected") {
+	            Downloader.reset();
+
+	            var selectedFile = event.data.data;
+	            if (selectedFile.length == 0) {
+	                CORE.showToast("请选择一下你要保存的文件哦", "failure");
+	                return;
+	            }
+
+	            for (var i = 0; i < selectedFile.length; i++) {
+	                var item = selectedFile[i];
+	                if (item.isdir)
+	                    Downloader.addFolder(item.path);
+	                else
+	                    Downloader.addFile(item.fs_id, item.path);
+	            }
+
+	            Downloader.start();
+	        }
+	    });
+
+	    var pathPrefixLength;
+
+	    function getSelected() {
+	        var path = getHashParameter("path");
+	        var level = parseInt(localStorage.getItem("rpc_fold")) || 0;
+	        console.log(level);
+	        if (path == undefined || path == "/" || level == -1) {
+	            pathPrefixLength = 1;
+	        } else if (level == 0) {
+	            pathPrefixLength = path.length + 1;
+	        }
+
+	        window.postMessage({ "type": "get_selected" }, "*");
+	    }
+	    //生成请求参数 发送给后台 进行 http请求
+	    function generateParameter(rpc_list) {
+	        var paths = CORE.parseAuth(RPC_PATH);
+	        for (var i = 0; i < rpc_list.length; i++) {
+	            var parameter = { url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(rpc_list[i]), headers: { Authorization: paths[0] } };
+	            CORE.sendToBackground("rpc_data", parameter, function(success) {
+	                if (success)
+	                    CORE.showToast("下载成功!赶紧去看看吧~", "MODE_SUCCESS");
+	                else
+	                    CORE.showToast("下载失败!是不是没有开启aria2?", "MODE_FAILURE");
+	            });
+	        }
+	    }
+
+	    // Init
+	    var CORE = __webpack_require__(1);
+	    CORE.init();
+	    CORE.requestCookies([{ url: "http://pan.baidu.com/", name: "BDUSS" }, { url: "http://pcs.baidu.com/", name: "pcsett" }]);
+
+	    var menu = CORE.addMenu.init("home");
+	    menu.on("click", ".rpc_export_list", function() {
+	        MODE = "RPC";
+	        RPC_PATH = $(this).data("id");
+	        getSelected();
+	    });
+	    menu.on("click", "#aria2_download", function() {
+	        MODE = "TXT";
+	        CORE.dataBox.init("home");
+	        // When closing download dialog, cancel all delay feteching.
+	        CORE.dataBox.onClose(Downloader.reset);
+	        getSelected();
+	    });
+	    CORE.showToast("初始化成功!", "success");
+	})();
+
+/***/ },
+/* 1 */
+/***/ function(module, exports) {
+
+	var CORE = (function () {
+	    const version = "0.8.8";
+	    const update_date = "2016/11/04";
+	    const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
+	    const defaultreferer = "http://pan.baidu.com/disk/home";
+	    var cookies = null;
+	    return {
+	        init: function () {
+	            this.startListen();
+	            if (typeof browser != "undefined") {
+	                chrome = browser;
+
+	                if (!chrome.storage.sync)
+	                    chrome.storage.sync = chrome.storage.local;
+	            }
+	            chrome.storage.sync.get(null, function (items) {
+	                for (var key in items) {
+	                    localStorage.setItem(key, items[key]);
+	                    //console.log(key + items[key]);
+	                }
+	            });
+	        },
+	        // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
+	        escapeString: function (str) {
+	            if (navigator.platform.indexOf("Win") != -1) {
+	                return str;
+	            }
+
+	            var result = "'" + str.replace("'", "'\\''") + "'";
+	            return result;
+	        },
+	        //调整元素的位置使元素居中
+	        setCenter: function (obj) {
+	            var screenWidth = $(window).width(), screenHeight = $(window).height();
+	            var scrolltop = $(document).scrollTop();
+	            var objLeft = (screenWidth - obj.width()) / 2;
+	            var objTop = (screenHeight - obj.height()) / 2 + scrolltop;
+	            obj.css({ left: objLeft + "px", top: objTop + "px" });
+	        },
+	        startListen:function(){
+	            function saveSyncData(data, value) {
+	                var obj = new Object();
+	                obj[data] = value;
+	                chrome.storage.sync.set(obj, function () {
+	                    // console.log(data + ' saved');
+	                });
+	            }
+	            window.addEventListener("message", function (event) {
+	                if (event.source != window)
+	                    return;
+	                if (event.data.type && (event.data.type == "config_data")) {
+	                    for (var key in event.data.data) {
+	                        localStorage.setItem(key, event.data.data[key]);
+	                        if (event.data.data["rpc_sync"] === true) {
+	                            saveSyncData(key, event.data.data[key]);
+	                        } else {
+	                            chrome.storage.sync.clear();
+	                        }
+	                    }
+	                }
+	                if (event.data.type && (event.data.type == "clear_data")) {
+	                    chrome.storage.sync.clear();
+	                }
+	            }, false);
+	        },
+	        sendToBackground:function(method, data, callback){
+	            chrome.runtime.sendMessage({
+	                method: method,
+	                data: data
+	            }, callback);
+	        },
+	        showToast:function(message, type){
+	            window.postMessage({ type: "show_toast", data: { message: message, type: type } }, "*");
+	        },
+	        //获取aria2c的版本号用来测试通信
+	        getVersion: function () {
+	            var data = {
+	                "jsonrpc": "2.0",
+	                "method": "aria2.getVersion",
+	                "id": 1,
+	                "params": []
+	            };
+	            var rpc_path = $("#rpc_url_1").val();
+	            var paths = this.parseAuth(rpc_path);
+	            if (paths[0] && paths[0].startsWith("token")) {
+	                data.params.unshift(paths[0]);
+	            }
+	            var parameter = { url: paths[1], dataType: "json", type: "POST", data: JSON.stringify(data) };
+	            if (paths[0] && paths[0].startsWith("Basic")) {
+	                parameter["headers"] = { "Authorization": paths[0] };
+	            }
+	            this.sendToBackground("rpc_version", parameter, function(version) {
+	                if (version)
+	                    $("#send_test").html("ARIA2\u7248\u672c\u4e3a\uff1a\u0020" + version.result.version);
+	                else
+	                    $("#send_test").html("错误,请查看是否开启Aria2");
+	            });
+	        },
+	        //解析 RPC地址 返回验证数据 和地址
+	        parseAuth: function (url) {
+	            var parseURL = new URL(url);
+	            var auth_str = (parseURL.username != "") ? (parseURL.username + ":" +decodeURI(parseURL.password)) : null;
+	            var options = [];
+	            if (auth_str) {
+	                if (auth_str.indexOf("token:") != 0) {
+	                    auth_str = "Basic " + btoa(auth_str);
+	                }
+	            }
+	            var hash = parseURL.hash.substr(1);
+	            if (hash) {
+	                hash.split("&").forEach(function (item) {
+	                    item = item.split("=");
+	                    if (item[0].length > 1) {
+	                        options.push([item[0], item.length == 2 ? item[1] : "enabled"]);
+	                    }
+	                });
+	            }
+
+	            var path = parseURL.origin + parseURL.pathname;
+	            return [auth_str, path, options];
+	        },
+	        //导出菜单
+	        addMenu: {
+	            init: function (type) {
+	                if ($("#export_menu").length != 0) {
+	                    return $("#export_menu");
+	                }
+	                var aria2_btn = $("<span>").attr("id", "export_menu");
+	                var list = $("<div>").addClass("menu").attr("id", "aria2_list").hide().appendTo(aria2_btn);
+	                $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
+	                var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
+	                if (type == "home") {
+	                    aria2_btn.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"), $("<span>").addClass("text").text("导出下载"))));
+	                    $(".g-dropdown-button").eq(3).after(aria2_btn);
+	                } else if (type == "share") {
+	                    // aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
+	                    $(".bar").css("position","absolute");
+	                    aria2_btn.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"), $("<span>").addClass("text").text("导出下载"))));
+	                    $('a[data-button-id="b3"]').parent().prepend(aria2_btn);
+	                } else if (type == "album") {
+	                    aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
+	                    $("#albumFileSaveKey, #emphsizeButton").parent().prepend(aria2_btn);
+	                }
+	                aria2_btn.mouseenter(function () {
+	                    aria2_btn.toggleClass("button-open");
+	                    list.show();
+	                });
+	                aria2_btn.mouseleave(function () {
+	                    aria2_btn.toggleClass("button-open");
+	                    list.hide();
+	                });
+	                config.click(function () {
+	                    if ($("#setting_div").length == 0) {
+	                        CORE.setting.init();
+	                    }
+	                    $("#setting_divtopmsg").html("");
+	                    $("#setting_div").show();
+	                });
+	                this.update();
+	                return aria2_btn;
+	            },
+	            //根据设置更新按钮
+	            update: function () {
+	                $(".rpc_export_list").remove();
+	                var rpc_list = JSON.parse(localStorage.getItem("rpc_list") || '[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
+	                while (rpc_list.length > 0) {
+	                    var rpcObj = rpc_list.pop();
+	                    $("<a class='rpc_export_list'>").addClass("g-button-menu").attr("data-id", rpcObj.url).text(rpcObj.name).prependTo($("#aria2_list"));
+	                }
+	            }
+	        },
+	        //设置界面
+	        setting: {
+	            init: function () {
+	                var self = this;
+	                var setting_div = document.createElement("div");
+	                setting_div.id = "setting_div";
+	                if ($("#setting_div").length != 0) {
+	                    return setting_div.id;
+	                }
+	                var html_ = [
+	                    '<div class="top"><div title="关闭" id="setting_div_close" class="close"></div><h3>导出设置</h3></div>',
+	                    '<div style=" margin: 20px 10px 10px 10px; ">',
+	                    '<div id="setting_divtopmsg" style="position:absolute; margin-top: -18px; margin-left: 10px; color: #E15F00;"></div>',
+	                    '<table id="setting_div_table" >',
+	                    "<tbody>",
+	                    '<tr><td><label>开启配置同步:</label></td><td><input id="rpc_sync" type="checkbox"></td></tr>',
+	                    '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
+	                    '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
+	                    '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
+	                    '<tr><td><label>User-Agent :</label></td><td><input type="text" id="setting_aria2_useragent_input" class="input-large"></td></tr>',
+	                    '<tr><td><label>Referer ：</label></td><td><input type="text" id="setting_aria2_referer_input" class="input-large"></td></tr>',
+	                    '<tr><td colspan="2"><div style="color: #656565;">Headers<label style="margin-left: 65px;">※使用回车分隔每个headers。</label></div><li class="b-list-item separator-1"></li></td></tr>',
+	                    '<tr><td><label>headers ：</label></td><td><textarea id="setting_aria2_headers" ></textarea></td></tr>',
+	                    "</tbody>",
+	                    "</table>",
+	                    '<div style="margin-top:10px;">',
+	                    '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a><br/> Version:' + version + " 更新日期: " + update_date + " </div>",
+	                    '<div style="margin-left:50px; display:inline-block"><a href="javascript:;" id="apply" class="button">应用</a><a href="javascript:;" id="reset" class="button">重置</a></div>',
+	                    "</div>",
+	                    "</div>"
+	                ];
+	                setting_div.innerHTML = html_.join("");
+	                document.body.appendChild(setting_div);
+	                $("#setting_divtopmsg").html("");
+	                self.update();
+	                $("#setting_div").on("click", function (event) {
+	                    switch (event.target.id) {
+	                        case "setting_div_close":
+	                            $("#setting_div").hide();
+	                            break;
+	                        case "apply":
+	                            self.save();
+	                            setTimeout(function () {
+	                                CORE.addMenu.update();
+	                            }, 60);
+	                            $("#setting_divtopmsg").html("设置已保存.");
+	                            break;
+	                        case "reset":
+	                            localStorage.clear();
+	                            window.postMessage({ type: "clear_data" }, "*");
+	                            $("#setting_divtopmsg").html("设置已重置.");
+	                            self.update();
+	                            break;
+	                        case "send_test":
+	                            CORE.getVersion();
+	                            break;
+	                        case "add_rpc":
+	                            var num = $(".rpc_list").length + 1;
+	                            var row = '<tr class="rpc_list"><td><input id="rpc_name_' + num + '" type="text" value="ARIA2 RPC ' + num + '" class="input-medium">：</td><td><input id="rpc_url_' + num + '" type="text" class="input-large"></td></tr>';
+	                            $(row).insertAfter($(".rpc_list").eq(num - 2));
+	                            break;
+	                        default:
+	                            //console.log(event);
+
+	                    }
+	                });
+	                CORE.setCenter($("#setting_div"));
+	                return setting_div.id;
+	            },
+	            //保存配置数据
+	            save: function () {
+	                var config_data = {};
+	                config_data["UA"] = document.getElementById("setting_aria2_useragent_input").value;
+	                config_data["rpc_delay"] = $("#rpc_delay").val();
+	                config_data["referer"] = $("#setting_aria2_referer_input").val();
+	                config_data["rpc_dir"] = $("#setting_aria2_dir").val();
+	                config_data["rpc_fold"] = $("#rpc_fold").val();
+	                config_data["rpc_headers"] = $("#setting_aria2_headers").val();
+	                config_data["rpc_sync"] = $("#rpc_sync").prop("checked");
+	                var rpc_list = [];
+	                for (var i = 0; i < $(".rpc_list").length; i++) {
+	                    var num = i + 1;
+	                    if ($("#rpc_url_" + num).val() != "" && $("#rpc_name_" + num).val() != "") {
+	                        rpc_list.push({ "name": $("#rpc_name_" + num).val(), "url": $("#rpc_url_" + num).val() });
+	                    }
+	                }
+	                config_data["rpc_list"] = JSON.stringify(rpc_list);
+	                CORE.sendToBackground("config_data", config_data);
+	                window.postMessage({ type: "config_data", data: config_data }, "*");
+	            },
+	            //根据配置数据 更新 设置菜单
+	            update: function () {
+	                $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
+	                $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
+	                var rpc_sync = localStorage.getItem("rpc_sync");
+	                if (rpc_sync == "false") {
+	                    $("#rpc_sync").prop("checked", false);
+	                } else {
+	                    $("#rpc_sync").prop("checked", true);
+	                }
+	                $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
+	                $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || defaultUA);
+	                $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || defaultreferer);
+	                $("#setting_aria2_headers").val(localStorage.getItem("rpc_headers"));
+	                var rpc_list = JSON.parse(localStorage.getItem("rpc_list") || '[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
+	                $(".rpc_list").remove();
+	                for (var i in rpc_list) {
+	                    var num = (+i) + 1;
+	                    var addBtn = 1 == num ? '<a id="add_rpc" href="javascript:;" >ADD RPC</a>' : "";
+	                    var row = '<tr class="rpc_list"><td><input id="rpc_name_' + num + '" type="text" value="' + rpc_list[i]["name"] + '" class="input-medium">：</td><td><input id="rpc_url_' + num + '" type="text" class="input-large" value="' + rpc_list[i]["url"] + '">' + addBtn + "</td></tr>";
+	                    if ($(".rpc_list").length > 0) {
+	                        $(row).insertAfter($(".rpc_list").eq(num - 2));
+	                    } else {
+	                        $(row).prependTo($("#setting_div_table>tbody"));
+	                    }
+	                }
+	            }
+	        },
+	        copyText:function(text){
+	            var input = document.createElement("textarea");
+	            document.body.appendChild(input);
+	            input.style.position = "fixed";
+	            input.style.left = "0";
+	            input.style.top = "0";
+	            input.value = text;
+	            input.focus();
+	            input.select();
+	            var result = document.execCommand("copy");
+	            input.remove();
+	            console.log(result);
+	            if (result)
+	                this.showToast("拷贝成功~", "MODE_SUCCESS");
+	            else
+	                this.showToast("拷贝失败 QAQ", "MODE_FAILURE");
+	        },
+	        // names format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
+	        requestCookies: function (names) {
+	            this.sendToBackground("get_cookies", names, function(value) {cookies = value});
+	        },
+	        //获取 http header信息
+	        getHeader: function (type) {
+	            var addheader = [];
+	            var UA = localStorage.getItem("UA") || defaultUA;
+	            var headers = localStorage.getItem("headers");
+	            var referer = localStorage.getItem("referer") || defaultreferer;
+	            addheader.push("User-Agent: " + UA);
+	            addheader.push("Referer: " + referer);
+	            if (headers) {
+	                var text = headers.split("\n");
+	                for (var i = 0; i < text.length; i++) {
+	                    addheader.push(text[i]);
+	                }
+	            }
+	            if (cookies) {
+	                var format_cookies = [];
+	                for (var key in cookies) {
+	                    format_cookies.push(key + "=" + cookies[key]);
+	                }
+	                addheader.push("Cookie: " + format_cookies.join(";"));
+	            }
+
+	            var header = "";
+	            if (type == "aria2c_line") {
+	                for (i = 0; i < addheader.length; i++) {
+	                    header += " --header " + JSON.stringify(addheader[i]);
+	                }
+	                return header;
+	            } else if (type == "aria2c_txt") {
+	                for (i = 0; i < addheader.length; i++) {
+	                    header += " header=" + (addheader[i]) + " \n";
+	                }
+	                return header;
+	            } else if (type == "idm_txt") {
+	                for (i = 0; i < addheader.length; i++) {
+	                    if(addheader[i].indexOf("Referer") != 0){
+	                        header +=  (addheader[i].split(": ")[0].toLowerCase()+": "+addheader[i].split(": ")[1]) + "\n";
+	                    }
+	                }
+	                
+	                return header.replace(/\n$/, "");
+	            } else {
+	                return addheader;
+	            }
+
+	        },
+	        //把要下载的link和name作为数组对象传过来
+	        aria2Data: function (file_list, token, options) {
+	            var rpc_list = [];
+	            var self = this;
+	            if (file_list.length > 0) {
+	                var length = file_list.length;
+	                for (var i = 0; i < length; i++) {
+	                    var rpc_data = {
+	                        "jsonrpc": "2.0",
+	                        "method": "aria2.addUri",
+	                        "id": new Date().getTime(),
+	                        "params": [[file_list[i].link], {
+	                            "out": file_list[i].name,
+	                            "dir": localStorage.getItem("rpc_dir") || null,
+	                            "header": self.getHeader()
+	                        }]
+	                    };
+	                    console.log(options);
+	                    if (options.length > 0) {
+	                        var params = rpc_data.params[rpc_data.params.length - 1];
+	                        options.forEach(function (item) {
+	                            params[item[0]] = item[1];
+	                        });
+	                    }
+	                    if (token && token.indexOf("token:") == 0) {
+	                        rpc_data.params.unshift(token);
+	                    }
+
+	                    rpc_list.push(rpc_data);
+	                    console.log(rpc_data);
+	                }
+	            }
+	            return rpc_list;
+	        },
+	        //文本模式的导出数据框
+	        dataBox: {
+	            init: function (type) {
+	                if ($("#download_ui").length != 0)
+	                    return this;
+	                var download_ui = $("<div>").attr("id", "download_ui").append('<div class="top"><a href="javascript:;" title="关闭" id="aria2_download_close" class="close"></a><h3><em></em>ARIA2导出</h3></div>');
+	                var content_ui = $("<div>").addClass("content").attr("id", "content_ui").appendTo(download_ui);
+	                download_ui.hide().appendTo($("body"));
+	                content_ui.empty();
+	                var download_menu = $("<div>").css({ "margin-bottom": "10px" }).appendTo(content_ui);
+	                $("<a>").attr("id", "aria2c_btn").attr({ "download": "aria2c.down", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为aria2文件</b>').appendTo(download_menu);
+	                $("<a>").attr("id", "idm_btn").attr({ "download": "idm.ef2", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>存为IDM文件</b>').appendTo(download_menu);
+	                $("<a>").attr("id", "download_txt_btn").attr({ "download": "download_link.txt", "target": "_blank" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>保存下载链接</b>').appendTo(download_menu);
+	                $("<a>").attr("id", "copy_txt_btn").attr({ "href": "javascript:void(0);", "data": "" }).addClass("save-button ").html('<em class="global-icon-download"></em><b>拷贝下载链接</b>').appendTo(download_menu);
+	                // Disable spellcheck and resize for textarea.
+	                $("<textarea>").attr({ "id": "download_link", "wrap": "off", "spellcheck": false }).css({ "width": "100%", "overflow": "scroll", "height": "180px", "resize": "none" }).appendTo(content_ui);
+	                CORE.setCenter($("#download_ui"));
+	                $("#download_ui").on("click", "#aria2_download_close", function () {
+	                    // Clean up when closing download dialog.
+	                    if (navigator.msSaveBlob)
+	                        $("#aria2c_btn, #idm_btn, #download_txt_btn").data("href", "")
+	                    else
+	                        $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
+
+	                    $("#copy_txt_btn").attr("data", "");
+	                    $("#download_link").val("");
+
+	                    download_ui.hide();
+	                });
+	                $("#download_ui").on("click", "#copy_txt_btn", function () {
+	                    CORE.copyText($("#copy_txt_btn").attr("data"));
+	                });
+
+	                // Edge does support `a[download]`, but it ignores the file name, so use `msSaveBlob()` instead
+	                if (navigator.msSaveBlob) {
+	                    $("#aria2c_btn, #idm_btn, #download_txt_btn").click(function (e) {
+	                        e.preventDefault();
+
+	                        var $this = $(this);
+	                        navigator.msSaveBlob(new Blob([$this.data("href")]), $this.attr("download"));
+	                    });
+	                }
+	                else {
+	                    $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
+	                }
+	            },
+	            show: function () {
+	                $("#download_ui").show();
+	            },
+	            onClose: function (callback) {
+	                $("#download_ui").on("click", "#aria2_download_close", callback);
+	            },
+	            //在数据框里面填充数据
+	            fillData: function (file_list) {
+	                var files = [];
+	                var aria2c_txt = [];
+	                var idm_txt = [];
+	                var down_txt = [];
+	                if (file_list.length > 0) {
+	                    var length = file_list.length;
+	                    for (var i = 0; i < length; i++) {
+	                        var filename = (navigator.platform.indexOf("Win") != -1) ? JSON.stringify(file_list[i].name) : CORE.escapeString(file_list[i].name);
+	                        files.push("aria2c -c -s10 -k1M -x10 --enable-rpc=false -o " + filename + CORE.getHeader("aria2c_line") + " " + JSON.stringify(file_list[i].link) + "\n");
+	                        aria2c_txt.push([
+	                            file_list[i].link,
+	                            CORE.getHeader("aria2c_txt"),
+	                            " out=" + file_list[i].name,
+	                            " continue=true",
+	                            " max-connection-per-server=10",
+	                            " split=10",
+	                            " min-split-size=1M",
+	                            "\n"
+	                        ].join("\n"));
+	                        idm_txt.push([
+	                            "<",
+	                            file_list[i].link,
+	                            CORE.getHeader("idm_txt"),
+	                            "out=" + file_list[i].name,
+	                            ">\r\n"
+	                        ].join("\r\n"));
+	                        down_txt.push(file_list[i].link + "\n");
+	                    }
+
+	                    if (navigator.msSaveBlob) {
+	                        $("#aria2c_btn").data("href", $("#aria2c_btn").data("href") + aria2c_txt.join(""));
+	                        $("#idm_btn").data("href", $("#idm_btn").data("href") + idm_txt.join(""));
+	                        $("#download_txt_btn").data("href", $("#download_txt_btn").data("href") + down_txt.join(""));
+	                    }
+	                    else {
+	                        $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
+	                        $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("\r\n")));
+	                        $("#download_txt_btn").attr("href", $("#download_txt_btn").attr("href") + encodeURIComponent(down_txt.join("")));
+	                    }
+	                    $("#copy_txt_btn").attr("data", $("#copy_txt_btn").attr("data") + down_txt.join(""));
+	                    $("#download_link").val($("#download_link").val() + files.join(""));
+	                }
+	            }
+	        }
+	    };
+	})();
+	module.exports = CORE;
+
+/***/ }
+/******/ ]);
