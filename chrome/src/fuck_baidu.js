@@ -1,14 +1,5 @@
 var fuck_baidu=function(){
-    var addevt = document.addEventListener.bind(document);
-    document.addEventListener = function (p1,p2,p3) {
-        if(p1 == "DOMNodeInserted"){
-            console.log("Fucked a event listener request");
-            return;
-        }
-        addevt(p1,p2,p3);
-    };
     Object.defineProperty(window, "chrome", { writable: false} );
-    Object.defineProperty(document, "addEventListener", { writable: false} );
 };
 var script = document.createElement("script");
 script.id = "fuck_baidu";
