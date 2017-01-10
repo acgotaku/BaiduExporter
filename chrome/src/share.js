@@ -43,7 +43,7 @@
                 CORE.showToast("正在获取文件列表... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
 
                 var path = folders.pop();
-                $.getJSON("/share/list", {
+                $.getJSON(window.location.origin + "/share/list", {
                     "dir": path,
                     "bdstoken": yunData.MYBDSTOKEN,
                     "uk": yunData.SHARE_UK,
@@ -252,7 +252,7 @@
 
     //根据文件路径获取文件的信息
     function getFilemetas(data) {
-        $.post("/api/sharedownload?" + $.param({
+        $.post(window.location.origin + "/api/sharedownload?" + $.param({
             "timestamp": yunData.TIMESTAMP,
             "sign": yunData.SIGN,
             "bdstoken": yunData.MYBDSTOKEN,

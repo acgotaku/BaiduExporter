@@ -42,7 +42,7 @@
                 CORE.showToast("正在获取文件列表... " + completedCount + "/" + (completedCount + folders.length - 1), "MODE_SUCCESS");
 
                 var path = folders.pop();
-                $.getJSON("/api/list", {
+                $.getJSON(window.location.origin + "/api/list", {
                     "dir": path,
                     "bdstoken": yunData.MYBDSTOKEN,
                     "channel": "chunlei",
@@ -110,12 +110,12 @@
     var sign = btoa(new Function("return " + yunData.sign2)()(yunData.sign3, yunData.sign1));
 
     function setFileData(files) {
-        $.get("/api/download", {
+        $.get(window.location.origin + "/api/download", {
             "type": "dlink",
+            "bdstoken": yunData.MYBDSTOKEN,
             "fidlist": JSON.stringify(Object.keys(files)),
             "timestamp": yunData.timestamp,
-            "sign": sign,
-            "bdstoken": yunData.MYBDSTOKEN,
+            "sign": sign, 
             "channel": "chunlei",
             "clienttype": 0,
             "web": 1,
@@ -144,7 +144,7 @@
             }
         }).fail(function(xhr) {
             CORE.showToast("网络请求失败", "MODE_FAILURE");
-            console.log(xhr);
+            console.log(JSON.stringify(xhr));
         });
     }
 
