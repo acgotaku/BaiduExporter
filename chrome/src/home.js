@@ -85,6 +85,7 @@
                         counter = 0;
                     }
                 }
+	            setFileData(tmp_files);
 
                 downloader.reset();
             } else {
