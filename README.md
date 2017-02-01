@@ -19,7 +19,7 @@
 全面支持 Chrome, Firefox, Edge 和 Safari：
 
 * Chrome : Click **Settings** -> **Extensions** -> Check **Developer mode**-> **Load unpacked extension**, navigate to the `chrome` folder, click OK.
-* Firefox : Open **about:debugging** in Firefox, click "Load Temporary Add-on" and navigate to the `chrome` folder, click OK.
+* Firefox : Open **about:debugging** in Firefox, click "Load Temporary Add-on" and navigate to the `chrome` folder, select `manifest.json`, click OK.
 * Safari : Install Chrome or Firefox on Mac.
 * Edge: You need at least Windows 10 build 14342
     1. Open [about:flags](about:flags), Check `Enable extension developer features`, Restart.
