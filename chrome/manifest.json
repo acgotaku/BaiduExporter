@@ -29,5 +29,5 @@
   "permissions": [ "cookies", "notifications", "*://pan.baidu.com/", "*://yun.baidu.com/", "*://pcs.baidu.com/", "activeTab", "contextMenus", "storage" ],
   "name": "__MSG_appName__",
   "author": "acgotaku",
-  "version": "0.8.9"
+  "version": "0.9.0"
 }
