@@ -129,11 +129,6 @@ tr>td:first-child{
     -webkit-box-shadow: 0 0 3px #C6C6C6;
 }
 
-a {
-    color: #666 !important;
-    text-decoration: none !important;
-}
-
 .button {
     background: #eeeeef;
     margin: 0 10px;

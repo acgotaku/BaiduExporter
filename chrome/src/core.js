@@ -1,11 +1,11 @@
-var CORE = (function () {
-    const version = "0.8.7";
-    const update_date = "2016/10/10";
+var CORE = (function() {
+    const version = "0.9.0";
+    const update_date = "2017/02/05";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
     var cookies = null;
     return {
-        init: function () {
+        init: function() {
             this.startListen();
             if (typeof browser != "undefined") {
                 chrome = browser;
@@ -13,7 +13,7 @@ var CORE = (function () {
                 if (!chrome.storage.sync)
                     chrome.storage.sync = chrome.storage.local;
             }
-            chrome.storage.sync.get(null, function (items) {
+            chrome.storage.sync.get(null, function(items) {
                 for (var key in items) {
                     localStorage.setItem(key, items[key]);
                     //console.log(key + items[key]);
@@ -21,7 +21,7 @@ var CORE = (function () {
             });
         },
         // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
-        escapeString: function (str) {
+        escapeString: function(str) {
             if (navigator.platform.indexOf("Win") != -1) {
                 return str;
             }
@@ -30,22 +30,23 @@ var CORE = (function () {
             return result;
         },
         //调整元素的位置使元素居中
-        setCenter: function (obj) {
-            var screenWidth = $(window).width(), screenHeight = $(window).height();
+        setCenter: function(obj) {
+            var screenWidth = $(window).width(),
+                screenHeight = $(window).height();
             var scrolltop = $(document).scrollTop();
             var objLeft = (screenWidth - obj.width()) / 2;
             var objTop = (screenHeight - obj.height()) / 2 + scrolltop;
             obj.css({ left: objLeft + "px", top: objTop + "px" });
         },
-        startListen:function(){
+        startListen: function() {
             function saveSyncData(data, value) {
                 var obj = new Object();
                 obj[data] = value;
-                chrome.storage.sync.set(obj, function () {
+                chrome.storage.sync.set(obj, function() {
                     // console.log(data + ' saved');
                 });
             }
-            window.addEventListener("message", function (event) {
+            window.addEventListener("message", function(event) {
                 if (event.source != window)
                     return;
                 if (event.data.type && (event.data.type == "config_data")) {
@@ -63,17 +64,17 @@ var CORE = (function () {
                 }
             }, false);
         },
-        sendToBackground:function(method, data, callback){
+        sendToBackground: function(method, data, callback) {
             chrome.runtime.sendMessage({
                 method: method,
                 data: data
             }, callback);
         },
-        showToast:function(message, type){
+        showToast: function(message, type) {
             window.postMessage({ type: "show_toast", data: { message: message, type: type } }, "*");
         },
         //获取aria2c的版本号用来测试通信
-        getVersion: function () {
+        getVersion: function() {
             var data = {
                 "jsonrpc": "2.0",
                 "method": "aria2.getVersion",
@@ -97,9 +98,9 @@ var CORE = (function () {
             });
         },
         //解析 RPC地址 返回验证数据 和地址
-        parseAuth: function (url) {
+        parseAuth: function(url) {
             var parseURL = new URL(url);
-            var auth_str = (parseURL.username != "") ? (parseURL.username + ":" +decodeURI(parseURL.password)) : null;
+            var auth_str = (parseURL.username != "") ? (parseURL.username + ":" + decodeURI(parseURL.password)) : null;
             var options = [];
             if (auth_str) {
                 if (auth_str.indexOf("token:") != 0) {
@@ -108,7 +109,7 @@ var CORE = (function () {
             }
             var hash = parseURL.hash.substr(1);
             if (hash) {
-                hash.split("&").forEach(function (item) {
+                hash.split("&").forEach(function(item) {
                     item = item.split("=");
                     if (item[0].length > 1) {
                         options.push([item[0], item.length == 2 ? item[1] : "enabled"]);
@@ -121,7 +122,7 @@ var CORE = (function () {
         },
         //导出菜单
         addMenu: {
-            init: function (type) {
+            init: function(type) {
                 if ($("#export_menu").length != 0) {
                     return $("#export_menu");
                 }
@@ -134,22 +135,22 @@ var CORE = (function () {
                     $(".g-dropdown-button").eq(3).after(aria2_btn);
                 } else if (type == "share") {
                     // aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
-                    $(".bar").css("position","absolute");
+                    $(".bar").css("position", "absolute");
                     aria2_btn.addClass("g-dropdown-button").prepend($("<a>").addClass("g-button").append($("<span>").addClass("g-button-right").append($("<em>").addClass("icon icon-download"), $("<span>").addClass("text").text("导出下载"))));
                     $('a[data-button-id="b3"]').parent().prepend(aria2_btn);
                 } else if (type == "album") {
                     aria2_btn.addClass("save-button").append('<em class="global-icon-download"></em><b>导出下载</b>');
                     $("#albumFileSaveKey, #emphsizeButton").parent().prepend(aria2_btn);
                 }
-                aria2_btn.mouseenter(function () {
+                aria2_btn.mouseenter(function() {
                     aria2_btn.toggleClass("button-open");
                     list.show();
                 });
-                aria2_btn.mouseleave(function () {
+                aria2_btn.mouseleave(function() {
                     aria2_btn.toggleClass("button-open");
                     list.hide();
                 });
-                config.click(function () {
+                config.click(function() {
                     if ($("#setting_div").length == 0) {
                         CORE.setting.init();
                     }
@@ -160,7 +161,7 @@ var CORE = (function () {
                 return aria2_btn;
             },
             //根据设置更新按钮
-            update: function () {
+            update: function() {
                 $(".rpc_export_list").remove();
                 var rpc_list = JSON.parse(localStorage.getItem("rpc_list") || '[{"name":"ARIA2 RPC","url":"http://localhost:6800/jsonrpc"}]');
                 while (rpc_list.length > 0) {
@@ -171,7 +172,7 @@ var CORE = (function () {
         },
         //设置界面
         setting: {
-            init: function () {
+            init: function() {
                 var self = this;
                 var setting_div = document.createElement("div");
                 setting_div.id = "setting_div";
@@ -204,14 +205,14 @@ var CORE = (function () {
                 document.body.appendChild(setting_div);
                 $("#setting_divtopmsg").html("");
                 self.update();
-                $("#setting_div").on("click", function (event) {
+                $("#setting_div").on("click", function(event) {
                     switch (event.target.id) {
                         case "setting_div_close":
                             $("#setting_div").hide();
                             break;
                         case "apply":
                             self.save();
-                            setTimeout(function () {
+                            setTimeout(function() {
                                 CORE.addMenu.update();
                             }, 60);
                             $("#setting_divtopmsg").html("设置已保存.");
@@ -239,7 +240,7 @@ var CORE = (function () {
                 return setting_div.id;
             },
             //保存配置数据
-            save: function () {
+            save: function() {
                 var config_data = {};
                 config_data["UA"] = document.getElementById("setting_aria2_useragent_input").value;
                 config_data["rpc_delay"] = $("#rpc_delay").val();
@@ -260,7 +261,7 @@ var CORE = (function () {
                 window.postMessage({ type: "config_data", data: config_data }, "*");
             },
             //根据配置数据 更新 设置菜单
-            update: function () {
+            update: function() {
                 $("#rpc_delay").val((localStorage.getItem("rpc_delay") || "300"));
                 $("#rpc_fold").val((localStorage.getItem("rpc_fold") || "0"));
                 var rpc_sync = localStorage.getItem("rpc_sync");
@@ -287,7 +288,7 @@ var CORE = (function () {
                 }
             }
         },
-        copyText:function(text){
+        copyText: function(text) {
             var input = document.createElement("textarea");
             document.body.appendChild(input);
             input.style.position = "fixed";
@@ -305,11 +306,11 @@ var CORE = (function () {
                 this.showToast("拷贝失败 QAQ", "MODE_FAILURE");
         },
         // names format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
-        requestCookies: function (names) {
-            this.sendToBackground("get_cookies", names, function(value) {cookies = value});
+        requestCookies: function(names) {
+            this.sendToBackground("get_cookies", names, function(value) { cookies = value });
         },
         //获取 http header信息
-        getHeader: function (type) {
+        getHeader: function(type) {
             var addheader = [];
             var UA = localStorage.getItem("UA") || defaultUA;
             var headers = localStorage.getItem("headers");
@@ -327,7 +328,7 @@ var CORE = (function () {
                 for (var key in cookies) {
                     format_cookies.push(key + "=" + cookies[key]);
                 }
-                addheader.push("Cookie: " + format_cookies.join(";"));
+                addheader.push("Cookie: " + format_cookies.join("; "));
             }
 
             var header = "";
@@ -343,11 +344,11 @@ var CORE = (function () {
                 return header;
             } else if (type == "idm_txt") {
                 for (i = 0; i < addheader.length; i++) {
-                    if(addheader[i].indexOf("Referer") != 0){
-                        header +=  (addheader[i].split(": ")[0].toLowerCase()+": "+addheader[i].split(": ")[1]) + "\n";
+                    if (addheader[i].indexOf("Referer") != 0) {
+                        header += (addheader[i].split(": ")[0].toLowerCase() + ": " + addheader[i].split(": ")[1]) + "\n";
                     }
                 }
-                
+
                 return header.replace(/\n$/, "");
             } else {
                 return addheader;
@@ -355,7 +356,7 @@ var CORE = (function () {
 
         },
         //把要下载的link和name作为数组对象传过来
-        aria2Data: function (file_list, token, options) {
+        aria2Data: function(file_list, token, options) {
             var rpc_list = [];
             var self = this;
             if (file_list.length > 0) {
@@ -365,16 +366,18 @@ var CORE = (function () {
                         "jsonrpc": "2.0",
                         "method": "aria2.addUri",
                         "id": new Date().getTime(),
-                        "params": [[file_list[i].link], {
-                            "out": file_list[i].name,
-                            "dir": localStorage.getItem("rpc_dir") || null,
-                            "header": self.getHeader()
-                        }]
+                        "params": [
+                            [file_list[i].link], {
+                                "out": file_list[i].name,
+                                "dir": localStorage.getItem("rpc_dir") || null,
+                                "header": self.getHeader()
+                            }
+                        ]
                     };
                     console.log(options);
                     if (options.length > 0) {
                         var params = rpc_data.params[rpc_data.params.length - 1];
-                        options.forEach(function (item) {
+                        options.forEach(function(item) {
                             params[item[0]] = item[1];
                         });
                     }
@@ -390,7 +393,7 @@ var CORE = (function () {
         },
         //文本模式的导出数据框
         dataBox: {
-            init: function (type) {
+            init: function(type) {
                 if ($("#download_ui").length != 0)
                     return this;
                 var download_ui = $("<div>").attr("id", "download_ui").append('<div class="top"><a href="javascript:;" title="关闭" id="aria2_download_close" class="close"></a><h3><em></em>ARIA2导出</h3></div>');
@@ -405,7 +408,7 @@ var CORE = (function () {
                 // Disable spellcheck and resize for textarea.
                 $("<textarea>").attr({ "id": "download_link", "wrap": "off", "spellcheck": false }).css({ "width": "100%", "overflow": "scroll", "height": "180px", "resize": "none" }).appendTo(content_ui);
                 CORE.setCenter($("#download_ui"));
-                $("#download_ui").on("click", "#aria2_download_close", function () {
+                $("#download_ui").on("click", "#aria2_download_close", function() {
                     // Clean up when closing download dialog.
                     if (navigator.msSaveBlob)
                         $("#aria2c_btn, #idm_btn, #download_txt_btn").data("href", "")
@@ -417,31 +420,31 @@ var CORE = (function () {
 
                     download_ui.hide();
                 });
-                $("#download_ui").on("click", "#copy_txt_btn", function () {
+                $("#download_ui").on("click", "#copy_txt_btn", function() {
                     CORE.copyText($("#copy_txt_btn").attr("data"));
                 });
 
                 // Edge does support `a[download]`, but it ignores the file name, so use `msSaveBlob()` instead
                 if (navigator.msSaveBlob) {
-                    $("#aria2c_btn, #idm_btn, #download_txt_btn").click(function (e) {
-                        e.preventDefault();
-
+                    $("#aria2c_btn, #idm_btn, #download_txt_btn").data("href", "").click(function(e) {
                         var $this = $(this);
-                        navigator.msSaveBlob(new Blob([$this.data("href")]), $this.attr("download"));
+
+                        var s = document.createElement("script");
+                        s.textContent = 'navigator.msSaveBlob(new Blob(["' + $this.data("href").replace(/\r/g, "\\r").replace(/\n/g, "\\n") + '"]), "' + $this.attr("download") + '")';
+                        document.body.appendChild(s);
                     });
-                }
-                else {
+                } else {
                     $("#aria2c_btn, #idm_btn, #download_txt_btn").attr("href", "data:text/plain;charset=utf-8,");
                 }
             },
-            show: function () {
+            show: function() {
                 $("#download_ui").show();
             },
-            onClose: function (callback) {
+            onClose: function(callback) {
                 $("#download_ui").on("click", "#aria2_download_close", callback);
             },
             //在数据框里面填充数据
-            fillData: function (file_list) {
+            fillData: function(file_list) {
                 var files = [];
                 var aria2c_txt = [];
                 var idm_txt = [];
@@ -466,7 +469,7 @@ var CORE = (function () {
                             file_list[i].link,
                             CORE.getHeader("idm_txt"),
                             "out=" + file_list[i].name,
-                            ">"
+                            ">\r\n"
                         ].join("\r\n"));
                         down_txt.push(file_list[i].link + "\n");
                     }
@@ -475,10 +478,9 @@ var CORE = (function () {
                         $("#aria2c_btn").data("href", $("#aria2c_btn").data("href") + aria2c_txt.join(""));
                         $("#idm_btn").data("href", $("#idm_btn").data("href") + idm_txt.join(""));
                         $("#download_txt_btn").data("href", $("#download_txt_btn").data("href") + down_txt.join(""));
-                    }
-                    else {
+                    } else {
                         $("#aria2c_btn").attr("href", $("#aria2c_btn").attr("href") + encodeURIComponent(aria2c_txt.join("")));
-                        $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("\r\n")));
+                        $("#idm_btn").attr("href", $("#idm_btn").attr("href") + encodeURIComponent(idm_txt.join("")));
                         $("#download_txt_btn").attr("href", $("#download_txt_btn").attr("href") + encodeURIComponent(down_txt.join("")));
                     }
                     $("#copy_txt_btn").attr("data", $("#copy_txt_btn").attr("data") + down_txt.join(""));
