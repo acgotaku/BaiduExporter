@@ -192,14 +192,14 @@
 
     function alertDialog(json, data) {
         var id = json.request_id;
-        var div = $("<div>").attr("id", "alert_div" + id).addClass("b-panel b-dialog alert-dialog");
+        var div = $("<div>").attr("id", "alert_div" + id).addClass("vcode_div");
         var html = [
-            '<div class="dlg-hd b-rlv">',
-            '<div title="关闭" id="alert_dialog_close" class="dlg-cnr dlg-cnr-r"></div>',
+            '<div class="top">',
+            '<div title="关闭" id="alert_dialog_close" class="close"></div>',
             "<h3>提示</h3>",
             "</div>",
-            '<div class="dlg-bd">',
-            '<div class="alert-dialog-msg center">',
+            '<div class="dialog-body">',
+            '<div class="alert-dialog-msg">',
             '<div class="download-verify">',
             '<div class="verify-body">请输入验证码：<input id="verification" type="text" class="input-code" maxlength="4">',
             '<img id="vcode" class="img-code" alt="验证码获取中"  width="100" height="30">',
@@ -211,11 +211,9 @@
             "</div>",
             "</div>",
             "</div>",
-            '<div class="dlg-ft b-rlv">',
-            '<div class="alert-dialog-commands clearfix center">',
-            '<a href="javascript:;" id="okay" class="sbtn okay"><b>确定</b></a>',
-            '<a href="javascript:;" id="ignore" class="dbtn cancel"><b>取消</b></a>',
-            "</div>",
+            '<div class="dialog-footer g-clearfix">',
+            '<a href="javascript:;" id="okay" class="button button-blue"><b>确定</b></a>',
+            '<a href="javascript:;" id="ignore" class="button"><b>取消</b></a>',
             "</div>"
         ];
         div.html(html.join(""));
@@ -256,7 +254,7 @@
             "timestamp": yunData.TIMESTAMP,
             "sign": yunData.SIGN,
             "bdstoken": yunData.MYBDSTOKEN,
-            "app_id": yunData.FILEINFO[0].app_id,
+            "app_id": 250528,
             "channel": "chunlei",
             "clienttype": 0,
             "web": 1
@@ -265,7 +263,7 @@
                 $.getJSON("/api/getcaptcha", {
                     "prod": "share",
                     "bdstoken": yunData.MYBDSTOKEN,
-                    "app_id": yunData.FILEINFO[0].app_id,
+                    "app_id": 250528,
                     "channel": "chunlei",
                     "clienttype": 0,
                     "web": 1

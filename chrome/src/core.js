@@ -1,6 +1,6 @@
 var CORE = (function() {
-    const version = "0.9.1";
-    const update_date = "2017/02/07";
+    const version = "0.9.2";
+    const update_date = "2017/02/15";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
     var cookies = null;
@@ -197,7 +197,7 @@ var CORE = (function() {
                     "</table>",
                     '<div style="margin-top:10px;">',
                     '<div id="copyright">© Copyright <a href="https://github.com/acgotaku/BaiduExporter">雪月秋水 </a><br/> Version:' + version + " 更新日期: " + update_date + " </div>",
-                    '<div style="margin-left:50px; display:inline-block"><a href="javascript:;" id="apply" class="button">应用</a><a href="javascript:;" id="reset" class="button">重置</a></div>',
+                    '<div style="margin-left:50px; display:inline-block"><a href="javascript:;" id="apply" class="button button-blue">应用</a><a href="javascript:;" id="reset" class="button">重置</a></div>',
                     "</div>",
                     "</div>"
                 ];

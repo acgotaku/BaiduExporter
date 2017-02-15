@@ -1,13 +1,26 @@
 #setting_div,
+.vcode_div,
 #download_ui {
-    border: 3px solid #999;
     background: #FFF;
     width: 600px;
-    box-shadow: 0 0 9px #999;
     position: absolute;
     z-index: 998;
+    border: 1px solid #ced1d9;
+    box-shadow: 0 0 3px #ced1d9;
+    -webkit-transtion: bottom .1s;
+    border-radius: 4px;
+    font-family: 'Microsoft YaHei',SimSun;
+
 }
 
+.alert-dialog-msg{
+    text-align: center;
+    padding: 22px;
+}
+.vcode_div .dialog-footer{
+    text-align: center;
+    padding-bottom: 15px;
+}
 .g-button-menu {
     cursor: pointer;
 }
@@ -135,19 +148,24 @@ tr>td:first-child{
     text-decoration: none;
     font-size: 14px;
     padding: 0 50px;
-    height: 37px;
-    line-height: 37px;
-    color: #333;
-    border: 1px solid rgb(198, 198, 198);
-    border-radius: 2px;
     display: inline-block;
+    color: #3b8cff;
+    border: 1px solid #c0d9fe;
+    border-radius: 4px;
+    height: 32px;
+    line-height: 32px;
+}
+.button-blue {
+    color: #fff;
+    border: 1px solid #3b8cff;
+    background-color: #3b8cff;
 }
 
 .button:hover,
 .button:visited,
 .button:active {
-    background: #fafafa;
-    color: #333;
+    color: #77afff!important;
+    border: 1px solid #c0d9fe;
     text-decoration: none;
 }
 
