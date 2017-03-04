@@ -110,59 +110,58 @@
     var sign = btoa(new Function("return " + yunData.sign2)()(yunData.sign3, yunData.sign1));
 
     function setFileData(files) {
-        console.log(files);
-        // $.get(window.location.origin + "/api/download", {
-        //     "type": "dlink",
-        //     "bdstoken": yunData.MYBDSTOKEN,
-        //     "fidlist": JSON.stringify(Object.keys(files)),
-        //     "timestamp": yunData.timestamp,
-        //     "sign": sign, 
-        //     "channel": "chunlei",
-        //     "clienttype": 0,
-        //     "web": 1,
-        //     "app_id": 250528
-        // }, null, "json").done(function(json) {
-        //     if (json.errno != 0) {
-        //         CORE.showToast("未知错误", "MODE_FAILURE");
-        //         console.log(json);
-        //         return;
-        //     }
+        if ($("#svip").prop("checked")){
+            $.get(window.location.origin + "/api/download", {
+                "type": "dlink",
+                "bdstoken": yunData.MYBDSTOKEN,
+                "fidlist": JSON.stringify(Object.keys(files)),
+                "timestamp": yunData.timestamp,
+                "sign": sign, 
+                "channel": "chunlei",
+                "clienttype": 0,
+                "web": 1,
+                "app_id": 250528
+            }, null, "json").done(function(json) {
+                var file_list = [];
+                if (json.errno != 0) {
+                    CORE.showToast("未知错误", "MODE_FAILURE");
+                    console.log(json);
+                    return;
+                }
+                for (var i = 0; i < json.dlink.length; i++) {
+                    var item = json.dlink[i];
+                    var path = files[item.fs_id];
+                    file_list.push({ name: path.substr(pathPrefixLength), link: item.dlink });
+                }
 
-        //     var file_list = [];
-        //     for (var i = 0; i < json.dlink.length; i++) {
-        //         var item = json.dlink[i];
-        //         var path = files[item.fs_id];
-        //         file_list.push({ name: path.substr(pathPrefixLength), link: item.dlink });
-        //     }
-
-        //     if (MODE == "TXT") {
-        //         CORE.dataBox.show();
-        //         CORE.dataBox.fillData(file_list);
-        //     } else {
-        //         var paths = CORE.parseAuth(RPC_PATH);
-        //         var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
-        //         generateParameter(rpc_list);
-        //     }
-        // }).fail(function(xhr) {
-        //     CORE.showToast("网络请求失败", "MODE_FAILURE");
-        //     console.log(JSON.stringify(xhr));
-        // });
-
-        var file_list = [];
-        var restAPIUrl = location.protocol + "//pcs.baidu.com/rest/2.0/pcs/";
-        for (var key in files) {
-            var path = files[key];
-            var dlink = restAPIUrl + 'file?method=download&app_id=250528&path=' + encodeURIComponent(path);
-            file_list.push({ name: path.substr(pathPrefixLength), link: dlink });
-        }
-
-        if (MODE == "TXT") {
-            CORE.dataBox.show();
-            CORE.dataBox.fillData(file_list);
+                if (MODE == "TXT") {
+                    CORE.dataBox.show();
+                    CORE.dataBox.fillData(file_list);
+                } else {
+                    var paths = CORE.parseAuth(RPC_PATH);
+                    var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
+                    generateParameter(rpc_list);
+                }
+            }).fail(function(xhr) {
+                CORE.showToast("网络请求失败", "MODE_FAILURE");
+                console.log(JSON.stringify(xhr));
+            });
         } else {
-            var paths = CORE.parseAuth(RPC_PATH);
-            var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
-            generateParameter(rpc_list);
+            var file_list = [];
+            var restAPIUrl = location.protocol + "//pcs.baidu.com/rest/2.0/pcs/";
+            for (var key in files) {
+                var path = files[key];
+                var dlink = restAPIUrl + 'file?method=download&app_id=250528&path=' + encodeURIComponent(path);
+                file_list.push({ name: path.substr(pathPrefixLength), link: dlink });
+            }
+            if (MODE == "TXT") {
+                CORE.dataBox.show();
+                CORE.dataBox.fillData(file_list);
+            } else {
+                var paths = CORE.parseAuth(RPC_PATH);
+                var rpc_list = CORE.aria2Data(file_list, paths[0], paths[2]);
+                generateParameter(rpc_list);
+            }
         }
 
     }

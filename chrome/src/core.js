@@ -1,6 +1,6 @@
 var CORE = (function() {
-    const version = "0.9.2";
-    const update_date = "2017/02/15";
+    const version = "0.9.3";
+    const update_date = "2017/03/04";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
     var cookies = null;
@@ -61,7 +61,7 @@ var CORE = (function() {
                 }
                 if (event.data.type && (event.data.type == "clear_data")) {
                     chrome.storage.sync.clear();
-                }
+                } 
             }, false);
         },
         sendToBackground: function(method, data, callback) {
@@ -186,6 +186,7 @@ var CORE = (function() {
                     '<table id="setting_div_table" >',
                     "<tbody>",
                     '<tr><td><label>开启配置同步:</label></td><td><input id="rpc_sync" type="checkbox"></td></tr>',
+                    '<tr><td><label>我是SVIP会员:</label></td><td><input id="svip" type="checkbox"></td></tr>',
                     '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
                     '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
                     '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
@@ -249,6 +250,7 @@ var CORE = (function() {
                 config_data["rpc_fold"] = $("#rpc_fold").val();
                 config_data["rpc_headers"] = $("#setting_aria2_headers").val();
                 config_data["rpc_sync"] = $("#rpc_sync").prop("checked");
+                config_data["svip"] =$("#svip").prop("checked");
                 var rpc_list = [];
                 for (var i = 0; i < $(".rpc_list").length; i++) {
                     var num = i + 1;
@@ -270,6 +272,16 @@ var CORE = (function() {
                 } else {
                     $("#rpc_sync").prop("checked", true);
                 }
+                var svip =localStorage.getItem("svip");
+                if (svip == null){
+                    svip = (yunData.is_svip == 0) ? "false" : "true";
+                }
+                if (svip == "true"){
+                    $("#svip").prop("checked", true);
+                } else {
+                    $("#svip").prop("checked", false);
+                }
+
                 $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
                 $("#setting_aria2_useragent_input").val(localStorage.getItem("UA") || defaultUA);
                 $("#setting_aria2_referer_input").val(localStorage.getItem("referer") || defaultreferer);
