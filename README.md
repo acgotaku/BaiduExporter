@@ -6,6 +6,7 @@
 
 ## Usage
 
+- 非SVIP用户下载分享文件须先将文件保存到自己网盘以获得较快的下载速度。
 - 插件的设置必须保存之后才会生效。
 - 推荐设置：
     - Set `--rpc-secret=<secret>` if you are using aria2 1.18.4(or higher) with 'JSON-RPC PATH' like http://token:secret@hostname:port/jsonrpc
