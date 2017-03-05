@@ -110,7 +110,7 @@
     var sign = btoa(new Function("return " + yunData.sign2)()(yunData.sign3, yunData.sign1));
 
     function setFileData(files) {
-        if ($("#svip").prop("checked")){
+        if (localStorage.getItem("svip") == "true"){
             $.get(window.location.origin + "/api/download", {
                 "type": "dlink",
                 "bdstoken": yunData.MYBDSTOKEN,
