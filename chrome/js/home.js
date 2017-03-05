@@ -118,8 +118,21 @@
 	                });
 	            } else if (files.length != 0) {
 	                CORE.showToast("正在获取下载地址... ", "MODE_SUCCESS");
+	                
+	                var counter = 0;
+	                var tmp_files = {};
+	                for (var fs_id in files) {
+	                    tmp_files[fs_id] = files[fs_id];
+	                    counter++;
+	                    if (counter == 100) {
+	                        setFileData(tmp_files);
+	                        // Reset files and counters
+	                        tmp_files = {};
+	                        counter = 0;
+	                    }
+	                }
+	                setFileData(tmp_files);
 
-	                setFileData(files);
 	                downloader.reset();
 	            } else {
 	                CORE.showToast("一个文件都没有哦", "MODE_CAUTION");
