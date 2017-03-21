@@ -1,9 +1,9 @@
 {
     "appName": {
-        "message": "百度网盘助手"
+        "message": "网盘助手"
     },
     "description": {
-        "message": "可以方便的把百度网盘的下载地址导出到aria2/aria2-rpc，支持YAAW。"
+        "message": "可以方便的把网盘的下载地址导出到aria2/aria2-rpc，支持YAAW。"
     },
     "openContextMenuTitle": {
         "message": "导出到aria2-rpc"

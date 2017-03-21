@@ -1,7 +1,10 @@
-var HttpSendRead = function(info) {
-    Promise.prototype.done=Promise.prototype.then;
-    Promise.prototype.fail=Promise.prototype.catch;
-    return new Promise(function(resolve, reject) {
+if (typeof browser != "undefined")
+    chrome = browser;
+
+var HttpSendRead = function (info) {
+    Promise.prototype.done = Promise.prototype.then;
+    Promise.prototype.fail = Promise.prototype.catch;
+    return new Promise(function (resolve, reject) {
         var http = new XMLHttpRequest();
         var contentType = "\u0061\u0070\u0070\u006c\u0069\u0063\u0061\u0074\u0069\u006f\u006e\u002f\u0078\u002d\u0077\u0077\u0077\u002d\u0066\u006f\u0072\u006d\u002d\u0075\u0072\u006c\u0065\u006e\u0063\u006f\u0064\u0065\u0064\u003b\u0020\u0063\u0068\u0061\u0072\u0073\u0065\u0074\u003d\u0055\u0054\u0046\u002d\u0038";
         var timeout = 3000;
@@ -15,7 +18,7 @@ var HttpSendRead = function(info) {
         function httpclose() {
             http.abort();
         }
-        http.onreadystatechange = function() {
+        http.onreadystatechange = function () {
             if (http.readyState == 4) {
                 if ((http.status == 200 && http.status < 300) || http.status == 304) {
                     clearTimeout(timeId);
@@ -49,109 +52,93 @@ var HttpSendRead = function(info) {
         }
     });
 };
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status === "loading" && tab.url.indexOf("n.baidu.com") != -1) {
-        if (!chrome.runtime.onConnectExternal.hasListeners()) {
-            chrome.runtime.onConnectExternal.addListener(function(port) {
-                console.assert(port.name == "BaiduExporter");
-                port.onMessage.addListener(function(request) {
-                    console.log(request.method);
-                    console.log(request.data);
-                    switch(request.method){
-                    case "rpc_data":
-                        HttpSendRead(request.data)
-                               .done(function(json, textStatus, jqXHR) {
-                                   port.postMessage({method:"rpc_result",status:true});
-                               })
-                                    .fail(function(jqXHR, textStatus, errorThrown) {
-                                        port.postMessage({method:"rpc_result",status:false});
-                                    });
-                        break;
-                    case "config_data":
-                        for(var key in request.data){
-                            localStorage.setItem(key,request.data[key]);
-                        }
-                        break;
-                    case "copy_text":
-                        var input = document.createElement("textarea");
-                        document.body.appendChild(input);
-                        input.value = request.data;
-                        input.focus();
-                        input.select();
-                        var result =document.execCommand("Copy");
-                        input.remove();
-                        console.log(result);
-                        if(result){
-                            port.postMessage({method:"copy_text",status:true});
-                        }else{
-                            port.postMessage({method:"copy_text",status:false});
-                        }
-                        break;
-                    case "rpc_version":
-                        HttpSendRead(request.data)
-                                .done(function(json, textStatus, jqXHR) {
-                                    port.postMessage({method:"rpc_version",status:true,data:json});
 
-                                })
-                                .fail(function(jqXHR, textStatus, errorThrown) {
-                                    port.postMessage({method:"rpc_version",status:false});
-                                });
-                        break;
-                    case "get_cookies":
-                        Promise.all(function(){
-                            var array=[];
-                            var data=request.data;
-                            for(var i=0;i<data.length;i++){
-                                array.push(get_cookie(data[i].site,data[i].name));
-                            }
-                            return array;
-                        }()).then(function(value){
-
-                            port.postMessage({method:"send_cookies",data:value});
-
-                        },function(){
-                            console.log("error");
-                        });
-                        break;
-                    }
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    console.log(request.method);
+    console.log(request.data);
+    switch (request.method) {
+        case "add_script":
+            chrome.tabs.executeScript(sender.tab.id, { file: request.data });
+            break;
+        case "rpc_data":
+            HttpSendRead(request.data)
+                .done(function (json, textStatus, jqXHR) {
+                    sendResponse(true);
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    sendResponse(false);
                 });
-            });
-        }
-
+            return true;
+        case "config_data":
+            for (var key in request.data) {
+                localStorage.setItem(key, request.data[key]);
+            }
+            break;
+        case "rpc_version":
+            HttpSendRead(request.data)
+                .done(function (json, textStatus, jqXHR) {
+                    sendResponse(json);
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    sendResponse(null);
+                });
+            return true;
+        case "get_cookies":
+            getCookies(request.data).then(value => sendResponse(value));
+            return true;
     }
 });
-//获取系统的cookies 使用Promise异步处理
-function get_cookie(site,name){
-    return new Promise(function(resolve, reject) {
-        chrome.cookies.get({"url": site, "name": name}, function(cookies) {
+
+// Promise style `chrome.cookies.get()`
+function getCookie(detail) {
+    return new Promise(function (resolve) {
+        chrome.cookies.get(detail, resolve);
+    });
+};
+
+//async function getCookies(details)
+//{
+//    var obj = {};
+//    for (var item of await Promise.all(details.map(item => getCookie(item))))
+//        obj[item.name] = item.value;
+//    return obj;
+//}
+
+function getCookies(details) {
+    return new Promise(function (resolve) {
+        var list = details.map(item => getCookie(item));
+        Promise.all(list).then(function (cookies) {
             var obj = {};
-            if (cookies) {
-                obj[cookies.name] = cookies.value;
-                resolve(obj);
-            }else{
-                resolve(obj);
-            }
+            for (var item of cookies)
+                if (item != null)
+                obj[item.name] = item.value;
+            resolve(obj);
         });
     });
 }
+
 //弹出chrome通知
-function showNotification(id,opt){
-    var notification = chrome.notifications.create(id,opt,function(notifyId){return notifyId;});
-    setTimeout(function(){
-        chrome.notifications.clear(id,function(){});
-    },5000);
+function showNotification(id, opt) {
+    if (!chrome.notifications)
+        return;
+
+    chrome.notifications.create(id, opt, function () { });
+    setTimeout(function () {
+        chrome.notifications.clear(id, function () { });
+    }, 5000);
 }
+
 //软件版本更新提示
 var manifest = chrome.runtime.getManifest();
-var previousVersion=localStorage.getItem("version");
-if(previousVersion == "" || previousVersion != manifest.version){
-    var opt={
+var previousVersion = localStorage.getItem("version");
+if (previousVersion == "" || previousVersion != manifest.version) {
+    var opt = {
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" +manifest.version + "版本啦～\n此次更新获取文件的API~",
+        message: "百度网盘助手更新到" + manifest.version + "版本啦～\n此次更新修复大量文件下载时的错误~",
         iconUrl: "images/icon.jpg"
     };
-    var id= new Date().getTime().toString();
-    showNotification(id,opt);
-    localStorage.setItem("version",manifest.version);
+    var id = new Date().getTime().toString();
+    showNotification(id, opt);
+    localStorage.setItem("version", manifest.version);
 }
