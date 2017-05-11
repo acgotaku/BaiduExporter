@@ -260,7 +260,7 @@
             "web": 1
         }), data, null, "json").done(function (json) {
             if (json.errno == -20) {
-                $.getJSON("/api/getcaptcha", {
+                $.getJSON(window.location.origin + "/api/getcaptcha", {
                     "prod": "share",
                     "bdstoken": yunData.MYBDSTOKEN,
                     "app_id": 250528,
