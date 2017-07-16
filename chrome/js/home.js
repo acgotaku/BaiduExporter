@@ -108,7 +108,7 @@
 	                        if (item.isdir)
 	                            folders.push(item.path);
 	                        else
-	                            files[item.fs_id] = item.path;
+	                            files[item.fs_id] = item;
 	                    }
 	                }).fail(function(xhr) {
 	                    CORE.showToast("网络请求失败", "MODE_FAILURE");
@@ -118,7 +118,7 @@
 	                });
 	            } else if (files.length != 0) {
 	                CORE.showToast("正在获取下载地址... ", "MODE_SUCCESS");
-	                
+
 	                var counter = 0;
 	                var tmp_files = {};
 	                for (var fs_id in files) {
@@ -146,8 +146,8 @@
 	            folders.push(path);
 	        };
 
-	        downloader.addFile = function(id, path) {
-	            files[id] = path;
+	        downloader.addFile = function(item) {
+	            files[item.fs_id] = item;
 	        };
 
 	        downloader.start = function() {
@@ -175,7 +175,7 @@
 	                "bdstoken": yunData.MYBDSTOKEN,
 	                "fidlist": JSON.stringify(Object.keys(files)),
 	                "timestamp": yunData.timestamp,
-	                "sign": sign, 
+	                "sign": sign,
 	                "channel": "chunlei",
 	                "clienttype": 0,
 	                "web": 1,
@@ -189,8 +189,12 @@
 	                }
 	                for (var i = 0; i < json.dlink.length; i++) {
 	                    var item = json.dlink[i];
-	                    var path = files[item.fs_id];
-	                    file_list.push({ name: path.substr(pathPrefixLength), link: item.dlink });
+	                    var path = files[item.fs_id].path;
+	                    var md5 = files[item.fs_id].md5;
+	                    file_list.push({
+	                        name: path.substr(pathPrefixLength),
+	                        link: item.dlink,
+	                        md5: md5 });
 	                }
 
 	                if (MODE == "TXT") {
@@ -209,9 +213,10 @@
 	            var file_list = [];
 	            var restAPIUrl = location.protocol + "//pcs.baidu.com/rest/2.0/pcs/";
 	            for (var key in files) {
-	                var path = files[key];
+	                var path = files[key].path;
+	                var md5 = files[key].md5;
 	                var dlink = restAPIUrl + 'file?method=download&app_id=250528&path=' + encodeURIComponent(path);
-	                file_list.push({ name: path.substr(pathPrefixLength), link: dlink });
+	                file_list.push({ name: path.substr(pathPrefixLength), link: dlink, md5: md5 });
 	            }
 	            if (MODE == "TXT") {
 	                CORE.dataBox.show();
@@ -243,7 +248,7 @@
 	                if (item.isdir)
 	                    Downloader.addFolder(item.path);
 	                else
-	                    Downloader.addFile(item.fs_id, item.path);
+	                    Downloader.addFile(item);
 	            }
 
 	            Downloader.start();
@@ -366,7 +371,7 @@
 	                }
 	                if (event.data.type && (event.data.type == "clear_data")) {
 	                    chrome.storage.sync.clear();
-	                } 
+	                }
 	            }, false);
 	        },
 	        sendToBackground: function(method, data, callback) {
@@ -687,7 +692,8 @@
 	                            [file_list[i].link], {
 	                                "out": file_list[i].name,
 	                                "dir": localStorage.getItem("rpc_dir") || null,
-	                                "header": self.getHeader()
+	                                "header": self.getHeader(),
+	                                "checksum": "md5=" + file_list[i].md5
 	                            }
 	                        ]
 	                    };
@@ -770,7 +776,7 @@
 	                    var length = file_list.length;
 	                    for (var i = 0; i < length; i++) {
 	                        var filename = (navigator.platform.indexOf("Win") != -1) ? JSON.stringify(file_list[i].name) : CORE.escapeString(file_list[i].name);
-	                        files.push("aria2c -c -s10 -k1M -x16 --enable-rpc=false -o " + filename + CORE.getHeader("aria2c_line") + " " + JSON.stringify(file_list[i].link) + "\n");
+	                        files.push("aria2c -c -s10 -k1M -x16 --enable-rpc=false --checksum=md5=" + file_list[i].md5 + " -o " + filename + CORE.getHeader("aria2c_line") + " " + JSON.stringify(file_list[i].link) + "\n");
 	                        aria2c_txt.push([
 	                            file_list[i].link,
 	                            CORE.getHeader("aria2c_txt"),
@@ -779,6 +785,7 @@
 	                            " max-connection-per-server=10",
 	                            " split=10",
 	                            " min-split-size=1M",
+	                            " checksum=md5=" + file_list[i].md5,
 	                            "\n"
 	                        ].join("\n"));
 	                        idm_txt.push([
