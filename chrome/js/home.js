@@ -497,6 +497,7 @@
 	                    "<tbody>",
 	                    '<tr><td><label>开启配置同步:</label></td><td><input id="rpc_sync" type="checkbox"></td></tr>',
 	                    '<tr><td><label>我是SVIP会员:</label></td><td><input id="svip" type="checkbox"></td></tr>',
+	                    '<tr><td><label>下载完成后校验md5:</label></td><td><input id="md5_checksum" type="checkbox"></td></tr>',
 	                    '<tr><td><label>文件夹结构层数：</label></td><td><input type="text" id="rpc_fold" class="input-small">(默认0表示不保留,-1表示保留完整路径)</td></tr>',
 	                    '<tr><td><label>递归下载延迟：</label></td><td><input type="text" id="rpc_delay" class="input-small">(单位:毫秒)<div style="position:absolute; margin-top: -20px; right: 20px;"><a id="send_test" type="0" href="javascript:;" >测试连接，成功显示版本号。</a></div></td></tr>',
 	                    '<tr><td><label>下载路径:</label></td><td><input type="text" placeholder="只能设置为绝对路径" id="setting_aria2_dir" class="input-large"></td></tr>',
@@ -561,6 +562,7 @@
 	                config_data["rpc_headers"] = $("#setting_aria2_headers").val();
 	                config_data["rpc_sync"] = $("#rpc_sync").prop("checked");
 	                config_data["svip"] =$("#svip").prop("checked");
+	                config_data["md5_checksum"] =$("#md5_checksum").prop("checked");
 	                var rpc_list = [];
 	                for (var i = 0; i < $(".rpc_list").length; i++) {
 	                    var num = i + 1;
@@ -590,6 +592,12 @@
 	                    $("#svip").prop("checked", true);
 	                } else {
 	                    $("#svip").prop("checked", false);
+	                }
+	                var md5_checksum = localStorage.getItem("md5_checksum") || "false";
+	                if (md5_checksum == "false") {
+	                    $("#md5_checksum").prop("checked", false);
+	                } else {
+	                    $("#md5_checksum").prop("checked", true);
 	                }
 
 	                $("#setting_aria2_dir").val(localStorage.getItem("rpc_dir"));
@@ -692,11 +700,14 @@
 	                            [file_list[i].link], {
 	                                "out": file_list[i].name,
 	                                "dir": localStorage.getItem("rpc_dir") || null,
-	                                "header": self.getHeader(),
-	                                "checksum": "md5=" + file_list[i].md5
+	                                "header": self.getHeader()
 	                            }
 	                        ]
 	                    };
+	                    if (localStorage.getItem("md5_checksum") == "true") {
+	                        var params = rpc_data.params[rpc_data.params.length - 1];
+	                        params["checksum"] = "md5=" + file_list[i].md5;
+	                    }
 	                    console.log(options);
 	                    if (options.length > 0) {
 	                        var params = rpc_data.params[rpc_data.params.length - 1];
@@ -776,18 +787,24 @@
 	                    var length = file_list.length;
 	                    for (var i = 0; i < length; i++) {
 	                        var filename = (navigator.platform.indexOf("Win") != -1) ? JSON.stringify(file_list[i].name) : CORE.escapeString(file_list[i].name);
-	                        files.push("aria2c -c -s10 -k1M -x16 --enable-rpc=false --checksum=md5=" + file_list[i].md5 + " -o " + filename + CORE.getHeader("aria2c_line") + " " + JSON.stringify(file_list[i].link) + "\n");
-	                        aria2c_txt.push([
+	                        var cmd_line = "aria2c -c -s10 -k1M -x16 --enable-rpc=false -o " + filename + CORE.getHeader("aria2c_line") + " " + JSON.stringify(file_list[i].link);
+	                        aria2c_txt_item = [
 	                            file_list[i].link,
 	                            CORE.getHeader("aria2c_txt"),
 	                            " out=" + file_list[i].name,
 	                            " continue=true",
 	                            " max-connection-per-server=10",
 	                            " split=10",
-	                            " min-split-size=1M",
-	                            " checksum=md5=" + file_list[i].md5,
-	                            "\n"
-	                        ].join("\n"));
+	                            " min-split-size=1M"
+	                        ];
+	                        if (localStorage.getItem("md5_checksum") == "true") {
+	                            cmd_line += " --checksum=md5=" + file_list[i].md5;
+	                            aria2c_txt_item.push(" checksum=md5=" + file_list[i].md5);
+	                        }
+	                        cmd_line += "\n";
+	                        aria2c_txt_item.push("\n");
+	                        files.push(cmd_line);
+	                        aria2c_txt.push(aria2c_txt_item.join("\n"));
 	                        idm_txt.push([
 	                            "<",
 	                            file_list[i].link,
