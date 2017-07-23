@@ -62,7 +62,7 @@
                         if (item.isdir)
                             folders.push(item.path);
                         else
-                            files[item.fs_id] = item.path;
+                            files[item.fs_id] = item;
                     }
                 }).fail(function(xhr) {
                     CORE.showToast("网络请求失败", "MODE_FAILURE");
@@ -100,8 +100,8 @@
             folders.push(path);
         };
 
-        downloader.addFile = function(id, path) {
-            files[id] = path;
+        downloader.addFile = function(item) {
+            files[item.fs_id] = item;
         };
 
         downloader.start = function() {
@@ -143,8 +143,12 @@
                 }
                 for (var i = 0; i < json.dlink.length; i++) {
                     var item = json.dlink[i];
-                    var path = files[item.fs_id];
-                    file_list.push({ name: path.substr(pathPrefixLength), link: item.dlink });
+                    var path = files[item.fs_id].path;
+                    var md5 = files[item.fs_id].md5;
+                    file_list.push({
+                        name: path.substr(pathPrefixLength),
+                        link: item.dlink,
+                        md5: md5 });
                 }
 
                 if (MODE == "TXT") {
@@ -163,9 +167,10 @@
             var file_list = [];
             var restAPIUrl = location.protocol + "//pcs.baidu.com/rest/2.0/pcs/";
             for (var key in files) {
-                var path = files[key];
+                var path = files[key].path;
+                var md5 = files[key].md5;
                 var dlink = restAPIUrl + 'file?method=download&app_id=250528&path=' + encodeURIComponent(path);
-                file_list.push({ name: path.substr(pathPrefixLength), link: dlink });
+                file_list.push({ name: path.substr(pathPrefixLength), link: dlink, md5: md5 });
             }
             if (MODE == "TXT") {
                 CORE.dataBox.show();
@@ -197,7 +202,7 @@
                 if (item.isdir)
                     Downloader.addFolder(item.path);
                 else
-                    Downloader.addFile(item.fs_id, item.path);
+                    Downloader.addFile(item);
             }
 
             Downloader.start();
