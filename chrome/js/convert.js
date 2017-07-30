@@ -219,7 +219,7 @@
         }, null, "json").done(function (json) {
             if (json.errno == 12)
                 console.log("删除失败!");
-            else if (json.erron == 0)
+            else if (json.errno == 0)
                 console.log("删除成功");
             else {
                 showToast("未知错误", "MODE_FAILURE");
