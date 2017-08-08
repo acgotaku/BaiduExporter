@@ -20,10 +20,8 @@
     "url": "https://github.com/acgotaku/BaiduExporter/issues"
   },
   "homepage": "https://github.com/acgotaku/BaiduExporter#readme",
-  "dependencies": {
-    "eslint-config-standard": "^10.2.1"
-  },
   "devDependencies": {
+    "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-node": "^5.1.1",
     "eslint-plugin-promise": "^3.5.0",
