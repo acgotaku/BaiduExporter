@@ -357,9 +357,9 @@
         setTimeout(function () {
             // Hook transfering files function for multiple file share page
             if (yunData.SHAREPAGETYPE != "single_file_page") {
-                // var s = document.createElement("script");
-                // s.src = chrome.runtime.getURL("js/convert.js");
-                // document.body.appendChild(s);
+                var s = document.createElement("script");
+                s.src = chrome.runtime.getURL("js/convert.js");
+                document.body.appendChild(s);
             }
         }, 1000);
         CORE.showToast("初始化成功!", "MODE_SUCCESS");

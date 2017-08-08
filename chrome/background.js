@@ -135,7 +135,7 @@ if (previousVersion == "" || previousVersion != manifest.version) {
     var opt = {
         type: "basic",
         title: "更新",
-        message: "百度网盘助手更新到" + manifest.version + "版本啦～\n此次更新修复大量文件下载时的错误~",
+        message: "百度网盘助手更新到" + manifest.version + "版本啦～\n此次更新添加MD5校验选项~",
         iconUrl: "images/icon.jpg"
     };
     var id = new Date().getTime().toString();
