@@ -1,0 +1,35 @@
+{
+  "name": "baiduexporter",
+  "version": "0.9.5",
+  "description": "Assistant for Baidu to export download links to aria2/aria2-rpc",
+  "main": "background.js",
+  "scripts": {
+    "start": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acgotaku/BaiduExporter.git"
+  },
+  "keywords": [
+    "BaiduExporter",
+    "aria2"
+  ],
+  "author": "acgotaku311",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/acgotaku/BaiduExporter/issues"
+  },
+  "homepage": "https://github.com/acgotaku/BaiduExporter#readme",
+  "dependencies": {
+    "eslint-config-standard": "^10.2.1"
+  },
+  "devDependencies": {
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
+    "gulp-sourcemaps": "^2.6.0"
+  }
+}
