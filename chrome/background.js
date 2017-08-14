@@ -121,6 +121,9 @@ function getCookies(details) {
 function showNotification(id, opt) {
     if (!chrome.notifications)
         return;
+    if (navigator.userAgent.indexOf("QQBrowser") > -1) {
+        return;
+    }
 
     chrome.notifications.create(id, opt, function () { });
     setTimeout(function () {
