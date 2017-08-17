@@ -1,10 +1,22 @@
+function generateId() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  for (var i = 0; i < 5; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
 var CORE = (function() {
     const version = "0.9.7";
     const update_date = "2017/08/12";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
+    const elm = { exportMenu: null };
     var cookies = null;
     return {
+        elm: elm,
         init: function() {
             this.startListen();
             if (typeof browser != "undefined") {
@@ -123,10 +135,9 @@ var CORE = (function() {
         //导出菜单
         addMenu: {
             init: function(type) {
-                if ($("#export_menu").length != 0) {
-                    return $("#export_menu");
-                }
-                var aria2_btn = $("<span>").attr("id", "export_menu");
+                if (elm.exportMenu) return elm.exportMenu;
+
+                var aria2_btn = $("<span>");
                 var list = $("<div>").addClass("menu").attr("id", "aria2_list").hide().appendTo(aria2_btn);
                 $("<a>").text("导出下载").addClass("g-button-menu").attr("id", "aria2_download").appendTo(list);
                 var config = $("<a>").text("设置").addClass("g-button-menu").appendTo(list);
@@ -158,6 +169,7 @@ var CORE = (function() {
                     $("#setting_div").show();
                 });
                 this.update();
+                elm.exportMenu = aria2_btn;
                 return aria2_btn;
             },
             //根据设置更新按钮
