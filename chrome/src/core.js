@@ -9,8 +9,8 @@ function generateId() {
 }
 
 var CORE = (function() {
-    const version = "0.9.6";
-    const update_date = "2017/08/08";
+    const version = "0.9.7";
+    const update_date = "2017/08/12";
     const defaultUA = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
     const defaultreferer = "http://pan.baidu.com/disk/home";
     const elmId = { exportMenu: generateId() };
