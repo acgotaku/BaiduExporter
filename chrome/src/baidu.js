@@ -75,8 +75,8 @@ var showToast;
                             removeChild.apply(this, arguments);
                         }
                     };
-                    Object.defineProperty(button.parent()[0], "removeChild", { writable: false} );
-                    Object.defineProperty(jQuery.fn, "after", { writable: false} );
+                    Object.freeze(button.parent()[0]);
+                    Object.defineProperty(jQuery.fn, "after", { writable: false, configurable: false });
                 } catch (e) {
                     console.log("Unable to hook removeChild");
                 }
