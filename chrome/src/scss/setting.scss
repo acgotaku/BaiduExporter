@@ -1,0 +1,10 @@
+body {
+  $color: #eee;
+  width: auto;
+  transform: none;
+  height: auto;
+  &.hello {
+    width: auto;
+    background: $color;
+  }
+}

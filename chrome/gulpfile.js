@@ -3,7 +3,14 @@ const babelify = require('babelify')
 const browserify = require('browserify')
 const tap = require('gulp-tap')
 const buffer = require('gulp-buffer')
+
 const eslint = require('gulp-eslint')
+const stylelint = require('gulp-stylelint')
+
+const sass = require('gulp-sass')
+const postcss = require('gulp-postcss')
+const autoprefixer = require('autoprefixer')
+const cssnano = require('cssnano')
 const plumber = require('gulp-plumber')
 const sourcemaps = require('gulp-sourcemaps')
 const uglify = require('gulp-uglify')
@@ -38,15 +45,21 @@ gulp.task('js', function () {
 gulp.task('css', function () {
   return gulp.src(cssTargets)
     .pipe(plumber(config.plumberConfig))
-    .pipe(sourcemaps.init())
-    .pipe(uglify())
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('dist/js/'))
+    .pipe(stylelint())
+    .pipe(sass()).on('error', sass.logError)
+    .pipe(postcss([
+      autoprefixer({
+        browsers: ['last 1 versions']
+      }),
+      cssnano()
+    ]))
+    .pipe(gulp.dest('dist/css/'))
 })
-gulp.task('build', ['js'])
+gulp.task('build', ['js', 'css'])
 
 gulp.task('watch', ['build'], function () {
   gulp.watch(jsTargets, ['js'])
+  gulp.watch(cssTargets, ['css'])
 })
 
 gulp.task('default', ['watch'])
