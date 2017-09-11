@@ -1,6 +1,6 @@
 class Core {
   constructor () {
-    console.log('Hello World')
+    console.log('Hello World11')
   }
 }
 
