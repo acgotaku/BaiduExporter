@@ -41,6 +41,7 @@
     "gulp-stylelint": "^5.0.0",
     "gulp-tap": "^1.0.1",
     "gulp-uglify": "^3.0.0",
+    "precss": "^2.0.0",
     "stylelint": "^8.1.1",
     "stylelint-scss": "^2.1.0"
   }

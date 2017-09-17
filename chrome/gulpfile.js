@@ -4,18 +4,21 @@ const browserify = require('browserify')
 const tap = require('gulp-tap')
 const buffer = require('gulp-buffer')
 
+const del = require('del')
+
 const eslint = require('gulp-eslint')
 const stylelint = require('gulp-stylelint')
 
-const sass = require('gulp-sass')
 const postcss = require('gulp-postcss')
+const precss = require('precss')
 const autoprefixer = require('autoprefixer')
 const cssnano = require('cssnano')
+
 const plumber = require('gulp-plumber')
 const sourcemaps = require('gulp-sourcemaps')
 const uglify = require('gulp-uglify')
 const jsTargets = ['./src/js/*.js', '!./src/js/_*']
-const cssTargets = ['./src/scss/*.scss']
+const cssTargets = ['./src/css/*.css']
 const config = {
   errorHandler: function (err) {
     console.log(err.toString())
@@ -37,7 +40,7 @@ gulp.task('js', function () {
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(uglify())
     // write sourcemaps
-    .pipe(sourcemaps.write('./'))
+    .pipe(sourcemaps.write('.'))
 
     .pipe(gulp.dest('dist/js/'))
 })
@@ -46,17 +49,24 @@ gulp.task('css', function () {
   return gulp.src(cssTargets)
     .pipe(plumber(config.plumberConfig))
     .pipe(stylelint())
-    .pipe(sass()).on('error', sass.logError)
+    .pipe(sourcemaps.init())
     .pipe(postcss([
+      precss(),
       autoprefixer({
         browsers: ['last 1 versions']
       }),
       cssnano()
     ]))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('dist/css/'))
 })
 gulp.task('build', ['js', 'css'])
 
+gulp.task('clean', function () {
+  return del([
+    'dist'
+  ])
+})
 gulp.task('watch', ['build'], function () {
   gulp.watch(jsTargets, ['js'])
   gulp.watch(cssTargets, ['css'])
