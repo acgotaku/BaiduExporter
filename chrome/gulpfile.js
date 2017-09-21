@@ -10,7 +10,7 @@ const eslint = require('gulp-eslint')
 const stylelint = require('gulp-stylelint')
 
 const postcss = require('gulp-postcss')
-const precss = require('precss')
+const sass = require('gulp-sass')
 const autoprefixer = require('autoprefixer')
 const cssnano = require('cssnano')
 
@@ -18,7 +18,7 @@ const plumber = require('gulp-plumber')
 const sourcemaps = require('gulp-sourcemaps')
 const uglify = require('gulp-uglify')
 const jsTargets = ['./src/js/*.js', '!./src/js/_*']
-const cssTargets = ['./src/css/*.css']
+const cssTargets = ['./src/css/*.scss']
 const config = {
   errorHandler: function (err) {
     console.log(err.toString())
@@ -50,8 +50,12 @@ gulp.task('css', function () {
     .pipe(plumber(config.plumberConfig))
     .pipe(stylelint())
     .pipe(sourcemaps.init())
+    .pipe(sass({
+      outputStyle: 'nested',
+      precision: 3,
+      includePaths: ['.']
+    }))
     .pipe(postcss([
-      precss(),
       autoprefixer({
         browsers: ['last 1 versions']
       }),

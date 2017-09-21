@@ -1,0 +1,16 @@
+@mixin flex {
+  display: flex;
+}
+
+.body {
+  $color: #eee;
+  @include flex;
+  height: auto;
+  transform: none;
+  width: auto;
+
+  &.hello {
+    background: $color;
+    width: auto;
+  }
+}

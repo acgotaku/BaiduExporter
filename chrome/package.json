@@ -43,6 +43,7 @@
     "gulp-uglify": "^3.0.0",
     "precss": "^2.0.0",
     "stylelint": "^8.1.1",
+    "stylelint-config-sass-guidelines": "^3.1.0",
     "stylelint-scss": "^2.1.0"
   }
 }
