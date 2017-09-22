@@ -17,7 +17,8 @@ const cssnano = require('cssnano')
 const plumber = require('gulp-plumber')
 const sourcemaps = require('gulp-sourcemaps')
 const uglify = require('gulp-uglify')
-const jsTargets = ['./src/js/*.js', '!./src/js/_*']
+const jsTargets = ['./src/js/**/*.js']
+const jsEntries = ['./src/js/*.js']
 const cssTargets = ['./src/css/*.scss']
 const config = {
   errorHandler: function (err) {
@@ -27,7 +28,7 @@ const config = {
 }
 
 gulp.task('js', function () {
-  return gulp.src(jsTargets)
+  return gulp.src(jsEntries)
     .pipe(plumber(config.plumberConfig))
     .pipe(eslint())
     .pipe(eslint.format())
