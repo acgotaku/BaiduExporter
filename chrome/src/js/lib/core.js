@@ -83,6 +83,11 @@ class Core {
       parameter['headers'] = { 'Authorization': authStr }
     }
     this.sendToBackground('rpc_version', parameter, function (version) {
+      if (version) {
+        document.querySelector('#sendTest').html = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version.result.version}`
+      } else {
+        document.querySelector('#sendTest').html = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
+      }
     })
   }
   // 解析 RPC地址 返回验证数据 和地址
@@ -106,6 +111,24 @@ class Core {
     }
     const path = parseURL.origin + parseURL.pathname
     return {authStr, path, options}
+  }
+  addMenu () {
+  }
+  updateMenu () {
+  }
+  copyText (text) {
+    const input = document.createElement('textarea')
+    document.body.appendChild(input)
+    input.value = text
+    input.focus()
+    input.select()
+    const result = document.execCommand('copy')
+    input.remove()
+    if (result) {
+      this.showToast('拷贝成功~', 'MODE_SUCCESS')
+    } else {
+      this.showToast('拷贝失败 QAQ', 'MODE_FAILURE')
+    }
   }
 }
 
