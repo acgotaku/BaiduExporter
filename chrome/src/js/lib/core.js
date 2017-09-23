@@ -15,6 +15,98 @@ class Core {
     }
     return `'${str.replace(/'/g, "\\'")}'`
   }
+  // 调整元素的位置使元素居中
+  setCenter (element) {
+    const screenWidth = window.innerWidth
+    const screenHeight = window.innerHeight
+    const scrollY = window.scrollY
+    const scrollX = window.scrollX
+    const domRect = element.getBoundingClientRect()
+    const left = (screenWidth - domRect.width) / 2 + scrollX
+    const top = (screenHeight - domRect.height) / 2 + scrollY
+    const domStyle = element.style
+    domStyle.left = left
+    domStyle.top = top
+  }
+
+  startListen () {
+    function saveSyncData (data, value) {
+      let obj = {[data]: value}
+      chrome.storage.sync.set(obj, function () {
+        // console.log(data + ' saved');
+      })
+    }
+    window.addEventListener('message', function (event) {
+      if (event.source !== window) {
+        return
+      }
+      if (event.data.type && (event.data.type === 'configData')) {
+        for (let key in event.data.data) {
+          localStorage.setItem(key, event.data.data[key])
+          if (event.data.data['rpcSync'] === true) {
+            saveSyncData(key, event.data.data[key])
+          } else {
+            chrome.storage.sync.clear()
+          }
+        }
+      }
+      if (event.data.type && (event.data.type === 'clearData')) {
+        chrome.storage.sync.clear()
+      }
+    }, false)
+  }
+  sendToBackground (method, data, callback) {
+    chrome.runtime.sendMessage({
+      method,
+      data
+    }, callback)
+  }
+  showToast (message, type) {
+    window.postMessage({ type: 'showToast', data: { message, type } }, '*')
+  }
+  // 获取aria2c的版本号用来测试通信
+  getVersion () {
+    // TODO 路径和显示部分需要重构
+    let data = {
+      jsonrpc: '2.0',
+      method: 'aria2.getVersion',
+      id: 1,
+      params: []
+    }
+    const rpcPath = document.querySelector('#rpcURL').value
+    const {authStr, path} = this.parseAuth(rpcPath)
+    if (authStr && authStr.startsWith('token')) {
+      data.params.unshift(authStr)
+    }
+    const parameter = { url: path, dataType: 'json', type: 'POST', data: JSON.stringify(data) }
+    if (authStr && authStr.startsWith('Basic')) {
+      parameter['headers'] = { 'Authorization': authStr }
+    }
+    this.sendToBackground('rpc_version', parameter, function (version) {
+    })
+  }
+  // 解析 RPC地址 返回验证数据 和地址
+  parseAuth (url) {
+    const parseURL = new URL(url)
+    let authStr = (parseURL.username !== '') ? `${parseURL.username} : ${decodeURI(parseURL.password)}` : null
+    if (authStr) {
+      if (authStr.indexOf('token:') !== 0) {
+        authStr = `Basic ${btoa(authStr)}`
+      }
+    }
+    const hash = parseURL.hash.substr(1)
+    let options = []
+    if (hash) {
+      hash.split('&').forEach((item) => {
+        const config = item.split('=')
+        if (config) {
+          options.push([config[0], config.length === 2 ? config[1] : 'enabled'])
+        }
+      })
+    }
+    const path = parseURL.origin + parseURL.pathname
+    return {authStr, path, options}
+  }
 }
 
 export default Core
