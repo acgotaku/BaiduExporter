@@ -1,5 +1,13 @@
 import Core from './lib/core'
 
-const example = new Core()
-console.log(example)
-console.log('Hello home')
+class Home {
+  constructor () {
+    Core.init()
+    Core.requestCookies([{ url: 'http://pan.baidu.com/', name: 'BDUSS' }, { url: 'http://pcs.baidu.com/', name: 'pcsett' }])
+    Core.addMenu('home')
+  }
+}
+
+const home = new Home()
+
+console.log(home)

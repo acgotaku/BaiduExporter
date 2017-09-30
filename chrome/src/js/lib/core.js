@@ -7,10 +7,23 @@ class Core {
     this.cookies = null
   }
   init () {
+    this.startListen()
+    if (typeof browser !== 'undefined') {
+      chrome = browser
+      if (!chrome.storage.sync) {
+        chrome.storage.sync = chrome.storage.local
+      }
+    }
+    chrome.storage.sync.get(null, function (items) {
+      for (var key in items) {
+        localStorage.setItem(key, items[key])
+        // console.log(key + items[key])
+      }
+    })
   }
   // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
   escapeString (str) {
-    if (navigator.platform.indexOf('Win') !== -1) {
+    if (!navigator.platform.includes('Win')) {
       return str
     }
     return `'${str.replace(/'/g, "\\'")}'`
@@ -110,7 +123,30 @@ class Core {
     const path = parseURL.origin + parseURL.pathname
     return {authStr, path, options}
   }
-  addMenu () {
+  addMenu (type) {
+    const button = `
+      <div id="exportMenu" class="g-dropdown-button">
+        <a class="g-button">
+          <span class="g-button-right">
+            <em class="icon icon-download"></em>
+            <span class="text">导出下载</span>
+          </span>
+        </a>
+        <div id="aria2List" class="menu">
+          <a class="g-button-menu" href="javascript:void(0);">ARIA2 RPC</a>
+          <a class="g-button-menu" id="aria2Text" href="javascript:void(0);">文本导出</a>
+          <a class="g-button-menu" href="javascript:void(0);">设置</a>
+        </div>
+      </div>`
+    const near = document.querySelectorAll('.g-dropdown-button')[3]
+    near.insertAdjacentHTML('afterend', button)
+    const exportMenu = document.querySelector('#exportMenu')
+    exportMenu.addEventListener('mouseenter', () => {
+      exportMenu.classList.add('button-open')
+    })
+    exportMenu.addEventListener('mouseleave', () => {
+      exportMenu.classList.remove('button-open')
+    })
   }
   updateMenu () {
   }
@@ -128,6 +164,10 @@ class Core {
       this.showToast('拷贝失败 QAQ', 'MODE_FAILURE')
     }
   }
+  // names format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
+  requestCookies (names) {
+    this.sendToBackground('getCookies', names, (value) => { this.cookies = value })
+  }
 }
 
-export default Core
+export default new Core()
