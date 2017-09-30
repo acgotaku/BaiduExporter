@@ -65,15 +65,13 @@ class Core {
     window.postMessage({ type: 'showToast', data: { message, type } }, '*')
   }
   // 获取aria2c的版本号用来测试通信
-  getVersion () {
-    // TODO 路径和显示部分需要重构
+  getVersion (rpcPath, element) {
     let data = {
       jsonrpc: '2.0',
       method: 'aria2.getVersion',
       id: 1,
       params: []
     }
-    const rpcPath = document.querySelector('#rpcURL').value
     const {authStr, path} = this.parseAuth(rpcPath)
     if (authStr && authStr.startsWith('token')) {
       data.params.unshift(authStr)
@@ -84,9 +82,9 @@ class Core {
     }
     this.sendToBackground('rpc_version', parameter, function (version) {
       if (version) {
-        document.querySelector('#sendTest').html = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version.result.version}`
+        element.innerHTML = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version.result.version}`
       } else {
-        document.querySelector('#sendTest').html = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
+        element.innerHTML = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
       }
     })
   }
@@ -95,7 +93,7 @@ class Core {
     const parseURL = new URL(url)
     let authStr = (parseURL.username !== '') ? `${parseURL.username} : ${decodeURI(parseURL.password)}` : null
     if (authStr) {
-      if (authStr.indexOf('token:') !== 0) {
+      if (!authStr.includes('token:')) {
         authStr = `Basic ${btoa(authStr)}`
       }
     }
