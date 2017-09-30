@@ -7,6 +7,7 @@ class Core {
     this.cookies = null
   }
   init () {
+    this.addSetting()
     this.startListen()
     if (typeof browser !== 'undefined') {
       chrome = browser
@@ -27,19 +28,6 @@ class Core {
       return str
     }
     return `'${str.replace(/'/g, "\\'")}'`
-  }
-  // 调整元素的位置使元素居中
-  setCenter (element) {
-    const screenWidth = window.innerWidth
-    const screenHeight = window.innerHeight
-    const scrollY = window.scrollY
-    const scrollX = window.scrollX
-    const domRect = element.getBoundingClientRect()
-    const left = (screenWidth - domRect.width) / 2 + scrollX
-    const top = (screenHeight - domRect.height) / 2 + scrollY
-    const domStyle = element.style
-    domStyle.left = left
-    domStyle.top = top
   }
 
   startListen () {
@@ -124,7 +112,7 @@ class Core {
     return {authStr, path, options}
   }
   addMenu (type) {
-    const button = `
+    const menu = `
       <div id="exportMenu" class="g-dropdown-button">
         <a class="g-button">
           <span class="g-button-right">
@@ -139,7 +127,7 @@ class Core {
         </div>
       </div>`
     const near = document.querySelectorAll('.g-dropdown-button')[3]
-    near.insertAdjacentHTML('afterend', button)
+    near.insertAdjacentHTML('afterend', menu)
     const exportMenu = document.querySelector('#exportMenu')
     exportMenu.addEventListener('mouseenter', () => {
       exportMenu.classList.add('button-open')
@@ -149,6 +137,23 @@ class Core {
     })
   }
   updateMenu () {
+  }
+  addSetting () {
+    const setting = `
+      <div id="settingMenu" class="setting-menu">
+        <div class="setting-menu-inner">
+          <div class="setting-menu-header">
+            <div class="setting-menu-title">导出设置</div>
+            <div class="setting-menu-close">×</div>
+          </div>
+          <div class="setting-menu-body">
+            <div class="setItem-menu-row">
+
+            </div>
+          </div>
+        </div>
+      </div>`
+    document.body.insertAdjacentHTML('beforeend', setting)
   }
   copyText (text) {
     const input = document.createElement('textarea')

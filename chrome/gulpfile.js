@@ -60,7 +60,7 @@ gulp.task('css', function () {
       autoprefixer({
         browsers: ['last 1 versions']
       }),
-      cssnano()
+      cssnano({zindex: false})
     ]))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('dist/css/'))
