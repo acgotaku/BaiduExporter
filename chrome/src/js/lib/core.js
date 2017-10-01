@@ -2,12 +2,15 @@ class Core {
   constructor () {
     this.version = '0.9.7'
     this.updateDate = '2017/09/22'
+    this.defaultRPC = [{name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc'}]
     this.defaultUA = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
     this.cookies = null
+    this.configData = {}
   }
   init () {
     this.addSetting()
+    this.updateSetting()
     this.startListen()
     if (typeof browser !== 'undefined') {
       chrome = browser
@@ -43,7 +46,7 @@ class Core {
       }
       if (event.data.type && (event.data.type === 'configData')) {
         for (let key in event.data.data) {
-          localStorage.setItem(key, event.data.data[key])
+          localStorage.setItem(key, JSON.stringify(event.data.data[key]))
           if (event.data.data['rpcSync'] === true) {
             saveSyncData(key, event.data.data[key])
           } else {
@@ -123,7 +126,7 @@ class Core {
         <div id="aria2List" class="menu">
           <a class="g-button-menu" href="javascript:void(0);">ARIA2 RPC</a>
           <a class="g-button-menu" id="aria2Text" href="javascript:void(0);">文本导出</a>
-          <a class="g-button-menu" href="javascript:void(0);">设置</a>
+          <a class="g-button-menu" id="settingButton" href="javascript:void(0);">设置</a>
         </div>
       </div>`
     const near = document.querySelectorAll('.g-dropdown-button')[3]
@@ -134,6 +137,12 @@ class Core {
     })
     exportMenu.addEventListener('mouseleave', () => {
       exportMenu.classList.remove('button-open')
+    })
+    const settingButton = document.querySelector('#settingButton')
+    const settingMenu = document.querySelector('#settingMenu')
+    settingButton.addEventListener('click', () => {
+      settingMenu.classList.add('open-o')
+      this.updateSetting()
     })
   }
   updateMenu () {
@@ -147,14 +156,188 @@ class Core {
             <div class="setting-menu-close">×</div>
           </div>
           <div class="setting-menu-body">
-            <div class="setItem-menu-row">
-
+            <div class="setting-menu-message">
+              <label class="setting-menu-label orange-o" id="message"></label>
+            </div>
+            <div class="setting-menu-row rpc-s">
+              <div class="setting-menu-name">
+                <input class="setting-menu-input name-s" spellcheck="false">
+              </div>
+              <div class="setting-menu-value">
+                <input class="setting-menu-input url-s" spellcheck="false">
+                <a class="setting-menu-button" id="addRPC" href="javascript:void(0);">添加RPC地址</a>
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">配置同步</label>
+              </div>
+              <div class="setting-menu-value">
+                <input type="checkbox" class="setting-menu-checkbox">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">SVIP会员</label>
+              </div>
+              <div class="setting-menu-value">
+                <input type="checkbox" class="setting-menu-checkbox">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">MD5校验</label>
+              </div>
+              <div class="setting-menu-value">
+                <input type="checkbox" class="setting-menu-checkbox">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">文件夹层数</label>
+              </div>
+              <div class="setting-menu-value">
+                <input class="setting-menu-input small-o" spellcheck="false">
+                <label class="setting-menu-label">(默认0表示不保留,-1表示保留完整路径)</label>
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">递归下载间隔</label>
+              </div>
+              <div class="setting-menu-value">
+                <input class="setting-menu-input small-o" spellcheck="false">
+                <label class="setting-menu-label">(单位:毫秒)</label>
+                <a class="setting-menu-button" id="testAria2" href="javascript:void(0);">测试连接，成功显示版本号</a>
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">下载路径</label>
+              </div>
+              <div class="setting-menu-value">
+                <input class="setting-menu-input" placeholder="只能设置为绝对路径" spellcheck="false">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">User-Agent</label>
+              </div>
+              <div class="setting-menu-value">
+                <input class="setting-menu-input" spellcheck="false">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">Referer</label>
+              </div>
+              <div class="setting-menu-value">
+                <input class="setting-menu-input" spellcheck="false">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">Headers</label>
+              </div>
+              <div class="setting-menu-value">
+                <textarea class="setting-menu-input textarea-o" type="textarea" spellcheck="false"></textarea>
+              </div>
+            </div><!-- /.setting-menu-row -->
+          </div><!-- /.setting-menu-body -->
+          <div class="setting-menu-footer">
+            <div class="setting-menu-copyright">
+              <div class="setting-menu-item">
+                <label class="setting-menu-label">&copy; Copyright</label>
+                <a class="setting-menu-link" href="https://github.com/acgotaku/BaiduExporter" target="_blank">雪月秋水</a>
+              </div>
+              <div class="setting-menu-item">
+                <label class="setting-menu-label">Version: ${this.version}</label>
+                <label class="setting-menu-label">Update date: ${this.updateDate}</label>
+              </div>
+            </div><!-- /.setting-menu-copyright -->
+            <div class="setting-menu-operate">
+              <a class="setting-menu-button large-o blue-o" id="apply" href="javascript:void(0);">应用</a>
+              <a class="setting-menu-button large-o" id="reset" href="javascript:void(0);">重置</a>
             </div>
           </div>
         </div>
       </div>`
     document.body.insertAdjacentHTML('beforeend', setting)
+    const close = document.querySelector('.setting-menu-close')
+    const settingMenu = document.querySelector('#settingMenu')
+    close.addEventListener('click', () => {
+      settingMenu.classList.remove('open-o')
+    })
+    const addRPC = document.querySelector('#addRPC')
+    addRPC.addEventListener('click', () => {
+      const rpcDOMList = document.querySelectorAll('.rpc-s')
+      const RPC = `
+        <div class="setting-menu-row rpc-s">
+          <div class="setting-menu-name">
+            <input class="setting-menu-input name-s" spellcheck="false">
+          </div>
+          <div class="setting-menu-value">
+            <input class="setting-menu-input url-s" spellcheck="false">
+          </div>
+        </div><!-- /.setting-menu-row -->`
+      Array.from(rpcDOMList).pop().insertAdjacentHTML('afterend', RPC)
+    })
+    const apply = document.querySelector('#apply')
+    const message = document.querySelector('#message')
+    apply.addEventListener('click', () => {
+      this.saveSetting()
+      setTimeout(() => this.updateSetting(), 60)
+      message.innerText = '设置已保存'
+    })
+
+    const reset = document.querySelector('#reset')
+    reset.addEventListener('click', () => {
+      localStorage.clear()
+      window.postMessage({ type: 'clearData' }, '*')
+      message.innerText = '设置已重置'
+      this.updateSetting()
+    })
   }
+
+  updateSetting () {
+    const rpcList = JSON.parse(localStorage.getItem('rpcList')) || this.defaultRPC
+    document.querySelectorAll('.rpc-s').forEach((rpc, index) => {
+      if (index !== 0) {
+        rpc.remove()
+      }
+    })
+    rpcList.forEach((rpc, index) => {
+      const rpcDOMList = document.querySelectorAll('.rpc-s')
+      if (index === 0) {
+        rpcDOMList[index].querySelector('.name-s').value = rpc.name
+        rpcDOMList[index].querySelector('.url-s').value = rpc.url
+      } else {
+        const RPC = `
+          <div class="setting-menu-row rpc-s">
+            <div class="setting-menu-name">
+              <input class="setting-menu-input name-s" value="${rpc.name}" spellcheck="false">
+            </div>
+            <div class="setting-menu-value">
+              <input class="setting-menu-input url-s" value="${rpc.url}" spellcheck="false">
+            </div>
+          </div><!-- /.setting-menu-row -->`
+        Array.from(rpcDOMList).pop().insertAdjacentHTML('afterend', RPC)
+      }
+    })
+  }
+
+  saveSetting () {
+    const rpcDOMList = document.querySelectorAll('.rpc-s')
+    const rpcList = Array.from(rpcDOMList).map((rpc) => {
+      return {
+        name: rpc.querySelector('.name-s').value,
+        url: rpc.querySelector('.url-s').value
+      }
+    })
+    this.configData = {rpcList}
+    window.postMessage({ type: 'configData', data: this.configData }, '*')
+  }
+
   copyText (text) {
     const input = document.createElement('textarea')
     document.body.appendChild(input)
