@@ -6,11 +6,10 @@ class Core {
     this.defaultUA = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
     this.cookies = null
-    this.configData = {}
   }
   init () {
+    this.initSetting()
     this.addSetting()
-    this.updateSetting()
     this.startListen()
     if (typeof browser !== 'undefined') {
       chrome = browser
@@ -47,7 +46,7 @@ class Core {
       if (event.data.type && (event.data.type === 'configData')) {
         for (let key in event.data.data) {
           localStorage.setItem(key, JSON.stringify(event.data.data[key]))
-          if (event.data.data['rpcSync'] === true) {
+          if (event.data.data['configSync'] === true) {
             saveSyncData(key, event.data.data[key])
           } else {
             chrome.storage.sync.clear()
@@ -173,15 +172,7 @@ class Core {
                 <label class="setting-menu-label">配置同步</label>
               </div>
               <div class="setting-menu-value">
-                <input type="checkbox" class="setting-menu-checkbox">
-              </div>
-            </div><!-- /.setting-menu-row -->
-            <div class="setting-menu-row">
-              <div class="setting-menu-name">
-                <label class="setting-menu-label">SVIP会员</label>
-              </div>
-              <div class="setting-menu-value">
-                <input type="checkbox" class="setting-menu-checkbox">
+                <input type="checkbox" class="setting-menu-checkbox configSync-s">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -189,7 +180,7 @@ class Core {
                 <label class="setting-menu-label">MD5校验</label>
               </div>
               <div class="setting-menu-value">
-                <input type="checkbox" class="setting-menu-checkbox">
+                <input type="checkbox" class="setting-menu-checkbox md5Check-s">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -197,7 +188,7 @@ class Core {
                 <label class="setting-menu-label">文件夹层数</label>
               </div>
               <div class="setting-menu-value">
-                <input class="setting-menu-input small-o" spellcheck="false">
+                <input class="setting-menu-input small-o fold-s" type="number" spellcheck="false">
                 <label class="setting-menu-label">(默认0表示不保留,-1表示保留完整路径)</label>
               </div>
             </div><!-- /.setting-menu-row -->
@@ -206,7 +197,7 @@ class Core {
                 <label class="setting-menu-label">递归下载间隔</label>
               </div>
               <div class="setting-menu-value">
-                <input class="setting-menu-input small-o" spellcheck="false">
+                <input class="setting-menu-input small-o interval-s" type="number" spellcheck="false">
                 <label class="setting-menu-label">(单位:毫秒)</label>
                 <a class="setting-menu-button" id="testAria2" href="javascript:void(0);">测试连接，成功显示版本号</a>
               </div>
@@ -216,7 +207,7 @@ class Core {
                 <label class="setting-menu-label">下载路径</label>
               </div>
               <div class="setting-menu-value">
-                <input class="setting-menu-input" placeholder="只能设置为绝对路径" spellcheck="false">
+                <input class="setting-menu-input downloadPath-s" placeholder="只能设置为绝对路径" spellcheck="false">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -224,7 +215,7 @@ class Core {
                 <label class="setting-menu-label">User-Agent</label>
               </div>
               <div class="setting-menu-value">
-                <input class="setting-menu-input" spellcheck="false">
+                <input class="setting-menu-input ua-s" spellcheck="false">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -232,7 +223,7 @@ class Core {
                 <label class="setting-menu-label">Referer</label>
               </div>
               <div class="setting-menu-value">
-                <input class="setting-menu-input" spellcheck="false">
+                <input class="setting-menu-input referer-s" spellcheck="false">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -240,7 +231,7 @@ class Core {
                 <label class="setting-menu-label">Headers</label>
               </div>
               <div class="setting-menu-value">
-                <textarea class="setting-menu-input textarea-o" type="textarea" spellcheck="false"></textarea>
+                <textarea class="setting-menu-input textarea-o headers-s" type="textarea" spellcheck="false"></textarea>
               </div>
             </div><!-- /.setting-menu-row -->
           </div><!-- /.setting-menu-body -->
@@ -286,7 +277,7 @@ class Core {
     const message = document.querySelector('#message')
     apply.addEventListener('click', () => {
       this.saveSetting()
-      setTimeout(() => this.updateSetting(), 60)
+      this.updateSetting()
       message.innerText = '设置已保存'
     })
 
@@ -294,18 +285,30 @@ class Core {
     reset.addEventListener('click', () => {
       localStorage.clear()
       window.postMessage({ type: 'clearData' }, '*')
-      message.innerText = '设置已重置'
+      this.initSetting()
       this.updateSetting()
+      message.innerText = '设置已重置'
     })
   }
-
-  updateSetting () {
-    const rpcList = JSON.parse(localStorage.getItem('rpcList')) || this.defaultRPC
+  initSetting () {
+    this.configData = {
+      rpcList: JSON.parse(localStorage.getItem('rpcList')) || this.defaultRPC,
+      configSync: JSON.parse(localStorage.getItem('configSync')) || false
+    }
+  }
+  resetSetting () {
+    // reset dom
     document.querySelectorAll('.rpc-s').forEach((rpc, index) => {
       if (index !== 0) {
         rpc.remove()
       }
     })
+    const message = document.querySelector('#message')
+    message.innerText = ''
+  }
+  updateSetting () {
+    this.resetSetting()
+    const { rpcList, configSync } = this.configData
     rpcList.forEach((rpc, index) => {
       const rpcDOMList = document.querySelectorAll('.rpc-s')
       if (index === 0) {
@@ -324,17 +327,24 @@ class Core {
         Array.from(rpcDOMList).pop().insertAdjacentHTML('afterend', RPC)
       }
     })
+    document.querySelector('.configSync-s').checked = configSync
   }
 
   saveSetting () {
+    // TODO 检测数据来变更DOM
     const rpcDOMList = document.querySelectorAll('.rpc-s')
     const rpcList = Array.from(rpcDOMList).map((rpc) => {
-      return {
-        name: rpc.querySelector('.name-s').value,
-        url: rpc.querySelector('.url-s').value
+      const name = rpc.querySelector('.name-s').value
+      const url = rpc.querySelector('.url-s').value
+      if (name && url) {
+        return { name, url }
       }
     })
-    this.configData = {rpcList}
+    const configSync = document.querySelector('.configSync-s').checked
+    this.configData = {
+      rpcList,
+      configSync
+    }
     window.postMessage({ type: 'configData', data: this.configData }, '*')
   }
 
