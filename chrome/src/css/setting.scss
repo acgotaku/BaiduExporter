@@ -81,6 +81,7 @@ $padding-space: 10px;
 
     &.textarea-o {
       height: 80px;
+      padding: 5px $padding-space;
     }
 
     &:focus {

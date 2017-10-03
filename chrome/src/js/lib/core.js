@@ -3,7 +3,7 @@ class Core {
     this.version = '0.9.7'
     this.updateDate = '2017/09/22'
     this.defaultRPC = [{name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc'}]
-    this.defaultUA = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia'
+    this.defaultUserAgent = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuserAgentnJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
     this.cookies = null
   }
@@ -215,7 +215,7 @@ class Core {
                 <label class="setting-menu-label">User-Agent</label>
               </div>
               <div class="setting-menu-value">
-                <input class="setting-menu-input ua-s" spellcheck="false">
+                <input class="setting-menu-input userAgent-s" spellcheck="false">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -293,7 +293,14 @@ class Core {
   initSetting () {
     this.configData = {
       rpcList: JSON.parse(localStorage.getItem('rpcList')) || this.defaultRPC,
-      configSync: JSON.parse(localStorage.getItem('configSync')) || false
+      configSync: JSON.parse(localStorage.getItem('configSync')) || false,
+      md5Check: JSON.parse(localStorage.getItem('md5Check')) || false,
+      fold: JSON.parse(localStorage.getItem('fold')) || 0,
+      interval: JSON.parse(localStorage.getItem('interval')) || 300,
+      downloadPath: JSON.parse(localStorage.getItem('downloadPath')) || null,
+      userAgent: JSON.parse(localStorage.getItem('userAgent')) || this.defaultUserAgent,
+      referer: JSON.parse(localStorage.getItem('referer')) || this.defaultReferer,
+      headers: JSON.parse(localStorage.getItem('headers')) || ''
     }
   }
   resetSetting () {
@@ -308,7 +315,7 @@ class Core {
   }
   updateSetting () {
     this.resetSetting()
-    const { rpcList, configSync } = this.configData
+    const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, headers } = this.configData
     rpcList.forEach((rpc, index) => {
       const rpcDOMList = document.querySelectorAll('.rpc-s')
       if (index === 0) {
@@ -328,6 +335,13 @@ class Core {
       }
     })
     document.querySelector('.configSync-s').checked = configSync
+    document.querySelector('.md5Check-s').checked = md5Check
+    document.querySelector('.fold-s').value = fold
+    document.querySelector('.interval-s').value = interval
+    document.querySelector('.downloadPath-s').value = downloadPath
+    document.querySelector('.userAgent-s').value = userAgent
+    document.querySelector('.referer-s').value = referer
+    document.querySelector('.headers-s').value = headers
   }
 
   saveSetting () {
@@ -341,9 +355,24 @@ class Core {
       }
     })
     const configSync = document.querySelector('.configSync-s').checked
+    const md5Check = document.querySelector('.md5Check-s').checked
+    const fold = document.querySelector('.fold-s').value
+    const interval = document.querySelector('.interval-s').value
+    const downloadPath = document.querySelector('.downloadPath-s').value
+    const userAgent = document.querySelector('.userAgent-s').value
+    const referer = document.querySelector('.referer-s').value
+    const headers = document.querySelector('.headers-s').value
+
     this.configData = {
       rpcList,
-      configSync
+      configSync,
+      md5Check,
+      fold,
+      interval,
+      downloadPath,
+      userAgent,
+      referer,
+      headers
     }
     window.postMessage({ type: 'configData', data: this.configData }, '*')
   }
