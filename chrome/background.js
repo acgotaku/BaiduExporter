@@ -1,6 +1,7 @@
 if (typeof browser !== 'undefined') {
   chrome = browser
 }
+// https://developer.chrome.com/apps/runtime#event-onMessage
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   switch (request.method) {
     case 'addScript':
@@ -19,15 +20,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       }
       break
     case 'rpcVersion':
-      fetch(request.data).then((data) => {
-        sendResponse(data)
-      }).catch(() => {
-        sendResponse(null)
+      fetch(request.data.url, request.data.options).then((response) => {
+        if (response.ok) {
+          response.json().then(function (data) {
+            sendResponse(data.result.version)
+          })
+        } else {
+          console.log(response)
+          sendResponse(false)
+        }
+      }).catch((err) => {
+        sendResponse(false)
+        console.log(err)
       })
-      break
+      return true
     case 'getCookies':
       getCookies(request.data).then(value => sendResponse(value))
-      break
+      return true
   }
 })
 

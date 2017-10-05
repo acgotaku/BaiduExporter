@@ -67,30 +67,6 @@ class Core {
   showToast (message, type) {
     window.postMessage({ type: 'showToast', data: { message, type } }, '*')
   }
-  // 获取aria2c的版本号用来测试通信
-  getVersion (rpcPath, element) {
-    let data = {
-      jsonrpc: '2.0',
-      method: 'aria2.getVersion',
-      id: 1,
-      params: []
-    }
-    const {authStr, path} = this.parseAuth(rpcPath)
-    if (authStr && authStr.startsWith('token')) {
-      data.params.unshift(authStr)
-    }
-    const parameter = { url: path, dataType: 'json', type: 'POST', data: JSON.stringify(data) }
-    if (authStr && authStr.startsWith('Basic')) {
-      parameter['headers'] = { 'Authorization': authStr }
-    }
-    this.sendToBackground('rpc_version', parameter, function (version) {
-      if (version) {
-        element.innerHTML = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version.result.version}`
-      } else {
-        element.innerHTML = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
-      }
-    })
-  }
   // 解析 RPC地址 返回验证数据 和地址
   parseAuth (url) {
     const parseURL = new URL(url)
@@ -112,6 +88,39 @@ class Core {
     }
     const path = parseURL.origin + parseURL.pathname
     return {authStr, path, options}
+  }
+  // 获取aria2c的版本号用来测试通信
+  getVersion (rpcPath, element) {
+    let data = {
+      jsonrpc: '2.0',
+      method: 'aria2.getVersion',
+      id: 1,
+      params: []
+    }
+    const {authStr, path} = this.parseAuth(rpcPath)
+    if (authStr && authStr.startsWith('token')) {
+      data.params.unshift(authStr)
+    }
+    const parameter = {
+      url: path,
+      options: {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body: JSON.stringify(data)
+      }
+    }
+    if (authStr && authStr.startsWith('Basic')) {
+      Object.assign(parameter.options.headers, { Authorization: authStr })
+    }
+    this.sendToBackground('rpcVersion', parameter, function (version) {
+      if (version) {
+        element.innerHTML = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version}`
+      } else {
+        element.innerHTML = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
+      }
+    })
   }
   addMenu (type) {
     const menu = `
@@ -199,7 +208,7 @@ class Core {
               <div class="setting-menu-value">
                 <input class="setting-menu-input small-o interval-s" type="number" spellcheck="false">
                 <label class="setting-menu-label">(单位:毫秒)</label>
-                <a class="setting-menu-button" id="testAria2" href="javascript:void(0);">测试连接，成功显示版本号</a>
+                <a class="setting-menu-button version-s" id="testAria2" href="javascript:void(0);">测试连接，成功显示版本号</a>
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -288,6 +297,11 @@ class Core {
       this.initSetting()
       this.updateSetting()
       message.innerText = '设置已重置'
+    })
+
+    const testAria2 = document.querySelector('#testAria2')
+    testAria2.addEventListener('click', () => {
+      this.getVersion(this.configData.rpcList[0].url, testAria2)
     })
   }
   initSetting () {
