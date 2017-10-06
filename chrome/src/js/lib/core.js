@@ -70,7 +70,7 @@ class Core {
   // 解析 RPC地址 返回验证数据 和地址
   parseAuth (url) {
     const parseURL = new URL(url)
-    let authStr = (parseURL.username !== '') ? `${parseURL.username} : ${decodeURI(parseURL.password)}` : null
+    let authStr = (parseURL.username !== '') ? `${parseURL.username}:${decodeURI(parseURL.password)}` : null
     if (authStr) {
       if (!authStr.includes('token:')) {
         authStr = `Basic ${btoa(authStr)}`
@@ -116,9 +116,9 @@ class Core {
     }
     this.sendToBackground('rpcVersion', parameter, function (version) {
       if (version) {
-        element.innerHTML = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version}`
+        element.innerText = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version}`
       } else {
-        element.innerHTML = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
+        element.innerText = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
       }
     })
   }
@@ -326,6 +326,8 @@ class Core {
     })
     const message = document.querySelector('#message')
     message.innerText = ''
+    const testAria2 = document.querySelector('#testAria2')
+    testAria2.innerText = '测试连接，成功显示版本号'
   }
   updateSetting () {
     this.resetSetting()

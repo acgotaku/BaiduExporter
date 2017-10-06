@@ -4,7 +4,9 @@
   "description": "Assistant for Baidu to export download links to aria2/aria2-rpc",
   "main": "background.js",
   "scripts": {
-    "start": "gulp"
+    "start": "npm run dev",
+    "dev": "NODE_ENV=development gulp serve",
+    "build": "NODE_ENV=production gulp public"
   },
   "repository": {
     "type": "git",
