@@ -14,7 +14,7 @@ const stylelint = require('gulp-stylelint')
 const postcss = require('gulp-postcss')
 const sass = require('gulp-sass')
 const autoprefixer = require('autoprefixer')
-const cssnano = require('cssnano')
+const cssmin = require('gulp-cssmin')
 
 const plumber = require('gulp-plumber')
 const sourcemaps = require('gulp-sourcemaps')
@@ -45,9 +45,9 @@ gulp.task('js', function () {
     }))
     .pipe(buffer())
     .pipe(gulpIf(config.env.dev, sourcemaps.init({loadMaps: true})))
-    .pipe(gulpIf(config.env.prod, uglify()))
     // write sourcemaps
     .pipe(gulpIf(config.env.dev, sourcemaps.write()))
+    .pipe(gulpIf(config.env.prod, uglify()))
 
     .pipe(gulp.dest('dist/js/'))
 })
@@ -55,7 +55,11 @@ gulp.task('js', function () {
 gulp.task('css', function () {
   return gulp.src(cssTargets)
     .pipe(plumber(config.plumberConfig))
-    .pipe(stylelint())
+    .pipe(stylelint({
+      reporters: [
+        {formatter: 'string', console: true}
+      ]
+    }))
     .pipe(gulpIf(config.env.dev, sourcemaps.init()))
     .pipe(sass({
       outputStyle: 'nested',
@@ -65,10 +69,10 @@ gulp.task('css', function () {
     .pipe(postcss([
       autoprefixer({
         browsers: ['last 1 versions']
-      }),
-      cssnano({zindex: false})
+      })
     ]))
     .pipe(gulpIf(config.env.dev, sourcemaps.write()))
+    .pipe(gulpIf(config.env.prod, cssmin()))
     .pipe(gulp.dest('dist/css/'))
 })
 gulp.task('build', ['js', 'css'])
