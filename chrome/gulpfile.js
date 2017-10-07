@@ -5,6 +5,8 @@ const tap = require('gulp-tap')
 const buffer = require('gulp-buffer')
 
 const del = require('del')
+const gulpIf = require('gulp-if')
+const runSequence = require('run-sequence')
 
 const eslint = require('gulp-eslint')
 const stylelint = require('gulp-stylelint')
@@ -24,6 +26,10 @@ const config = {
   errorHandler: function (err) {
     console.log(err.toString())
     this.emit('end')
+  },
+  env: {
+    dev: process.env.NODE_ENV === 'development',
+    prod: process.env.NODE_ENV === 'production'
   }
 }
 
@@ -35,13 +41,13 @@ gulp.task('js', function () {
     .pipe(tap(function (file) {
       console.log('bundling ' + file.path)
       // replace file contents with browserify's bundle stream
-      file.contents = browserify(file.path, {debug: true}).transform(babelify, {presets: ['env']}).bundle().on('error', config.errorHandler)
+      file.contents = browserify(file.path, {debug: config.env.dev}).transform(babelify, {presets: ['env']}).bundle().on('error', config.errorHandler)
     }))
     .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(uglify())
+    .pipe(gulpIf(config.env.dev, sourcemaps.init({loadMaps: true})))
+    .pipe(gulpIf(config.env.prod, uglify()))
     // write sourcemaps
-    .pipe(sourcemaps.write('.'))
+    .pipe(gulpIf(config.env.dev, sourcemaps.write()))
 
     .pipe(gulp.dest('dist/js/'))
 })
@@ -50,7 +56,7 @@ gulp.task('css', function () {
   return gulp.src(cssTargets)
     .pipe(plumber(config.plumberConfig))
     .pipe(stylelint())
-    .pipe(sourcemaps.init())
+    .pipe(gulpIf(config.env.dev, sourcemaps.init()))
     .pipe(sass({
       outputStyle: 'nested',
       precision: 3,
@@ -62,7 +68,7 @@ gulp.task('css', function () {
       }),
       cssnano({zindex: false})
     ]))
-    .pipe(sourcemaps.write('.'))
+    .pipe(gulpIf(config.env.dev, sourcemaps.write()))
     .pipe(gulp.dest('dist/css/'))
 })
 gulp.task('build', ['js', 'css'])
@@ -72,9 +78,17 @@ gulp.task('clean', function () {
     'dist'
   ])
 })
-gulp.task('watch', ['build'], function () {
-  gulp.watch(jsTargets, ['js'])
-  gulp.watch(cssTargets, ['css'])
+gulp.task('serve', ['clean'], function () {
+  runSequence(['build'], function () {
+    gulp.watch(jsTargets, ['js'])
+    gulp.watch(cssTargets, ['css'])
+  })
 })
 
-gulp.task('default', ['watch'])
+gulp.task('public', ['clean'], function () {
+  runSequence(['build'])
+})
+
+gulp.task('default', function () {
+  console.info('You should use npm run dev to start development mode.')
+})
