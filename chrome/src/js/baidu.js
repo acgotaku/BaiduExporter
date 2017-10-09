@@ -2,28 +2,40 @@ class Baidu {
   constructor () {
     this.context = window.require('system-core:context/context.js').instanceForSystem
   }
-  showToast (message, type) {
-    if (type.startsWith('MODE')) {
-      type = type.split('_')[1].toLowerCase()
-    }
+  // 封装的百度的Toast提示消息
+  // Type类型有
+  // caution       警告  failure       失败  loading      加载 success      成功
+  showToast ({message, type}) {
     this.context.ui.tip({
       mode: type,
       msg: message
     })
   }
   startListen () {
-    window.addEventListener('message', function (event) {
+    window.addEventListener('message', (event) => {
       if (event.source !== window) {
         return
       }
 
-      if (event.data.type === 'getSelected') {
+      if (event.data.type && event.data.type === 'getSelected') {
         window.postMessage({ type: 'selected', data: this.context.list.getSelected() }, '*')
       }
+      if (event.data.type && event.data.type === 'showToast') {
+        this.showToast(event.data.data)
+      }
     })
+    if (window.yunData) {
+      // TODO 分析效果
+      if (window.yunData.sign2) {
+        const yunData = window.require('disk-system:widget/data/yunData.js').get()
+        window.postMessage({ type: 'yunData', data: JSON.stringify(yunData) }, '*')
+      } else {
+        window.postMessage({ type: 'yunData', data: JSON.stringify(window.yunData) }, '*')
+      }
+    }
   }
 }
 
 const baidu = new Baidu()
 
-baidu.start()
+baidu.startListen()

@@ -14,7 +14,6 @@ window.addEventListener('message', function (event) {
   }
 
   if (event.data.type === 'yunData') {
-    // TODO check it meaning
     window.yunData = JSON.parse(event.data.data)
     if (window.location.href.includes('/disk/home')) {
       requestAddScript('home')
@@ -28,7 +27,7 @@ window.addEventListener('message', function (event) {
 
 function addBaiduJS () {
   let script = document.createElement('script')
-  script.src = chrome.runtime.getURL('js/baidu.js')
+  script.src = chrome.runtime.getURL('dist/js/baidu.js')
   document.body.appendChild(script)
 }
 
