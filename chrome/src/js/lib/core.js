@@ -5,12 +5,23 @@ class Core {
     this.defaultRPC = [{name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc'}]
     this.defaultUserAgent = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuserAgentnJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
+    this.defaultConfigData = {
+      rpcList: this.defaultRPC,
+      configSync: false,
+      md5Check: false,
+      fold: 0,
+      interval: 300,
+      downloadPath: '',
+      userAgent: this.defaultUserAgent,
+      referer: this.defaultReferer,
+      headers: ''
+    }
     this.cookies = null
+    this.configData = {}
   }
   init () {
     this.initSetting()
     this.addSetting()
-    this.startListen()
     if (typeof browser !== 'undefined') {
       chrome = browser
       if (!chrome.storage.sync) {
@@ -18,45 +29,42 @@ class Core {
       }
     }
     chrome.storage.sync.get(null, function (items) {
-      for (var key in items) {
-        localStorage.setItem(key, items[key])
+      for (let key in items) {
         // console.log(key + items[key])
+        chrome.storage.local.set({key: items[key]}, () => {
+          console.log('chrome local set: %s, %s', key, items[key])
+        })
       }
     })
   }
   // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
   escapeString (str) {
-    if (!navigator.platform.includes('Win')) {
+    if (navigator.platform.includes('Win')) {
       return str
     }
     return `'${str.replace(/'/g, "\\'")}'`
   }
 
-  startListen () {
-    function saveSyncData (data, value) {
-      let obj = {[data]: value}
-      chrome.storage.sync.set(obj, function () {
-        // console.log(data + ' saved');
+  saveConfigData (configData) {
+    for (let key in configData) {
+      chrome.storage.local.set({[key]: configData[key]}, () => {
+        console.log('chrome local set: %s, %s', key, configData[key])
       })
+      if (configData['configSync'] === true) {
+        chrome.storage.sync.set({[key]: configData[key]}, () => {
+          console.log('chrome sync set: %s, %s', key, configData[key])
+        })
+      }
     }
-    window.addEventListener('message', function (event) {
-      if (event.source !== window) {
-        return
-      }
-      if (event.data.type && (event.data.type === 'configData')) {
-        for (let key in event.data.data) {
-          localStorage.setItem(key, JSON.stringify(event.data.data[key]))
-          if (event.data.data['configSync'] === true) {
-            saveSyncData(key, event.data.data[key])
-          } else {
-            chrome.storage.sync.clear()
-          }
-        }
-      }
-      if (event.data.type && (event.data.type === 'clearData')) {
-        chrome.storage.sync.clear()
-      }
-    }, false)
+  }
+  getConfigData (key = null) {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(key, resolve)
+    })
+  }
+  clearConfigData () {
+    chrome.storage.sync.clear()
+    chrome.storage.local.clear()
   }
   sendToBackground (method, data, callback) {
     chrome.runtime.sendMessage({
@@ -132,7 +140,6 @@ class Core {
           </span>
         </a>
         <div id="aria2List" class="menu">
-          <a class="g-button-menu" href="javascript:void(0);">ARIA2 RPC</a>
           <a class="g-button-menu" id="aria2Text" href="javascript:void(0);">文本导出</a>
           <a class="g-button-menu" id="settingButton" href="javascript:void(0);">设置</a>
         </div>
@@ -153,7 +160,20 @@ class Core {
       this.updateSetting()
     })
   }
+  resetMenu () {
+    document.querySelectorAll('.rpc-button').forEach((rpc) => {
+      rpc.remove()
+    })
+  }
   updateMenu () {
+    this.resetMenu()
+    const { rpcList } = this.configData
+    let rpcDOMList = ''
+    rpcList.forEach((rpc) => {
+      const rpcDOM = `<a class="g-button-menu rpc-button" href="javascript:void(0);" data-url=${rpc.url}>${rpc.name}</a>`
+      rpcDOMList = rpcDOMList + rpcDOM
+    })
+    document.querySelector('#aria2List').insertAdjacentHTML('afterbegin', rpcDOMList)
   }
   addSetting () {
     const setting = `
@@ -292,11 +312,10 @@ class Core {
 
     const reset = document.querySelector('#reset')
     reset.addEventListener('click', () => {
-      localStorage.clear()
-      window.postMessage({ type: 'clearData' }, '*')
-      this.initSetting()
-      this.updateSetting()
-      message.innerText = '设置已重置'
+      this.clearConfigData()
+      this.initSetting().then(() => {
+        message.innerText = '设置已重置'
+      })
     })
 
     const testAria2 = document.querySelector('#testAria2')
@@ -305,17 +324,13 @@ class Core {
     })
   }
   initSetting () {
-    this.configData = {
-      rpcList: JSON.parse(localStorage.getItem('rpcList')) || this.defaultRPC,
-      configSync: JSON.parse(localStorage.getItem('configSync')) || false,
-      md5Check: JSON.parse(localStorage.getItem('md5Check')) || false,
-      fold: JSON.parse(localStorage.getItem('fold')) || 0,
-      interval: JSON.parse(localStorage.getItem('interval')) || 300,
-      downloadPath: JSON.parse(localStorage.getItem('downloadPath')) || null,
-      userAgent: JSON.parse(localStorage.getItem('userAgent')) || this.defaultUserAgent,
-      referer: JSON.parse(localStorage.getItem('referer')) || this.defaultReferer,
-      headers: JSON.parse(localStorage.getItem('headers')) || ''
-    }
+    return new Promise((resolve) => {
+      this.getConfigData().then((items = this.defaultConfigData) => {
+        this.configData = Object.assign({}, this.defaultConfigData, items)
+        this.updateSetting()
+        resolve()
+      })
+    })
   }
   resetSetting () {
     // reset dom
@@ -331,6 +346,7 @@ class Core {
   }
   updateSetting () {
     this.resetSetting()
+    this.updateMenu()
     const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, headers } = this.configData
     rpcList.forEach((rpc, index) => {
       const rpcDOMList = document.querySelectorAll('.rpc-s')
@@ -390,7 +406,7 @@ class Core {
       referer,
       headers
     }
-    window.postMessage({ type: 'configData', data: this.configData }, '*')
+    this.saveConfigData(this.configData)
   }
 
   copyText (text) {
