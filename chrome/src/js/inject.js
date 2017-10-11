@@ -14,7 +14,7 @@ window.addEventListener('message', function (event) {
   }
 
   if (event.data.type === 'yunData') {
-    window.yunData = JSON.parse(event.data.data)
+    window.yunData = event.data.data
     if (window.location.href.includes('/disk/home')) {
       requestAddScript('home')
     } else if (window.location.href.includes('/pcloud/album/')) {

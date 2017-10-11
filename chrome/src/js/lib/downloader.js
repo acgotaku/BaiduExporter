@@ -1,6 +1,7 @@
 import Core from './core'
 class Downloader {
   constructor (parameter) {
+    this.mode = 'RPC'
     this.listParameter = parameter
     this.fileParameter = parameter
     this.pathPrefixLength = 0
@@ -11,7 +12,8 @@ class Downloader {
     this.folders = []
     this.files = {}
   }
-  start (delay) {
+  start (mode = 'RPC', delay = 300) {
+    this.mode = mode
     this.delay = delay
     this.currentTaskId = new Date().getTime()
     this.getNextFile(this.currentTaskId)
@@ -36,9 +38,8 @@ class Downloader {
       this.completedCount++
       Core.showToast(`正在获取文件列表... ${this.completedCount}/${this.completedCount + this.folders.length - 1}`, 'success')
       const dir = this.folders.pop()
-      console.log(dir)
-      // this.listParameter.options.body = { ...this.listParameter.options.body, dir }
-      fetch(`${window.location.origin}${this.listParameter.url}`, this.listParameter.options).then((response) => {
+      this.listParameter.search.dir = dir
+      fetch(`${window.location.origin}${this.listParameter.url}${Core.objectToQueryString(this.listParameter.search)}`, this.listParameter.options).then((response) => {
         if (response.ok) {
           response.json().then(function (data) {
             setTimeout(() => this.getNextFile(taskId), this.delay)

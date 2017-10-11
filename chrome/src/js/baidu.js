@@ -1,6 +1,7 @@
 class Baidu {
   constructor () {
     this.context = window.require('system-core:context/context.js').instanceForSystem
+    this.context.log.send = function () {}
   }
   // 封装的百度的Toast提示消息
   // Type类型有
@@ -28,9 +29,9 @@ class Baidu {
       // TODO 分析效果
       if (window.yunData.sign2) {
         const yunData = window.require('disk-system:widget/data/yunData.js').get()
-        window.postMessage({ type: 'yunData', data: JSON.stringify(yunData) }, '*')
+        window.postMessage({ type: 'yunData', data: yunData }, '*')
       } else {
-        window.postMessage({ type: 'yunData', data: JSON.stringify(window.yunData) }, '*')
+        window.postMessage({ type: 'yunData', data: window.yunData }, '*')
       }
     }
   }

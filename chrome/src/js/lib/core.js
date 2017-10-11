@@ -44,7 +44,12 @@ class Core {
     }
     return `'${str.replace(/'/g, "\\'")}'`
   }
-
+  objectToQueryString (obj) {
+    const string = Object.keys(obj).map((key) => {
+      return `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`
+    }).join('&')
+    return `?${string}`
+  }
   saveConfigData (configData) {
     for (let key in configData) {
       chrome.storage.local.set({[key]: configData[key]}, () => {
