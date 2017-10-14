@@ -1,8 +1,10 @@
 import Core from './lib/core'
+import Config from './lib/config'
 import Downloader from './lib/downloader'
+
 class Home {
   constructor () {
-    Core.init()
+    Config.init()
     Core.requestCookies([{ url: 'http://pan.baidu.com/', name: 'BDUSS' }, { url: 'http://pcs.baidu.com/', name: 'pcsett' }])
     Core.addMenu('home')
     Core.showToast('初始化成功!', 'success')
