@@ -1,20 +1,17 @@
 import Core from './core'
 class Downloader {
-  constructor (parameter) {
-    this.mode = 'RPC'
-    this.listParameter = parameter
-    this.fileParameter = parameter
-    this.pathPrefixLength = 0
-    this.fileList = []
-    this.delay = 300
+  constructor (listParameter, fileParameter) {
+    this.listParameter = listParameter
+    this.fileParameter = fileParameter
+    this.fileDownloadInfo = []
     this.currentTaskId = 0
     this.completedCount = 0
     this.folders = []
     this.files = {}
   }
-  start (mode = 'RPC', delay = 300) {
-    this.mode = mode
-    this.delay = delay
+  start (interval = 300, done) {
+    this.interval = interval
+    this.done = done
     this.currentTaskId = new Date().getTime()
     this.getNextFile(this.currentTaskId)
   }
@@ -41,8 +38,8 @@ class Downloader {
       this.listParameter.search.dir = dir
       fetch(`${window.location.origin}${this.listParameter.url}${Core.objectToQueryString(this.listParameter.search)}`, this.listParameter.options).then((response) => {
         if (response.ok) {
-          response.json().then(function (data) {
-            setTimeout(() => this.getNextFile(taskId), this.delay)
+          response.json().then((data) => {
+            setTimeout(() => this.getNextFile(taskId), this.interval)
             if (data.errno !== 0) {
               Core.showToast('未知错误', 'failure')
               console.log(data)
@@ -62,51 +59,51 @@ class Downloader {
       }).catch((err) => {
         Core.showToast('网络请求失败', 'failure')
         console.log(err)
-        setTimeout(() => this.getNextFile(taskId), this.delay)
+        setTimeout(() => this.getNextFile(taskId), this.interval)
       })
     } else if (this.files.length !== 0) {
       Core.showToast('正在获取下载地址...', 'success')
       this.getFiles(this.files).then(() => {
-        console.log('download complete')
+        this.done(this.fileDownloadInfo)
       })
     } else {
       Core.showToast('一个文件都没有哦...', 'caution')
       this.reset()
     }
   }
-  getFiles (files) {
-    function getFilesByChunk (fidlist) {
-      return new Promise((resolve) => {
-        // this.fileParameter.options.body = { ...this.fileParameter.options.body, fidlist }
-        fetch(`${window.location.origin}${this.fileParameter.url}`, this.fileParameter.options).then((response) => {
-          if (response.ok) {
-            response.json().then(function (data) {
-              if (data.errno !== 0) {
-                Core.showToast('未知错误', 'failure')
-                console.log(data)
-                return
-              }
-              data.dlink.forEach((item) => {
-                this.fileList.push({
-                  name: files[item.fs_id].path.substr(this.pathPrefixLength),
-                  link: item.dlink,
-                  md5: files[item.fs_id].md5
-                })
-                resolve()
+  getFilesByChunk (files, fidlist) {
+    return new Promise((resolve) => {
+      this.fileParameter.search.fidlist = JSON.stringify(fidlist)
+      fetch(`${window.location.origin}${this.fileParameter.url}${Core.objectToQueryString(this.fileParameter.search)}`, this.fileParameter.options).then((response) => {
+        if (response.ok) {
+          response.json().then((data) => {
+            if (data.errno !== 0) {
+              Core.showToast('未知错误', 'failure')
+              console.log(data)
+              return
+            }
+            data.dlink.forEach((item) => {
+              this.fileDownloadInfo.push({
+                name: files[item.fs_id].path,
+                link: item.dlink,
+                md5: files[item.fs_id].md5
               })
+              resolve()
             })
-          } else {
-            console.log(response)
-          }
-        })
+          })
+        } else {
+          console.log(response)
+        }
       })
-    }
+    })
+  }
+  getFiles (files) {
     const chunk = 100
     const fileArray = Object.keys(files)
     const fidlist = fileArray.map((el, index) => {
       return index % chunk === 0 ? fileArray.slice(index, index + chunk) : null
     }).filter(el => el)
-    const list = fidlist.map(item => getFilesByChunk(item))
+    const list = fidlist.map(item => this.getFilesByChunk(files, item))
     return new Promise((resolve) => {
       Promise.all(list).then(
         resolve()

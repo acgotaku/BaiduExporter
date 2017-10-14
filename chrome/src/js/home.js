@@ -10,23 +10,50 @@ class Home {
     this.initDownloader()
   }
   initDownloader () {
-    const search = {
+    const listSearch = {
       dir: '',
       channel: 'chunlei',
       clienttype: 0,
       web: 1
     }
-    const parameter = {
-      search,
+    const listParameter = {
+      search: listSearch,
       url: `/api/list`,
       options: {
+        credentials: 'include',
         method: 'GET',
         headers: {
           'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
         }
       }
     }
-    this.downloader = new Downloader(parameter)
+    // eslint-disable-next-line no-new-func
+    const sign = btoa(new Function(`return ${window.yunData.sign2}`)()(window.yunData.sign3, window.yunData.sign1))
+
+    const fileSearch = {
+      sign,
+      type: 'dlink',
+      bdstoken: window.yunData.bdstoken,
+      fidlist: '',
+      timestamp: window.yunData.timestamp,
+      channel: 'chunlei',
+      clienttype: 0,
+      web: 1,
+      app_id: 250528
+    }
+
+    const fileParameter = {
+      search: fileSearch,
+      url: `/api/download`,
+      options: {
+        credentials: 'include',
+        method: 'GET',
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        }
+      }
+    }
+    this.downloader = new Downloader(listParameter, fileParameter)
   }
   startListen () {
     window.addEventListener('message', (event) => {
@@ -48,7 +75,9 @@ class Home {
             this.downloader.addFile(item)
           }
         })
-        this.downloader.start(this.mode)
+        this.downloader.start(Core.getConfigData('interval'), (fileDownloadInfo) => {
+          console.log(fileDownloadInfo)
+        })
       }
     })
     const menuButton = document.querySelector('#aria2List')

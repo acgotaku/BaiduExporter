@@ -62,10 +62,13 @@ class Core {
       }
     }
   }
-  getConfigData (key = null) {
+  readConfigData (key = null) {
     return new Promise((resolve) => {
       chrome.storage.local.get(key, resolve)
     })
+  }
+  getConfigData (key) {
+    return this.configData[key]
   }
   clearConfigData () {
     chrome.storage.sync.clear()
@@ -330,7 +333,7 @@ class Core {
   }
   initSetting () {
     return new Promise((resolve) => {
-      this.getConfigData().then((items = this.defaultConfigData) => {
+      this.readConfigData().then((items = this.defaultConfigData) => {
         this.configData = Object.assign({}, this.defaultConfigData, items)
         this.updateSetting()
         resolve()
