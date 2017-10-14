@@ -9,6 +9,7 @@ class Home {
     Core.addMenu('home')
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
+    this.rpcURL = 'http://localhost:6800/jsonrpc'
     this.initDownloader()
   }
   initDownloader () {
@@ -78,7 +79,7 @@ class Home {
           }
         })
         this.downloader.start(Core.getConfigData('interval'), (fileDownloadInfo) => {
-          console.log(fileDownloadInfo)
+          Core.aria2RPCMode(this.rpcURL, fileDownloadInfo)
         })
       }
     })
@@ -86,11 +87,13 @@ class Home {
     menuButton.addEventListener('click', (event) => {
       const rpcURL = event.target.dataset.url
       if (rpcURL) {
+        this.rpcURL = rpcURL
         this.getSelected()
         this.mode = 'RPC'
       }
     })
   }
+
   getSelected () {
     window.postMessage({ type: 'getSelected' }, '*')
   }

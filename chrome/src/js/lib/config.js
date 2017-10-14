@@ -259,7 +259,7 @@ class Config {
     })
     const configSync = document.querySelector('.configSync-s').checked
     const md5Check = document.querySelector('.md5Check-s').checked
-    const fold = document.querySelector('.fold-s').value
+    const fold = Number.parseInt(document.querySelector('.fold-s').value)
     const interval = document.querySelector('.interval-s').value
     const downloadPath = document.querySelector('.downloadPath-s').value
     const userAgent = document.querySelector('.userAgent-s').value

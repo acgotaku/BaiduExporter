@@ -16,6 +16,7 @@ class Downloader {
     this.getNextFile(this.currentTaskId)
   }
   reset () {
+    this.fileDownloadInfo = []
     this.currentTaskId = 0
     this.folders = []
     this.files = {}
@@ -105,9 +106,9 @@ class Downloader {
     }).filter(el => el)
     const list = fidlist.map(item => this.getFilesByChunk(files, item))
     return new Promise((resolve) => {
-      Promise.all(list).then(
+      Promise.all(list).then(() => {
         resolve()
-      )
+      })
     })
   }
 }

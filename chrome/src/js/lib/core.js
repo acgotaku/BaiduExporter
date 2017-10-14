@@ -1,6 +1,6 @@
 class Core {
   constructor () {
-    this.cookies = null
+    this.cookies = {}
     this.defaultRPC = [{name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc'}]
     this.defaultUserAgent = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuserAgentnJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
@@ -49,6 +49,39 @@ class Core {
   showToast (message, type) {
     window.postMessage({ type: 'showToast', data: { message, type } }, '*')
   }
+  getHashParameter (name) {
+    const hash = window.location.hash
+    const paramsString = hash.substr(1)
+    const searchParams = new URLSearchParams(paramsString)
+    return searchParams.get(name)
+  }
+  getPrefixLength () {
+    const path = this.getHashParameter('path')
+    const fold = this.getConfigData('fold')
+    if (fold === 0) {
+      return (path.length)
+    }
+  }
+  getCookies () {
+    const cookies = []
+    for (let key in this.cookies) {
+      cookies.push(`${key}=${this.cookies[key]}`)
+    }
+    return cookies.join('; ')
+  }
+  getHeader () {
+    const headerOption = []
+    headerOption.push(`User-Agent: ${this.getConfigData('userAgent')}`)
+    headerOption.push(`Referer: ${this.getConfigData('referer')}`)
+    headerOption.push(`Cookie: ${this.getCookies()}`)
+    const headers = this.getConfigData('headers')
+    if (headers) {
+      headers.split('\n').forEach((item) => {
+        headerOption.push(item)
+      })
+    }
+    return headerOption
+  }
   // 解析 RPC地址 返回验证数据 和地址
   parseAuth (url) {
     const parseURL = new URL(url)
@@ -58,15 +91,11 @@ class Core {
         authStr = `Basic ${btoa(authStr)}`
       }
     }
-    const hash = parseURL.hash.substr(1)
-    let options = []
-    if (hash) {
-      hash.split('&').forEach((item) => {
-        const config = item.split('=')
-        if (config) {
-          options.push([config[0], config.length === 2 ? config[1] : 'enabled'])
-        }
-      })
+    const paramsString = parseURL.hash.substr(1)
+    let options = {}
+    const searchParams = new URLSearchParams(paramsString)
+    for (let key of searchParams) {
+      options[key[0]] = key.length === 2 ? key[1] : 'enabled'
     }
     const path = parseURL.origin + parseURL.pathname
     return {authStr, path, options}
@@ -96,11 +125,11 @@ class Core {
     if (authStr && authStr.startsWith('Basic')) {
       Object.assign(parameter.options.headers, { Authorization: authStr })
     }
-    this.sendToBackground('rpcVersion', parameter, function (version) {
+    this.sendToBackground('rpcVersion', parameter, (version) => {
       if (version) {
-        element.innerText = `Aria2\u7248\u672c\u4e3a\uff1a\u0020${version}`
+        element.innerText = `Aria2版本为: ${version}`
       } else {
-        element.innerText = '\u9519\u8BEF,\u8BF7\u67E5\u770B\u662F\u5426\u5F00\u542FAria2'
+        element.innerText = '错误,请查看是否开启Aria2'
       }
     })
   }
@@ -165,6 +194,61 @@ class Core {
   // names format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
   requestCookies (names) {
     this.sendToBackground('getCookies', names, (value) => { this.cookies = value })
+  }
+  aria2RPCMode (rpcPath, fileDownloadInfo) {
+    const {authStr, path, options} = this.parseAuth(rpcPath)
+    const prefix = this.getPrefixLength()
+    fileDownloadInfo.forEach((file) => {
+      const rpcData = {
+        jsonrpc: '2.0',
+        method: 'aria2.addUri',
+        id: new Date().getTime(),
+        params: [
+          [file.link], {
+            out: file.name.substr(prefix),
+            header: this.getHeader()
+          }
+        ]
+      }
+      const md5Check = this.getConfigData('md5Check')
+      const rpcOption = rpcData.params[1]
+      const dir = this.getConfigData('downloadPath')
+      if (dir) {
+        rpcOption['dir'] = dir
+      }
+      if (md5Check) {
+        rpcOption['checksum'] = `md5=${file.md5}`
+      }
+      if (options) {
+        for (let key in options) {
+          rpcOption[key] = options[key]
+        }
+      }
+      if (authStr && authStr.startsWith('token')) {
+        rpcData.params.unshift(authStr)
+      }
+      const parameter = {
+        url: path,
+        options: {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          },
+          body: JSON.stringify(rpcData)
+        }
+      }
+      if (authStr && authStr.startsWith('Basic')) {
+        Object.assign(parameter.options.headers, { Authorization: authStr })
+      }
+      console.log(parameter)
+      this.sendToBackground('rpcData', parameter, (success) => {
+        if (success) {
+          this.showToast('下载成功!赶紧去看看吧~', 'success')
+        } else {
+          this.showToast('下载失败!是不是没有开启Aria2?', 'failure')
+        }
+      })
+    })
   }
 }
 

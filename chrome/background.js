@@ -3,17 +3,26 @@ if (typeof browser !== 'undefined') {
 }
 // https://developer.chrome.com/apps/runtime#event-onMessage
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  console.log(request)
   switch (request.method) {
     case 'addScript':
       chrome.tabs.executeScript(sender.tab.id, { file: request.data })
       break
     case 'rpcData':
-      fetch(request.data).then(() => {
-        sendResponse(true)
-      }).catch(() => {
+      fetch(request.data.url, request.data.options).then((response) => {
+        if (response.ok) {
+          response.json().then(function (data) {
+            sendResponse(true)
+          })
+        } else {
+          console.log(response)
+          sendResponse(false)
+        }
+      }).catch((err) => {
         sendResponse(false)
+        console.log(err)
       })
-      break
+      return true
     case 'configData':
       for (let key in request.data) {
         localStorage.setItem(key, request.data[key])
