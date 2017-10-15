@@ -1,26 +1,32 @@
 if (typeof browser !== 'undefined') {
   chrome = browser
 }
+
+const httpSend = ({url, options}, resolve, reject) => {
+  fetch(url, options).then((response) => {
+    if (response.ok) {
+      response.json().then((data) => {
+        resolve(data)
+      })
+    } else {
+      reject(response)
+    }
+  }).catch((err) => {
+    reject(err)
+  })
+}
 // https://developer.chrome.com/apps/runtime#event-onMessage
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  console.log(request)
   switch (request.method) {
     case 'addScript':
       chrome.tabs.executeScript(sender.tab.id, { file: request.data })
       break
     case 'rpcData':
-      fetch(request.data.url, request.data.options).then((response) => {
-        if (response.ok) {
-          response.json().then(function (data) {
-            sendResponse(true)
-          })
-        } else {
-          console.log(response)
-          sendResponse(false)
-        }
-      }).catch((err) => {
-        sendResponse(false)
+      httpSend(request.data, (data) => {
+        sendResponse(true)
+      }, (err) => {
         console.log(err)
+        sendResponse(false)
       })
       return true
     case 'configData':
@@ -29,18 +35,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       }
       break
     case 'rpcVersion':
-      fetch(request.data.url, request.data.options).then((response) => {
-        if (response.ok) {
-          response.json().then(function (data) {
-            sendResponse(data.result.version)
-          })
-        } else {
-          console.log(response)
-          sendResponse(false)
-        }
-      }).catch((err) => {
-        sendResponse(false)
+      httpSend(request.data, (data) => {
+        sendResponse(data.result.version)
+      }, (err) => {
         console.log(err)
+        sendResponse(false)
       })
       return true
     case 'getCookies':
@@ -50,13 +49,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 })
 
 // Promise style `chrome.cookies.get()`
-function getCookie (detail) {
+const getCookie = (detail) => {
   return new Promise(function (resolve) {
     chrome.cookies.get(detail, resolve)
   })
 }
 
-function getCookies (details) {
+const getCookies = (details) => {
   return new Promise(function (resolve) {
     const list = details.map(item => getCookie(item))
     Promise.all(list).then(function (cookies) {
@@ -71,13 +70,13 @@ function getCookies (details) {
   })
 }
 
-function showNotification (id, opt) {
+const showNotification = (id, opt) => {
   if (!chrome.notifications) {
     return
   }
-  chrome.notifications.create(id, opt, function () { })
-  setTimeout(function () {
-    chrome.notifications.clear(id, function () { })
+  chrome.notifications.create(id, opt, () => {})
+  setTimeout(() => {
+    chrome.notifications.clear(id, () => {})
   }, 5000)
 }
 // 软件版本更新提示
