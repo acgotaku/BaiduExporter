@@ -34,6 +34,19 @@ class Core {
     }
     return `'${str.replace(/'/g, "\\'")}'`
   }
+  httpSend ({url, options}, resolve, reject) {
+    fetch(url, options).then((response) => {
+      if (response.ok) {
+        response.json().then((data) => {
+          resolve(data)
+        })
+      } else {
+        reject(response)
+      }
+    }).catch((err) => {
+      reject(err)
+    })
+  }
   objectToQueryString (obj) {
     const string = Object.keys(obj).map((key) => {
       return `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`
@@ -116,9 +129,6 @@ class Core {
       url: path,
       options: {
         method: 'POST',
-        headers: {
-          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        },
         body: JSON.stringify(data)
       }
     }
@@ -240,7 +250,6 @@ class Core {
       if (authStr && authStr.startsWith('Basic')) {
         Object.assign(parameter.options.headers, { Authorization: authStr })
       }
-      console.log(parameter)
       this.sendToBackground('rpcData', parameter, (success) => {
         if (success) {
           this.showToast('下载成功!赶紧去看看吧~', 'success')
