@@ -14,6 +14,7 @@ const stylelint = require('gulp-stylelint')
 const postcss = require('gulp-postcss')
 const sass = require('gulp-sass')
 const autoprefixer = require('autoprefixer')
+const concat = require('gulp-concat')
 const cssmin = require('gulp-cssmin')
 
 const plumber = require('gulp-plumber')
@@ -71,6 +72,7 @@ gulp.task('css', function () {
         browsers: ['last 1 versions']
       })
     ]))
+    .pipe(concat('inject.css'))
     .pipe(gulpIf(config.env.dev, sourcemaps.write()))
     .pipe(gulpIf(config.env.prod, cssmin()))
     .pipe(gulp.dest('dist/css/'))

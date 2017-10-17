@@ -171,6 +171,11 @@ class Core {
     settingButton.addEventListener('click', () => {
       settingMenu.classList.add('open-o')
     })
+    const textButton = document.querySelector('#aria2Text')
+    const textMenu = document.querySelector('#textExport')
+    textButton.addEventListener('click', () => {
+      textMenu.classList.add('open-o')
+    })
   }
   resetMenu () {
     document.querySelectorAll('.rpc-button').forEach((rpc) => {

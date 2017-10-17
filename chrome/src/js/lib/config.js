@@ -7,6 +7,7 @@ class Config {
   }
   init () {
     this.addSettingUI()
+    this.addTextExport()
     if (typeof browser !== 'undefined') {
       chrome = browser
       if (!chrome.storage.sync) {
@@ -44,15 +45,32 @@ class Config {
     chrome.storage.sync.clear()
     chrome.storage.local.clear()
   }
+  addTextExport () {
+    const text = `
+      <div id="textExport" class="export-menu">
+        <div class="export-menu-inner">
+          <div class="export-menu-header">
+            <div class="export-menu-title">文本导出</div>
+            <div class="export-menu-close">×</div>
+          </div>
+        </div>
+      </div>`
+    document.body.insertAdjacentHTML('beforeend', text)
+    const close = document.querySelector('.export-menu-close')
+    const exportMenu = document.querySelector('#textExport')
+    close.addEventListener('click', () => {
+      exportMenu.classList.remove('open-o')
+    })
+  }
   addSettingUI () {
     const setting = `
-      <div id="settingMenu" class="setting-menu">
-        <div class="setting-menu-inner">
-          <div class="setting-menu-header">
-            <div class="setting-menu-title">导出设置</div>
-            <div class="setting-menu-close">×</div>
+      <div id="settingMenu" class="modal setting-menu">
+        <div class="modal-inner">
+          <div class="modal-header">
+            <div class="modal-title">导出设置</div>
+            <div class="modal-close">×</div>
           </div>
-          <div class="setting-menu-body">
+          <div class="modal-body">
             <div class="setting-menu-message">
               <label class="setting-menu-label orange-o" id="message"></label>
             </div>
@@ -133,7 +151,7 @@ class Config {
               </div>
             </div><!-- /.setting-menu-row -->
           </div><!-- /.setting-menu-body -->
-          <div class="setting-menu-footer">
+          <div class="modal-footer">
             <div class="setting-menu-copyright">
               <div class="setting-menu-item">
                 <label class="setting-menu-label">&copy; Copyright</label>
@@ -152,7 +170,7 @@ class Config {
         </div>
       </div>`
     document.body.insertAdjacentHTML('beforeend', setting)
-    const close = document.querySelector('.setting-menu-close')
+    const close = document.querySelector('.modal-close')
     const settingMenu = document.querySelector('#settingMenu')
     close.addEventListener('click', () => {
       settingMenu.classList.remove('open-o')
