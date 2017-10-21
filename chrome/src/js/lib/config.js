@@ -47,20 +47,44 @@ class Config {
   }
   addTextExport () {
     const text = `
-      <div id="textExport" class="export-menu">
-        <div class="export-menu-inner">
-          <div class="export-menu-header">
-            <div class="export-menu-title">文本导出</div>
-            <div class="export-menu-close">×</div>
+      <div id="textMenu" class="modal export-menu">
+        <div class="modal-inner">
+          <div class="modal-header">
+            <div class="modal-title">文本导出</div>
+            <div class="modal-close">×</div>
+          </div>
+          <div class="modal-body">
+            <div class="export-menu-row">
+              <a class="export-menu-button" href="javascript:void(0);" id="aria2Txt" download="aria2c.down">存为Aria2文件</a>
+              <a class="export-menu-button" href="javascript:void(0);" id="idmTxt" download="idm.ef2">存为IDM文件</a>
+              <a class="export-menu-button" href="javascript:void(0);" id="downloadLinkTxt" download="link.txt">保存下载链接</a>
+              <a class="export-menu-button" href="javascript:void(0);" id="copyDownloadLinkTxt">拷贝下载链接</a>
+            </div>
+            <div class="export-menu-row">
+              <textarea class="export-menu-textarea" type="textarea" wrap="off" spellcheck="false" id="aria2CmdTxt"></textarea>
+            </div>
           </div>
         </div>
       </div>`
     document.body.insertAdjacentHTML('beforeend', text)
-    const close = document.querySelector('.export-menu-close')
-    const exportMenu = document.querySelector('#textExport')
-    close.addEventListener('click', () => {
-      exportMenu.classList.remove('open-o')
+    const textMenu = document.querySelector('#textMenu')
+    const close = textMenu.querySelector('.modal-close')
+    const copyDownloadLinkTxt = textMenu.querySelector('#copyDownloadLinkTxt')
+    copyDownloadLinkTxt.addEventListener('click', () => {
+      Core.copyText(copyDownloadLinkTxt.dataset.link)
     })
+    close.addEventListener('click', () => {
+      textMenu.classList.remove('open-o')
+      this.resetTextExport()
+    })
+  }
+  resetTextExport () {
+    const textMenu = document.querySelector('#textMenu')
+    textMenu.querySelector('#aria2Txt').href = ''
+    textMenu.querySelector('#idmTxt').href = ''
+    textMenu.querySelector('#downloadLinkTxt').href = ''
+    textMenu.querySelector('#aria2CmdTxt').value = ''
+    textMenu.querySelector('#copyDownloadLinkTxt').dataset.link = ''
   }
   addSettingUI () {
     const setting = `
@@ -170,8 +194,8 @@ class Config {
         </div>
       </div>`
     document.body.insertAdjacentHTML('beforeend', setting)
-    const close = document.querySelector('.modal-close')
     const settingMenu = document.querySelector('#settingMenu')
+    const close = settingMenu.querySelector('.modal-close')
     close.addEventListener('click', () => {
       settingMenu.classList.remove('open-o')
       this.updateSetting()

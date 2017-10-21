@@ -1,91 +1,17 @@
-$header-height: 40px;
-$row-height: 40px;
+$row-height: 50px;
 $padding-space: 10px;
 
 .export-menu {
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: none;
-  height: 100%;
-  justify-content: center;
-  margin: auto;
-  position: fixed;
-  width: 100%;
-  z-index: 99;
-
-  &.open-o {
-    display: flex;
-  }
-
-  &-inner {
-    background-color: #fafafa;
-    border-radius: 4px;
-    margin: auto;
-    width: 650px;
-  }
-
-  &-header {
-    border-bottom: 1px solid #dadada;
-    display: flex;
-    height: $header-height;
-    line-height: $header-height;
-  }
-
-  &-title {
-    flex: 1;
-    font-weight: bold;
-    padding-left: $padding-space;
-  }
-
-  &-close {
-    cursor: pointer;
-    font-size: 30px;
-    padding: 0 $padding-space;
-  }
-
-  &-body {
-    padding: 0 $padding-space;
-  }
-
-  &-message {
-    align-items: center;
-    display: flex;
-    height: 20px;
-  }
-
   &-row {
     box-sizing: border-box;
     display: flex;
     height: $row-height;
+    justify-content: space-between;
     padding: 5px 0;
 
     &:last-child {
-      height: 100px;
-    }
-  }
-
-  &-row:hover {
-    background-color: #eff4f8;
-  }
-
-  &-input {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
-    height: 28px;
-    padding: 0 $padding-space;
-    width: 70%;
-
-    &.small-o {
-      width: 30%;
-    }
-
-    &.textarea-o {
-      height: 80px;
-      padding: 5px $padding-space;
-    }
-
-    &:focus {
-      border-color: #5cb3fd;
+      height: 200px;
+      padding-bottom: 10px;
     }
   }
 
@@ -93,10 +19,9 @@ $padding-space: 10px;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 4px;
     color: #666;
-    height: 28px;
-    line-height: 28px;
-    margin-left: 10px;
-    padding: 0 $padding-space;
+    height: 38px;
+    line-height: 38px;
+    padding: 0 30px;
     text-align: center;
 
     &:hover,
@@ -105,77 +30,13 @@ $padding-space: 10px;
       color: #666;
       text-decoration: none;
     }
-
-    &.large-o {
-      height: 40px;
-      line-height: 40px;
-      width: 120px;
-    }
-
-    &.blue-o {
-      background-color: #3b8cff;
-      color: #fff;
-
-      &:hover {
-        background-color: #77afff;
-      }
-    }
   }
 
-  .version-s {
-    margin-left: auto;
-    margin-right: 10px;
-  }
-
-  &-checkbox {
-    cursor: pointer;
-  }
-
-  &-label {
-    padding-left: $padding-space;
-
-    &.orange-o {
-      color: #e15f00;
-    }
-  }
-
-  &-name {
-    align-items: center;
-    display: flex;
-    width: 20%;
-  }
-
-  &-value {
-    align-items: center;
-    display: flex;
-    padding-left: 20px;
-    width: 80%;
-  }
-
-  &-footer {
-    border-top: 1px solid #dadada;
-    display: flex;
-    padding-bottom: $padding-space;
-  }
-
-  &-copyright,
-  &-operate {
-    width: 50%;
-  }
-
-  &-item {
-    align-items: center;
-    display: flex;
-    height: $row-height;
-  }
-
-  &-link {
-    padding-left: $padding-space;
-  }
-
-  &-operate {
-    align-items: flex-end;
-    display: flex;
-    padding: $padding-space;
+  &-textarea {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    padding: 5px $padding-space;
+    resize: none;
+    width: 100%;
   }
 }

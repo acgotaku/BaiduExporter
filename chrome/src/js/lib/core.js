@@ -2,7 +2,7 @@ class Core {
   constructor () {
     this.cookies = {}
     this.defaultRPC = [{name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc'}]
-    this.defaultUserAgent = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuserAgentnJia'
+    this.defaultUserAgent = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
     this.defaultConfigData = {
       rpcList: this.defaultRPC,
@@ -69,7 +69,7 @@ class Core {
     return searchParams.get(name)
   }
   getPrefixLength () {
-    const path = this.getHashParameter('path')
+    const path = this.getHashParameter('list/path')
     const fold = this.getConfigData('fold')
     if (fold === 0) {
       return (path.length)
@@ -82,7 +82,7 @@ class Core {
     }
     return cookies.join('; ')
   }
-  getHeader () {
+  getHeader (type = 'RPC') {
     const headerOption = []
     headerOption.push(`User-Agent: ${this.getConfigData('userAgent')}`)
     headerOption.push(`Referer: ${this.getConfigData('referer')}`)
@@ -93,7 +93,18 @@ class Core {
         headerOption.push(item)
       })
     }
-    return headerOption
+    if (type === 'RPC') {
+      return headerOption
+    } else if (type === 'aria2Cmd') {
+      return headerOption.map(item => `--header ${JSON.stringify(item)}`).join(' ')
+    } else if (type === 'aria2c') {
+      return headerOption.map(item => ` header=${item}`).join('\n')
+    } else if (type === 'idm') {
+      return headerOption.map((item) => {
+        const headers = item.split(': ')
+        return `${headers[0].toLowerCase()}: ${headers[1]}`
+      }).join('\r\n')
+    }
   }
   // 解析 RPC地址 返回验证数据 和地址
   parseAuth (url) {
@@ -171,11 +182,6 @@ class Core {
     settingButton.addEventListener('click', () => {
       settingMenu.classList.add('open-o')
     })
-    const textButton = document.querySelector('#aria2Text')
-    const textMenu = document.querySelector('#textExport')
-    textButton.addEventListener('click', () => {
-      textMenu.classList.add('open-o')
-    })
   }
   resetMenu () {
     document.querySelectorAll('.rpc-button').forEach((rpc) => {
@@ -201,9 +207,9 @@ class Core {
     const result = document.execCommand('copy')
     input.remove()
     if (result) {
-      this.showToast('拷贝成功~', 'MODE_SUCCESS')
+      this.showToast('拷贝成功~', 'success')
     } else {
-      this.showToast('拷贝失败 QAQ', 'MODE_FAILURE')
+      this.showToast('拷贝失败 QAQ', 'failure')
     }
   }
   // names format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
@@ -220,7 +226,7 @@ class Core {
         id: new Date().getTime(),
         params: [
           [file.link], {
-            out: file.name.substr(prefix),
+            out: this.escapeString(file.name.substr(prefix)),
             header: this.getHeader()
           }
         ]
@@ -246,9 +252,6 @@ class Core {
         url: path,
         options: {
           method: 'POST',
-          headers: {
-            'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-          },
           body: JSON.stringify(rpcData)
         }
       }
@@ -263,6 +266,34 @@ class Core {
         }
       })
     })
+  }
+  aria2TXTMode (fileDownloadInfo) {
+    const aria2CmdTxt = []
+    const aria2Txt = []
+    const idmTxt = []
+    const downloadLinkTxt = []
+    const prefix = this.getPrefixLength()
+    const prefixTxt = 'data:text/plain;charset=utf-8,'
+    fileDownloadInfo.forEach((file) => {
+      const name = this.escapeString(file.name.substr(prefix))
+      let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${name} ${this.getHeader('aria2Cmd')} ${JSON.stringify(file.link)}`
+      let aria2Line = [file.link, this.getHeader('aria2c'), ` out=${name}`].join('\n')
+      const md5Check = this.getConfigData('md5Check')
+      if (md5Check) {
+        aria2CmdLine += ` --checksum=md5=${file.md5}`
+        aria2Line.push(` checksum=md5=${file.md5}`)
+      }
+      aria2CmdTxt.push(aria2CmdLine)
+      aria2Txt.push(aria2Line)
+      const idmLine = ['<', file.link, this.getHeader('idm'), `out=${name}`, '>\r\n'].join('\r\n')
+      idmTxt.push(idmLine)
+      downloadLinkTxt.push(file.link)
+    })
+    document.querySelector('#aria2CmdTxt').value = `${aria2CmdTxt.join('\n')}`
+    document.querySelector('#aria2Txt').href = `${prefixTxt}${encodeURIComponent(aria2Txt.join('\n'))}`
+    document.querySelector('#idmTxt').href = `${prefixTxt}${encodeURIComponent(idmTxt.join('\r\n'))}`
+    document.querySelector('#downloadLinkTxt').href = `${prefixTxt}${encodeURIComponent(downloadLinkTxt.join('\n'))}`
+    document.querySelector('#copyDownloadLinkTxt').dataset.link = downloadLinkTxt.join('\n')
   }
 }
 

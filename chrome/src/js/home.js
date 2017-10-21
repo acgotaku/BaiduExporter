@@ -73,7 +73,13 @@ class Home {
           }
         })
         this.downloader.start(Core.getConfigData('interval'), (fileDownloadInfo) => {
-          Core.aria2RPCMode(this.rpcURL, fileDownloadInfo)
+          if (this.mode === 'RPC') {
+            Core.aria2RPCMode(this.rpcURL, fileDownloadInfo)
+          }
+          if (this.mode === 'TXT') {
+            Core.aria2TXTMode(fileDownloadInfo)
+            document.querySelector('#textMenu').classList.add('open-o')
+          }
         })
       }
     })
@@ -84,6 +90,10 @@ class Home {
         this.rpcURL = rpcURL
         this.getSelected()
         this.mode = 'RPC'
+      }
+      if (event.target.id === 'aria2Text') {
+        this.getSelected()
+        this.mode = 'TXT'
       }
     })
   }
