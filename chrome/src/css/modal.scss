@@ -1,9 +1,10 @@
-$header-height: 40px;
-$padding-space: 10px;
+@charset 'utf-8';
+
+@import './lib/share';
 
 .modal {
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: $opacity-5;
   display: none;
   height: 100%;
   justify-content: center;
@@ -17,14 +18,14 @@ $padding-space: 10px;
   }
 
   &-inner {
-    background-color: #fafafa;
+    background-color: $grey-fa;
     border-radius: 4px;
     margin: auto;
     width: 650px;
   }
 
   &-header {
-    border-bottom: 1px solid #dadada;
+    border-bottom: $border;
     display: flex;
     height: $header-height;
     line-height: $header-height;
@@ -47,7 +48,7 @@ $padding-space: 10px;
   }
 
   &-footer {
-    border-top: 1px solid #dadada;
+    border-top: $border;
     display: flex;
     padding-bottom: $padding-space;
   }

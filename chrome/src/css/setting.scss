@@ -1,5 +1,6 @@
-$row-height: 40px;
-$padding-space: 10px;
+@charset 'utf-8';
+
+@import './lib/share';
 
 .setting-menu {
   &-message {
@@ -24,8 +25,7 @@ $padding-space: 10px;
   }
 
   &-input {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
+    @include button-border;
     height: 28px;
     padding: 0 $padding-space;
     width: 70%;
@@ -45,8 +45,7 @@ $padding-space: 10px;
   }
 
   &-button {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
+    @include button-border;
     color: #666;
     height: 28px;
     line-height: 28px;

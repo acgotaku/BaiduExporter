@@ -22,7 +22,7 @@ const sourcemaps = require('gulp-sourcemaps')
 const uglify = require('gulp-uglify')
 const jsTargets = ['./src/js/**/*.js']
 const jsEntries = ['./src/js/*.js']
-const cssTargets = ['./src/css/*.scss']
+const cssTargets = ['./src/css/**/*.scss']
 const config = {
   errorHandler: function (err) {
     console.log(err.toString())
