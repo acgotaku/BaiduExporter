@@ -125,15 +125,6 @@ class Config {
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
               <div class="setting-menu-name">
-                <label class="setting-menu-label">文件夹层数</label>
-              </div>
-              <div class="setting-menu-value">
-                <input class="setting-menu-input small-o fold-s" type="number" spellcheck="false">
-                <label class="setting-menu-label">(默认0表示不保留,-1表示保留完整路径)</label>
-              </div>
-            </div><!-- /.setting-menu-row -->
-            <div class="setting-menu-row">
-              <div class="setting-menu-name">
                 <label class="setting-menu-label">递归下载间隔</label>
               </div>
               <div class="setting-menu-value">
@@ -260,7 +251,7 @@ class Config {
   updateSetting () {
     this.resetSetting()
     Core.updateMenu()
-    const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, headers } = Core.getConfigData()
+    const { rpcList, configSync, md5Check, interval, downloadPath, userAgent, referer, headers } = Core.getConfigData()
     rpcList.forEach((rpc, index) => {
       const rpcDOMList = document.querySelectorAll('.rpc-s')
       if (index === 0) {
@@ -281,7 +272,6 @@ class Config {
     })
     document.querySelector('.configSync-s').checked = configSync
     document.querySelector('.md5Check-s').checked = md5Check
-    document.querySelector('.fold-s').value = fold
     document.querySelector('.interval-s').value = interval
     document.querySelector('.downloadPath-s').value = downloadPath
     document.querySelector('.userAgent-s').value = userAgent
@@ -301,7 +291,6 @@ class Config {
     })
     const configSync = document.querySelector('.configSync-s').checked
     const md5Check = document.querySelector('.md5Check-s').checked
-    const fold = Number.parseInt(document.querySelector('.fold-s').value)
     const interval = document.querySelector('.interval-s').value
     const downloadPath = document.querySelector('.downloadPath-s').value
     const userAgent = document.querySelector('.userAgent-s').value
@@ -312,7 +301,6 @@ class Config {
       rpcList,
       configSync,
       md5Check,
-      fold,
       interval,
       downloadPath,
       userAgent,

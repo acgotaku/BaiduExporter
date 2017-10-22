@@ -8,7 +8,6 @@ class Core {
       rpcList: this.defaultRPC,
       configSync: false,
       md5Check: false,
-      fold: 0,
       interval: 300,
       downloadPath: '',
       userAgent: this.defaultUserAgent,
@@ -26,13 +25,6 @@ class Core {
   }
   setConfigData (configData) {
     this.configData = configData
-  }
-  // 将文件名用单引号包裹，并且反转义文件名中所有单引号，确保按照文件名保存
-  escapeString (str) {
-    if (navigator.platform.includes('Win')) {
-      return str
-    }
-    return `'${str.replace(/'/g, "\\'")}'`
   }
   httpSend ({url, options}, resolve, reject) {
     fetch(url, options).then((response) => {
@@ -69,13 +61,10 @@ class Core {
     return searchParams.get(name)
   }
   getPrefixLength () {
-    const path = this.getHashParameter('list/path')
-    const fold = this.getConfigData('fold')
-    if (fold === 0) {
-      return (path.length)
-    }
+    const path = this.getHashParameter('list/path') || this.getHashParameter('path')
+    return path.length === 1 ? path.length : path.length + 1
   }
-  getCookies () {
+  formatCookies () {
     const cookies = []
     for (let key in this.cookies) {
       cookies.push(`${key}=${this.cookies[key]}`)
@@ -86,7 +75,7 @@ class Core {
     const headerOption = []
     headerOption.push(`User-Agent: ${this.getConfigData('userAgent')}`)
     headerOption.push(`Referer: ${this.getConfigData('referer')}`)
-    headerOption.push(`Cookie: ${this.getCookies()}`)
+    headerOption.push(`Cookie: ${this.formatCookies()}`)
     const headers = this.getConfigData('headers')
     if (headers) {
       headers.split('\n').forEach((item) => {
@@ -107,9 +96,9 @@ class Core {
     }
   }
   // 解析 RPC地址 返回验证数据 和地址
-  parseAuth (url) {
+  parseURL (url) {
     const parseURL = new URL(url)
-    let authStr = (parseURL.username !== '') ? `${parseURL.username}:${decodeURI(parseURL.password)}` : null
+    let authStr = parseURL.username ? `${parseURL.username}:${decodeURI(parseURL.password)}` : null
     if (authStr) {
       if (!authStr.includes('token:')) {
         authStr = `Basic ${btoa(authStr)}`
@@ -124,7 +113,7 @@ class Core {
     const path = parseURL.origin + parseURL.pathname
     return {authStr, path, options}
   }
-  // 获取aria2c的版本号用来测试通信
+  // get aria2 version
   getVersion (rpcPath, element) {
     let data = {
       jsonrpc: '2.0',
@@ -132,7 +121,7 @@ class Core {
       id: 1,
       params: []
     }
-    const {authStr, path} = this.parseAuth(rpcPath)
+    const {authStr, path} = this.parseURL(rpcPath)
     if (authStr && authStr.startsWith('token')) {
       data.params.unshift(authStr)
     }
@@ -194,7 +183,7 @@ class Core {
     let rpcDOMList = ''
     rpcList.forEach((rpc) => {
       const rpcDOM = `<a class="g-button-menu rpc-button" href="javascript:void(0);" data-url=${rpc.url}>${rpc.name}</a>`
-      rpcDOMList = rpcDOMList + rpcDOM
+      rpcDOMList += rpcDOM
     })
     document.querySelector('#aria2List').insertAdjacentHTML('afterbegin', rpcDOMList)
   }
@@ -212,12 +201,12 @@ class Core {
       this.showToast('拷贝失败 QAQ', 'failure')
     }
   }
-  // names format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
-  requestCookies (names) {
-    this.sendToBackground('getCookies', names, (value) => { this.cookies = value })
+  // cookies format  [{"url": "http://pan.baidu.com/", "name": "BDUSS"},{"url": "http://pcs.baidu.com/", "name": "pcsett"}]
+  requestCookies (cookies) {
+    this.sendToBackground('getCookies', cookies, (value) => { this.cookies = value })
   }
   aria2RPCMode (rpcPath, fileDownloadInfo) {
-    const {authStr, path, options} = this.parseAuth(rpcPath)
+    const {authStr, path, options} = this.parseURL(rpcPath)
     const prefix = this.getPrefixLength()
     fileDownloadInfo.forEach((file) => {
       const rpcData = {
@@ -226,7 +215,7 @@ class Core {
         id: new Date().getTime(),
         params: [
           [file.link], {
-            out: this.escapeString(file.name.substr(prefix)),
+            out: file.name.substr(prefix),
             header: this.getHeader()
           }
         ]
@@ -255,6 +244,7 @@ class Core {
           body: JSON.stringify(rpcData)
         }
       }
+      // TODO 认证可以模块化
       if (authStr && authStr.startsWith('Basic')) {
         Object.assign(parameter.options.headers, { Authorization: authStr })
       }
@@ -275,13 +265,13 @@ class Core {
     const prefix = this.getPrefixLength()
     const prefixTxt = 'data:text/plain;charset=utf-8,'
     fileDownloadInfo.forEach((file) => {
-      const name = this.escapeString(file.name.substr(prefix))
+      const name = JSON.stringify(file.name.substr(prefix))
       let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${name} ${this.getHeader('aria2Cmd')} ${JSON.stringify(file.link)}`
       let aria2Line = [file.link, this.getHeader('aria2c'), ` out=${name}`].join('\n')
       const md5Check = this.getConfigData('md5Check')
       if (md5Check) {
         aria2CmdLine += ` --checksum=md5=${file.md5}`
-        aria2Line.push(` checksum=md5=${file.md5}`)
+        aria2Line += ` checksum=md5=${file.md5}`
       }
       aria2CmdTxt.push(aria2CmdLine)
       aria2Txt.push(aria2Line)
