@@ -1,0 +1,31 @@
+﻿version: 2
+jobs:
+  build:
+    docker:
+      - image: ubuntu:16.04
+
+    working_directory: ~/BaiduExporter
+
+    branches:
+      only:
+        - dev
+
+    steps:
+      - run: |
+          apt update
+          apt install -y zip openssl gawk vim ca-certificates git ssh
+      - checkout
+
+      # Generate key
+      - run: |
+          echo -e $KEY > /tmp/key.pem
+
+      - run: |
+          .circleci/pack chrome /tmp/key.pem
+
+      - run: |
+          git config --global user.email "press@circleci.com"
+          git config --global user.name "CircleCI"
+          git add .
+          git commit -m "[ci skip] update chrome.crx"
+          git push
