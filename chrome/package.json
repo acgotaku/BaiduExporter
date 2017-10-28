@@ -38,6 +38,7 @@
     "gulp-cssmin": "^0.2.0",
     "gulp-eslint": "^4.0.0",
     "gulp-if": "^2.0.2",
+    "gulp-imagemin": "^3.4.0",
     "gulp-plumber": "^1.1.0",
     "gulp-postcss": "^7.0.0",
     "gulp-sass": "^3.1.0",

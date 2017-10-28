@@ -17,12 +17,16 @@ const autoprefixer = require('autoprefixer')
 const concat = require('gulp-concat')
 const cssmin = require('gulp-cssmin')
 
+const imagemin = require('gulp-imagemin')
+
 const plumber = require('gulp-plumber')
 const sourcemaps = require('gulp-sourcemaps')
 const uglify = require('gulp-uglify')
 const jsTargets = ['./src/js/**/*.js']
 const jsEntries = ['./src/js/*.js']
 const cssTargets = ['./src/css/**/*.scss']
+const imageTargets = ['./src/img/**/*']
+const copyTarget = ['./_locales/**/*', 'background.js', 'manifest.json']
 const config = {
   errorHandler: function (err) {
     console.log(err.toString())
@@ -72,20 +76,32 @@ gulp.task('css', function () {
         browsers: ['last 1 versions']
       })
     ]))
-    .pipe(concat('inject.css'))
+    .pipe(concat('style.css'))
     .pipe(gulpIf(config.env.dev, sourcemaps.write()))
     .pipe(gulpIf(config.env.prod, cssmin()))
     .pipe(gulp.dest('dist/css/'))
 })
-gulp.task('build', ['js', 'css'])
+
+gulp.task('img', function () {
+  return gulp.src(imageTargets)
+    .pipe(plumber(config.plumberConfig))
+    .pipe(imagemin())
+    .pipe(gulp.dest('dist/img/'))
+})
+gulp.task('copy', function () {
+  return gulp.src(copyTarget, { base: '.' })
+    .pipe(gulp.dest('dist/'))
+})
+gulp.task('build', ['js', 'css', 'img', 'copy'])
 
 gulp.task('clean', function () {
   return del([
-    'dist'
+    'dist/**'
   ])
 })
 gulp.task('serve', ['clean'], function () {
   runSequence(['build'], function () {
+    gulp.watch(copyTarget, ['copy'])
     gulp.watch(jsTargets, ['js'])
     gulp.watch(cssTargets, ['css'])
   })

@@ -5,26 +5,21 @@
   },
   "content_scripts": [
     {
-      "js": ["dist/js/inject.js" ],
-      "css": [ "dist/css/inject.css" ],
+      "js": ["js/start.js" ],
+      "css": [ "css/style.css" ],
       "matches": [ "*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*" ],
       "run_at": "document_idle"
-    },
-    {
-      "js": [ "js/fuck_baidu.js" ],
-      "matches": [ "*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*" ],
-      "run_at": "document_start"
     }
   ],
   "default_locale": "en",
   "description": "__MSG_description__",
   "icons": {
-    "32": "images/logo32.png",
-    "16": "images/logo16.png",
-    "48": "images/logo48.png",
-    "128": "images/logo128.png"
+    "32": "img/logo32.png",
+    "16": "img/logo16.png",
+    "48": "img/logo48.png",
+    "128": "img/logo128.png"
   },
-  "web_accessible_resources": [ "dist/js/baidu.js", "js/convert.js" ],
+  "web_accessible_resources": [ "js/baidu.js" ],
   "manifest_version": 2,
   "permissions": [ "cookies", "notifications", "*://pan.baidu.com/", "*://yun.baidu.com/", "*://pcs.baidu.com/", "activeTab", "contextMenus", "storage" ],
   "name": "__MSG_appName__",

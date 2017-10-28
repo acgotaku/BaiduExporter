@@ -5,7 +5,7 @@ if (typeof browser !== 'undefined') {
 function requestAddScript (name) {
   chrome.runtime.sendMessage({
     method: 'addScript',
-    data: `dist/js/${name}.js`
+    data: `js/${name}.js`
   })
 }
 window.addEventListener('message', function (event) {
@@ -27,7 +27,7 @@ window.addEventListener('message', function (event) {
 
 function addBaiduJS () {
   let script = document.createElement('script')
-  script.src = chrome.runtime.getURL('dist/js/baidu.js')
+  script.src = chrome.runtime.getURL('js/baidu.js')
   document.body.appendChild(script)
 }
 
