@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - run: sudo apt update
-      - run: sudo apt-get install -y xxd
+      - run: sudo apt-get install -y vim-common
       - checkout
       - restore_cache:
           keys:
