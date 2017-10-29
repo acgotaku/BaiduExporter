@@ -2,7 +2,7 @@
 jobs:
   build:
     docker:
-      - image: circleci/latest-browsers
+      - image: circleci/node:latest-browsers
 
     working_directory: ~/BaiduExporter
 
