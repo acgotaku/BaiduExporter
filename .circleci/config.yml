@@ -32,6 +32,6 @@ jobs:
       - run: |
           git config --global user.email "press@circleci.com"
           git config --global user.name "CircleCI"
-          git add .
+          git add BaiduExporter.crx
           git commit -m "[ci skip] update chrome.crx"
           git push --set-upstream origin dev
