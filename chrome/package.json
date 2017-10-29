@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "NODE_ENV=development gulp serve",
-    "build": "NODE_ENV=production gulp public"
+    "build": "NODE_ENV=production gulp public",
+    "clean": "gulp clean"
   },
   "repository": {
     "type": "git",

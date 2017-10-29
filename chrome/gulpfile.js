@@ -96,7 +96,7 @@ gulp.task('build', ['js', 'css', 'img', 'copy'])
 
 gulp.task('clean', function () {
   return del([
-    'dist/**'
+    'dist/**/*'
   ])
 })
 gulp.task('serve', ['clean'], function () {

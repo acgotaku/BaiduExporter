@@ -7,7 +7,7 @@ fi
 
 dir=$1
 key=$2
-name=$(basename "$dir")
+name="BaiduExporter"
 crx="$name.crx"
 pub="$name.pub"
 sig="$name.sig"
@@ -38,4 +38,3 @@ sig_len_hex=$(byte_swap $(printf '%08x\n' $(ls -l "$sig" | awk '{print $5}')))
   cat "$pub" "$sig" "$zip"
 ) > "$crx"
 echo "Wrote $crx"
-
