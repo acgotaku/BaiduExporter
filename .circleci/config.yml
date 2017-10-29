@@ -11,6 +11,8 @@ jobs:
         - dev
 
     steps:
+      - run: apt update
+      - run: apt-get install -y xxd
       - checkout
       - restore_cache:
           keys:
