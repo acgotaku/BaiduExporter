@@ -99,7 +99,7 @@ class Home {
   }
 
   getSelected () {
-    window.postMessage({ type: 'getSelected' }, '*')
+    window.postMessage({ type: 'getSelected' }, location.origin)
   }
 }
 

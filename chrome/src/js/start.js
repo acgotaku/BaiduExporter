@@ -9,10 +9,6 @@ function requestAddScript (name) {
   })
 }
 window.addEventListener('message', function (event) {
-  if (event.source !== window) {
-    return
-  }
-
   if (event.data.type === 'yunData') {
     window.yunData = event.data.data
     if (window.location.href.includes('/disk/home')) {

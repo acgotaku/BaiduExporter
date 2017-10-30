@@ -1,30 +1,11 @@
+import Store from './store'
+
 class Core {
   constructor () {
     this.cookies = {}
-    this.defaultRPC = [{name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc'}]
-    this.defaultUserAgent = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia'
-    this.defaultReferer = 'https://pan.baidu.com/disk/home'
-    this.defaultConfigData = {
-      rpcList: this.defaultRPC,
-      configSync: false,
-      md5Check: false,
-      interval: 300,
-      downloadPath: '',
-      userAgent: this.defaultUserAgent,
-      referer: this.defaultReferer,
-      headers: ''
-    }
-    this.configData = {}
-  }
-  getConfigData (key = null) {
-    if (key) {
-      return this.configData[key]
-    } else {
-      return this.configData
-    }
-  }
-  setConfigData (configData) {
-    this.configData = configData
+    Store.on('updateView', (configData) => {
+      this.updateMenu(configData)
+    })
   }
   httpSend ({url, options}, resolve, reject) {
     fetch(url, options).then((response) => {
@@ -39,6 +20,9 @@ class Core {
       reject(err)
     })
   }
+  getConfigData (key = null) {
+    return Store.getConfigData(key)
+  }
   objectToQueryString (obj) {
     const string = Object.keys(obj).map((key) => {
       return `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`
@@ -52,7 +36,7 @@ class Core {
     }, callback)
   }
   showToast (message, type) {
-    window.postMessage({ type: 'showToast', data: { message, type } }, '*')
+    window.postMessage({ type: 'showToast', data: { message, type } }, location.origin)
   }
   getHashParameter (name) {
     const hash = window.location.hash
@@ -177,9 +161,10 @@ class Core {
       rpc.remove()
     })
   }
-  updateMenu () {
+  updateMenu (configData) {
     this.resetMenu()
-    const { rpcList } = this.configData
+    // need update
+    const { rpcList } = configData
     let rpcDOMList = ''
     rpcList.forEach((rpc) => {
       const rpcDOM = `<a class="g-button-menu rpc-button" href="javascript:void(0);" data-url=${rpc.url}>${rpc.name}</a>`

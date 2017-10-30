@@ -14,12 +14,8 @@ class Baidu {
   }
   startListen () {
     window.addEventListener('message', (event) => {
-      if (event.source !== window) {
-        return
-      }
-
       if (event.data.type && event.data.type === 'getSelected') {
-        window.postMessage({ type: 'selected', data: this.context.list.getSelected() }, '*')
+        window.postMessage({ type: 'selected', data: this.context.list.getSelected() }, location.origin)
       }
       if (event.data.type && event.data.type === 'showToast') {
         this.showToast(event.data.data)
@@ -31,7 +27,7 @@ class Baidu {
         const yunData = window.require('disk-system:widget/data/yunData.js').get()
         window.postMessage({ type: 'yunData', data: yunData }, '*')
       } else {
-        window.postMessage({ type: 'yunData', data: window.yunData }, '*')
+        window.postMessage({ type: 'yunData', data: window.yunData }, location.origin)
       }
     }
   }

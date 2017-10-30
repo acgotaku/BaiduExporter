@@ -1,50 +1,19 @@
 import Core from './core'
-
+import Store from './store'
 class Config {
   constructor () {
     this.version = '0.9.7'
     this.updateDate = '2017/09/22'
+    Store.on('updateView', (configData) => {
+      this.updateSetting(configData)
+    })
   }
   init () {
     this.addSettingUI()
     this.addTextExport()
-    if (typeof browser !== 'undefined') {
-      chrome = browser
-      if (!chrome.storage.sync) {
-        chrome.storage.sync = chrome.storage.local
-      }
-    }
-    chrome.storage.sync.get(null, (items) => {
-      for (let key in items) {
-        // console.log(key + items[key])
-        chrome.storage.local.set({key: items[key]}, () => {
-          console.log('chrome first local set: %s, %s', key, items[key])
-        })
-      }
-      this.initSetting()
-    })
+    Store.trigger('initConfigData')
   }
-  saveConfigData (configData) {
-    for (let key in configData) {
-      chrome.storage.local.set({[key]: configData[key]}, () => {
-        console.log('chrome local set: %s, %s', key, configData[key])
-      })
-      if (configData['configSync'] === true) {
-        chrome.storage.sync.set({[key]: configData[key]}, () => {
-          console.log('chrome sync set: %s, %s', key, configData[key])
-        })
-      }
-    }
-  }
-  readConfigData (key = null) {
-    return new Promise((resolve) => {
-      chrome.storage.local.get(key, resolve)
-    })
-  }
-  clearConfigData () {
-    chrome.storage.sync.clear()
-    chrome.storage.local.clear()
-  }
+
   addTextExport () {
     const text = `
       <div id="textMenu" class="modal export-menu">
@@ -189,7 +158,7 @@ class Config {
     const close = settingMenu.querySelector('.modal-close')
     close.addEventListener('click', () => {
       settingMenu.classList.remove('open-o')
-      this.updateSetting()
+      this.resetSetting()
     })
     const addRPC = document.querySelector('#addRPC')
     addRPC.addEventListener('click', () => {
@@ -209,49 +178,34 @@ class Config {
     const message = document.querySelector('#message')
     apply.addEventListener('click', () => {
       this.saveSetting()
-      this.updateSetting()
       message.innerText = '设置已保存'
     })
 
     const reset = document.querySelector('#reset')
     reset.addEventListener('click', () => {
-      this.clearConfigData()
-      this.initSetting().then(() => {
-        message.innerText = '设置已重置'
-      })
+      Store.trigger('clearConfigData')
+      message.innerText = '设置已重置'
     })
 
     const testAria2 = document.querySelector('#testAria2')
     testAria2.addEventListener('click', () => {
-      Core.getVersion(Core.configData.rpcList[0].url, testAria2)
-    })
-  }
-  initSetting () {
-    // TODO promise 没必要两重
-    return new Promise((resolve) => {
-      this.readConfigData().then((items = Core.defaultConfigData) => {
-        Core.setConfigData(Object.assign({}, Core.defaultConfigData, items))
-        this.updateSetting()
-        resolve()
-      })
+      Core.getVersion(Store.getConfigData('rpcList')[0].url, testAria2)
     })
   }
   resetSetting () {
+    const message = document.querySelector('#message')
+    message.innerText = ''
+    const testAria2 = document.querySelector('#testAria2')
+    testAria2.innerText = '测试连接，成功显示版本号'
+  }
+  updateSetting (configData) {
+    const { rpcList, configSync, md5Check, interval, downloadPath, userAgent, referer, headers } = configData
     // reset dom
     document.querySelectorAll('.rpc-s').forEach((rpc, index) => {
       if (index !== 0) {
         rpc.remove()
       }
     })
-    const message = document.querySelector('#message')
-    message.innerText = ''
-    const testAria2 = document.querySelector('#testAria2')
-    testAria2.innerText = '测试连接，成功显示版本号'
-  }
-  updateSetting () {
-    this.resetSetting()
-    Core.updateMenu()
-    const { rpcList, configSync, md5Check, interval, downloadPath, userAgent, referer, headers } = Core.getConfigData()
     rpcList.forEach((rpc, index) => {
       const rpcDOMList = document.querySelectorAll('.rpc-s')
       if (index === 0) {
@@ -280,7 +234,6 @@ class Config {
   }
 
   saveSetting () {
-    // TODO 检测数据来变更DOM
     const rpcDOMList = document.querySelectorAll('.rpc-s')
     const rpcList = Array.from(rpcDOMList).map((rpc) => {
       const name = rpc.querySelector('.name-s').value
@@ -288,7 +241,7 @@ class Config {
       if (name && url) {
         return { name, url }
       }
-    })
+    }).filter(el => el)
     const configSync = document.querySelector('.configSync-s').checked
     const md5Check = document.querySelector('.md5Check-s').checked
     const interval = document.querySelector('.interval-s').value
@@ -307,8 +260,7 @@ class Config {
       referer,
       headers
     }
-    Core.setConfigData(configData)
-    this.saveConfigData(Core.configData)
+    Store.trigger('setConfigData', configData)
   }
 }
 
