@@ -1,8 +1,7 @@
 import Core from './core'
 class Downloader {
-  constructor (listParameter, fileParameter) {
+  constructor (listParameter) {
     this.listParameter = listParameter
-    this.fileParameter = fileParameter
     this.fileDownloadInfo = []
     this.currentTaskId = 0
     this.completedCount = 0
@@ -72,44 +71,9 @@ class Downloader {
       this.reset()
     }
   }
-  getFilesByChunk (files, fidlist) {
-    return new Promise((resolve) => {
-      this.fileParameter.search.fidlist = JSON.stringify(fidlist)
-      fetch(`${window.location.origin}${this.fileParameter.url}${Core.objectToQueryString(this.fileParameter.search)}`, this.fileParameter.options).then((response) => {
-        if (response.ok) {
-          response.json().then((data) => {
-            if (data.errno !== 0) {
-              Core.showToast('未知错误', 'failure')
-              console.log(data)
-              return
-            }
-            data.dlink.forEach((item) => {
-              this.fileDownloadInfo.push({
-                name: files[item.fs_id].path,
-                link: item.dlink,
-                md5: files[item.fs_id].md5
-              })
-              resolve()
-            })
-          })
-        } else {
-          console.log(response)
-        }
-      })
-    })
-  }
+
   getFiles (files) {
-    const chunk = 100
-    const fileArray = Object.keys(files)
-    const fidlist = fileArray.map((el, index) => {
-      return index % chunk === 0 ? fileArray.slice(index, index + chunk) : null
-    }).filter(el => el)
-    const list = fidlist.map(item => this.getFilesByChunk(files, item))
-    return new Promise((resolve) => {
-      Promise.all(list).then(() => {
-        resolve()
-      })
-    })
+    throw new Error('subclass should implement this method!')
   }
 }
 

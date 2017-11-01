@@ -2,56 +2,31 @@ import Core from './lib/core'
 import Config from './lib/config'
 import Downloader from './lib/downloader'
 
-class Home {
+class Home extends Downloader {
   constructor () {
-    Config.init()
-    Core.requestCookies([{ url: 'http://pan.baidu.com/', name: 'BDUSS' }, { url: 'http://pcs.baidu.com/', name: 'pcsett' }])
-    Core.addMenu('home')
-    Core.showToast('初始化成功!', 'success')
-    this.mode = 'RPC'
-    this.rpcURL = 'http://localhost:6800/jsonrpc'
-    this.initDownloader()
-  }
-  initDownloader () {
-    const listSearch = {
+    const search = {
       dir: '',
       channel: 'chunlei',
       clienttype: 0,
       web: 1
     }
     const listParameter = {
-      search: listSearch,
+      search,
       url: `/api/list`,
       options: {
         credentials: 'include',
         method: 'GET'
       }
     }
-    // eslint-disable-next-line no-new-func
-    const sign = btoa(new Function(`return ${window.yunData.sign2}`)()(window.yunData.sign3, window.yunData.sign1))
-
-    const fileSearch = {
-      sign,
-      type: 'dlink',
-      bdstoken: window.yunData.bdstoken,
-      fidlist: '',
-      timestamp: window.yunData.timestamp,
-      channel: 'chunlei',
-      clienttype: 0,
-      web: 1,
-      app_id: 250528
-    }
-
-    const fileParameter = {
-      search: fileSearch,
-      url: `/api/download`,
-      options: {
-        credentials: 'include',
-        method: 'GET'
-      }
-    }
-    this.downloader = new Downloader(listParameter, fileParameter)
+    super(listParameter)
+    Config.init()
+    Core.requestCookies([{ url: 'http://pan.baidu.com/', name: 'BDUSS' }, { url: 'http://pcs.baidu.com/', name: 'pcsett' }])
+    Core.addMenu('home')
+    Core.showToast('初始化成功!', 'success')
+    this.mode = 'RPC'
+    this.rpcURL = 'http://localhost:6800/jsonrpc'
   }
+
   startListen () {
     window.addEventListener('message', (event) => {
       if (event.source !== window) {
@@ -59,7 +34,7 @@ class Home {
       }
 
       if (event.data.type && event.data.type === 'selected') {
-        this.downloader.reset()
+        this.reset()
         const selectedFile = event.data.data
         if (selectedFile.length === 0) {
           Core.showToast('请选择一下你要保存的文件哦', 'failure')
@@ -67,12 +42,12 @@ class Home {
         }
         selectedFile.forEach((item) => {
           if (item.isdir) {
-            this.downloader.addFolder(item.path)
+            this.addFolder(item.path)
           } else {
-            this.downloader.addFile(item)
+            this.addFile(item)
           }
         })
-        this.downloader.start(Core.getConfigData('interval'), (fileDownloadInfo) => {
+        this.start(Core.getConfigData('interval'), (fileDownloadInfo) => {
           if (this.mode === 'RPC') {
             Core.aria2RPCMode(this.rpcURL, fileDownloadInfo)
           }
@@ -100,6 +75,68 @@ class Home {
 
   getSelected () {
     window.postMessage({ type: 'getSelected' }, location.origin)
+  }
+  getFilesByChunk (files, fidlist) {
+    // eslint-disable-next-line no-new-func
+    const sign = btoa(new Function(`return ${window.yunData.sign2}`)()(window.yunData.sign3, window.yunData.sign1))
+
+    const search = {
+      sign,
+      type: 'dlink',
+      bdstoken: window.yunData.bdstoken,
+      fidlist: '',
+      timestamp: window.yunData.timestamp,
+      channel: 'chunlei',
+      clienttype: 0,
+      web: 1,
+      app_id: 250528
+    }
+
+    const fileParameter = {
+      search,
+      url: `/api/download`,
+      options: {
+        credentials: 'include',
+        method: 'GET'
+      }
+    }
+    return new Promise((resolve) => {
+      fileParameter.search.fidlist = JSON.stringify(fidlist)
+      fetch(`${window.location.origin}${fileParameter.url}${Core.objectToQueryString(fileParameter.search)}`, fileParameter.options).then((response) => {
+        if (response.ok) {
+          response.json().then((data) => {
+            if (data.errno !== 0) {
+              Core.showToast('未知错误', 'failure')
+              console.log(data)
+              return
+            }
+            data.dlink.forEach((item) => {
+              this.fileDownloadInfo.push({
+                name: files[item.fs_id].path,
+                link: item.dlink,
+                md5: files[item.fs_id].md5
+              })
+              resolve()
+            })
+          })
+        } else {
+          console.log(response)
+        }
+      })
+    })
+  }
+  getFiles (files) {
+    const chunk = 100
+    const fileArray = Object.keys(files)
+    const fidlist = fileArray.map((el, index) => {
+      return index % chunk === 0 ? fileArray.slice(index, index + chunk) : null
+    }).filter(el => el)
+    const list = fidlist.map(item => this.getFilesByChunk(files, item))
+    return new Promise((resolve) => {
+      Promise.all(list).then(() => {
+        resolve()
+      })
+    })
   }
 }
 
