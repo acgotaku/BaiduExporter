@@ -2,8 +2,8 @@ import Core from './core'
 import Store from './store'
 class Config {
   constructor () {
-    this.version = '0.9.7'
-    this.updateDate = '2017/09/22'
+    this.version = '0.9.9'
+    this.updateDate = '2017/10/02'
     Store.on('updateView', (configData) => {
       this.updateSetting(configData)
     })

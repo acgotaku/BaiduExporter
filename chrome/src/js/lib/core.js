@@ -127,7 +127,7 @@ class Core {
       }
     })
   }
-  addMenu (type) {
+  addMenu (element, position) {
     const menu = `
       <div id="exportMenu" class="g-dropdown-button">
         <a class="g-button">
@@ -141,8 +141,7 @@ class Core {
           <a class="g-button-menu" id="settingButton" href="javascript:void(0);">设置</a>
         </div>
       </div>`
-    const near = document.querySelectorAll('.g-dropdown-button')[3]
-    near.insertAdjacentHTML('afterend', menu)
+    element.insertAdjacentHTML(position, menu)
     const exportMenu = document.querySelector('#exportMenu')
     exportMenu.addEventListener('mouseenter', () => {
       exportMenu.classList.add('button-open')
@@ -163,7 +162,6 @@ class Core {
   }
   updateMenu (configData) {
     this.resetMenu()
-    // need update
     const { rpcList } = configData
     let rpcDOMList = ''
     rpcList.forEach((rpc) => {

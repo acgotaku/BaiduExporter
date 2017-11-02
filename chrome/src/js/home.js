@@ -21,7 +21,7 @@ class Home extends Downloader {
     super(listParameter)
     Config.init()
     Core.requestCookies([{ url: 'http://pan.baidu.com/', name: 'BDUSS' }, { url: 'http://pcs.baidu.com/', name: 'pcsett' }])
-    Core.addMenu('home')
+    Core.addMenu(document.querySelectorAll('.g-dropdown-button')[3], 'afterend')
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
     this.rpcURL = 'http://localhost:6800/jsonrpc'
@@ -76,67 +76,16 @@ class Home extends Downloader {
   getSelected () {
     window.postMessage({ type: 'getSelected' }, location.origin)
   }
-  getFilesByChunk (files, fidlist) {
-    // eslint-disable-next-line no-new-func
-    const sign = btoa(new Function(`return ${window.yunData.sign2}`)()(window.yunData.sign3, window.yunData.sign1))
 
-    const search = {
-      sign,
-      type: 'dlink',
-      bdstoken: window.yunData.bdstoken,
-      fidlist: '',
-      timestamp: window.yunData.timestamp,
-      channel: 'chunlei',
-      clienttype: 0,
-      web: 1,
-      app_id: 250528
-    }
-
-    const fileParameter = {
-      search,
-      url: `/api/download`,
-      options: {
-        credentials: 'include',
-        method: 'GET'
-      }
-    }
-    return new Promise((resolve) => {
-      fileParameter.search.fidlist = JSON.stringify(fidlist)
-      fetch(`${window.location.origin}${fileParameter.url}${Core.objectToQueryString(fileParameter.search)}`, fileParameter.options).then((response) => {
-        if (response.ok) {
-          response.json().then((data) => {
-            if (data.errno !== 0) {
-              Core.showToast('未知错误', 'failure')
-              console.log(data)
-              return
-            }
-            data.dlink.forEach((item) => {
-              this.fileDownloadInfo.push({
-                name: files[item.fs_id].path,
-                link: item.dlink,
-                md5: files[item.fs_id].md5
-              })
-              resolve()
-            })
-          })
-        } else {
-          console.log(response)
-        }
-      })
-    })
-  }
   getFiles (files) {
-    const chunk = 100
-    const fileArray = Object.keys(files)
-    const fidlist = fileArray.map((el, index) => {
-      return index % chunk === 0 ? fileArray.slice(index, index + chunk) : null
-    }).filter(el => el)
-    const list = fidlist.map(item => this.getFilesByChunk(files, item))
-    return new Promise((resolve) => {
-      Promise.all(list).then(() => {
-        resolve()
+    for (let key in files) {
+      this.fileDownloadInfo.push({
+        name: files[key].path,
+        link: `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=250528&path=${encodeURIComponent(files[key].path)}`,
+        md5: files[key].md5
       })
-    })
+    }
+    return Promise.resolve()
   }
 }
 
