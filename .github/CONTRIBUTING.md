@@ -8,7 +8,7 @@ Before contributing to BaiduExporter, lease make sure to take a moment and read 
 
 ## Development Setup
 
-Please make sure your [Node.js](http://nodejs.org) **version 8+**.
+Please make sure your [Node.js](http://nodejs.org) **version 6+**.
 
 After cloning the repo, run:
 
