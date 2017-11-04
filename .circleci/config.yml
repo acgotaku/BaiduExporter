@@ -21,6 +21,7 @@ jobs:
             - node-chache-{{ .Branch }}-
             - node-chache-
       - run: npm --prefix chrome install
+      - run: npm rebuild node-sass --force
       - save_cache:
           key: node-chache-{{ .Branch }}-{{ checksum "chrome/package-lock.json" }}
           paths:
