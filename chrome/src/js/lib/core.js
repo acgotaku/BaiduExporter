@@ -24,10 +24,9 @@ class Core {
     return Store.getConfigData(key)
   }
   objectToQueryString (obj) {
-    const string = Object.keys(obj).map((key) => {
+    return Object.keys(obj).map((key) => {
       return `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`
     }).join('&')
-    return `?${string}`
   }
   sendToBackground (method, data, callback) {
     chrome.runtime.sendMessage({
@@ -43,10 +42,6 @@ class Core {
     const paramsString = hash.substr(1)
     const searchParams = new URLSearchParams(paramsString)
     return searchParams.get(name)
-  }
-  getPrefixLength () {
-    const path = this.getHashParameter('list/path') || this.getHashParameter('path')
-    return path.length === 1 ? path.length : path.length + 1
   }
   formatCookies () {
     const cookies = []
@@ -127,6 +122,7 @@ class Core {
       }
     })
   }
+  // z-index resolve share page show problem
   addMenu (element, position) {
     const menu = `
       <div id="exportMenu" class="g-dropdown-button">
@@ -136,7 +132,7 @@ class Core {
             <span class="text">导出下载</span>
           </span>
         </a>
-        <div id="aria2List" class="menu">
+        <div id="aria2List" class="menu" style="z-index:50;">
           <a class="g-button-menu" id="aria2Text" href="javascript:void(0);">文本导出</a>
           <a class="g-button-menu" id="settingButton" href="javascript:void(0);">设置</a>
         </div>
@@ -190,7 +186,6 @@ class Core {
   }
   aria2RPCMode (rpcPath, fileDownloadInfo) {
     const {authStr, path, options} = this.parseURL(rpcPath)
-    const prefix = this.getPrefixLength()
     fileDownloadInfo.forEach((file) => {
       const rpcData = {
         jsonrpc: '2.0',
@@ -198,7 +193,7 @@ class Core {
         id: new Date().getTime(),
         params: [
           [file.link], {
-            out: file.name.substr(prefix),
+            out: file.name,
             header: this.getHeader()
           }
         ]
@@ -245,10 +240,9 @@ class Core {
     const aria2Txt = []
     const idmTxt = []
     const downloadLinkTxt = []
-    const prefix = this.getPrefixLength()
     const prefixTxt = 'data:text/plain;charset=utf-8,'
     fileDownloadInfo.forEach((file) => {
-      const name = JSON.stringify(file.name.substr(prefix))
+      const name = JSON.stringify(file.name)
       let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${name} ${this.getHeader('aria2Cmd')} ${JSON.stringify(file.link)}`
       let aria2Line = [file.link, this.getHeader('aria2c'), ` out=${name}`].join('\n')
       const md5Check = this.getConfigData('md5Check')

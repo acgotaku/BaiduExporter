@@ -76,11 +76,15 @@ class Home extends Downloader {
   getSelected () {
     window.postMessage({ type: 'getSelected' }, location.origin)
   }
-
+  getPrefixLength () {
+    const path = Core.getHashParameter('list/path') || Core.getHashParameter('path')
+    return path.length === 1 ? path.length : path.length + 1
+  }
   getFiles (files) {
+    const prefix = this.getPrefixLength()
     for (let key in files) {
       this.fileDownloadInfo.push({
-        name: files[key].path,
+        name: files[key].path.substr(prefix),
         link: `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=250528&path=${encodeURIComponent(files[key].path)}`,
         md5: files[key].md5
       })

@@ -25,9 +25,9 @@ class Baidu {
       // TODO 分析效果
       if (window.yunData.sign2) {
         const yunData = window.require('disk-system:widget/data/yunData.js').get()
-        window.postMessage({ type: 'yunData', data: yunData }, '*')
+        window.postMessage({ type: 'yunData', data: yunData }, location.origin)
       } else {
-        window.postMessage({ type: 'yunData', data: window.yunData }, location.origin)
+        window.postMessage({ type: 'yunData', data: JSON.parse(JSON.stringify(window.yunData)) }, location.origin)
       }
     }
   }
