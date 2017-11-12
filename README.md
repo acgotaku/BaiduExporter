@@ -1,7 +1,5 @@
 # BaiduExporter
 
-## 因为要获取Cookies，无法单纯使用脚本实现，必须插件模式加载。
-
 可以方便的把百度网盘的下载地址导出到 aria2/aria2-rpc，支持 YAAW。
 
 ## Usage
@@ -26,6 +24,10 @@
     1. Open [about:flags](about:flags), Check `Enable extension developer features`, Restart.
     2. Clone repo to a local read-write folder.
     3. Click **More(...)** -> **Extensions** -> **Load extension**, navigate to the `chrome` folder, click OK.
+
+## Contribution
+
+Please make sure to read the [Contributing Guide](https://github.com/acgotaku/BaiduExporter/blob/dev/.github/CONTRIBUTING.md) before making a pull request.
 
 ## Issue 须知
 

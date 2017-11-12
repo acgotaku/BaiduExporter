@@ -1,6 +1,6 @@
 {
     "appName": {
-        "message": "Exporter"
+        "message": "BaiduExporter"
     },
     "description": {
         "message": "Assistant to export download links to aria2/aria2-rpc"
