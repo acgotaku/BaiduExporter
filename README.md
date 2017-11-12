@@ -1,4 +1,4 @@
-# BaiduExporter
+# BaiduExporter (备份)
 
 ## 因为要获取Cookies，无法单纯使用脚本实现，必须插件模式加载。
 
