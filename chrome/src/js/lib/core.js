@@ -108,7 +108,8 @@ class Core {
       url: path,
       options: {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        headers: {},
       }
     }
     if (authStr && authStr.startsWith('Basic')) {
@@ -219,7 +220,8 @@ class Core {
         url: path,
         options: {
           method: 'POST',
-          body: JSON.stringify(rpcData)
+          body: JSON.stringify(rpcData),
+          headers: {},
         }
       }
       // TODO 认证可以模块化
