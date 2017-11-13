@@ -185,9 +185,9 @@ class Share extends Downloader {
     })
   }
   getPrefixLength () {
-    const path = Core.getHashParameter('list/path') || Core.getHashParameter('path')
+    const path = Core.getHashParameter('list/path') || Core.getHashParameter('path') || ''
     // solution for example :链接:http://pan.baidu.com/s/1hqOIdUk 密码:qat2
-    if (path.length === 1 && path !== window.yunData.PATH) {
+    if (path !== window.yunData.PATH) {
       return window.yunData.PATH.slice(0, window.yunData.PATH.lastIndexOf('/')).length + 1
     } else {
       return path.length === 1 ? path.length : path.length + 1
