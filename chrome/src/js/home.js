@@ -12,7 +12,7 @@ class Home extends Downloader {
     }
     const listParameter = {
       search,
-      url: `/api/list`,
+      url: `/api/list?`,
       options: {
         credentials: 'include',
         method: 'GET'
