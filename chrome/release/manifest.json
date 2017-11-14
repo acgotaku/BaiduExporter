@@ -1,0 +1,29 @@
+{
+  "background": {
+    "scripts": [ "background.js" ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "js": ["js/start.js" ],
+      "css": [ "css/style.css" ],
+      "matches": [ "*://pan.baidu.com/s/*", "*://yun.baidu.com/s/*", "*://pan.baidu.com/disk/home*", "*://yun.baidu.com/share/link*", "*://pan.baidu.com/share/link*", "*://yun.baidu.com/disk/home*", "*://pan.baidu.com/pcloud/album/*", "*://yun.baidu.com/pcloud/album/*" ],
+      "run_at": "document_idle"
+    }
+  ],
+  "default_locale": "en",
+  "description": "__MSG_description__",
+  "icons": {
+    "32": "img/logo32.png",
+    "16": "img/logo16.png",
+    "48": "img/logo48.png",
+    "128": "img/logo128.png"
+  },
+  "web_accessible_resources": [ "js/baidu.js" ],
+  "manifest_version": 2,
+  "permissions": [ "cookies", "notifications", "*://pan.baidu.com/", "*://yun.baidu.com/", "*://pcs.baidu.com/", "activeTab", "contextMenus", "storage" ],
+  "name": "__MSG_appName__",
+  "update_url": "https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/chrome/updates.xml",
+  "author": "acgotaku",
+  "version": "0.9.10"
+}
