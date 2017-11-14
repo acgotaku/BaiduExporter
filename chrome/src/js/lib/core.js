@@ -92,6 +92,23 @@ class Core {
     const path = parseURL.origin + parseURL.pathname
     return {authStr, path, options}
   }
+  generateParameter (authStr, path, data) {
+    if (authStr && authStr.startsWith('token')) {
+      data.params.unshift(authStr)
+    }
+    const parameter = {
+      url: path,
+      options: {
+        method: 'POST',
+        headers: {},
+        body: JSON.stringify(data)
+      }
+    }
+    if (authStr && authStr.startsWith('Basic')) {
+      parameter.options.headers['Authorization'] = authStr
+    }
+    return parameter
+  }
   // get aria2 version
   getVersion (rpcPath, element) {
     let data = {
@@ -101,20 +118,7 @@ class Core {
       params: []
     }
     const {authStr, path} = this.parseURL(rpcPath)
-    if (authStr && authStr.startsWith('token')) {
-      data.params.unshift(authStr)
-    }
-    const parameter = {
-      url: path,
-      options: {
-        method: 'POST',
-        body: JSON.stringify(data)
-      }
-    }
-    if (authStr && authStr.startsWith('Basic')) {
-      Object.assign(parameter.options.headers, { Authorization: authStr })
-    }
-    this.sendToBackground('rpcVersion', parameter, (version) => {
+    this.sendToBackground('rpcVersion', this.generateParameter(authStr, path, data), (version) => {
       if (version) {
         element.innerText = `Aria2版本为: ${version}`
       } else {
@@ -212,21 +216,7 @@ class Core {
           rpcOption[key] = options[key]
         }
       }
-      if (authStr && authStr.startsWith('token')) {
-        rpcData.params.unshift(authStr)
-      }
-      const parameter = {
-        url: path,
-        options: {
-          method: 'POST',
-          body: JSON.stringify(rpcData)
-        }
-      }
-      // TODO 认证可以模块化
-      if (authStr && authStr.startsWith('Basic')) {
-        Object.assign(parameter.options.headers, { Authorization: authStr })
-      }
-      this.sendToBackground('rpcData', parameter, (success) => {
+      this.sendToBackground('rpcData', this.generateParameter(authStr, path, rpcData), (success) => {
         if (success) {
           this.showToast('下载成功!赶紧去看看吧~', 'success')
         } else {

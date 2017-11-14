@@ -25,6 +25,8 @@ class Share extends Downloader {
     Config.init()
     Core.requestCookies([{ url: 'http://pan.baidu.com/', name: 'BDUSS' }, { url: 'http://pcs.baidu.com/', name: 'pcsett' }])
     Core.addMenu(document.querySelector('a[data-button-id="b1"]'), 'beforebegin')
+    // fix share button position
+    document.querySelector('.bar').style.position = 'absolute'
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
     this.rpcURL = 'http://localhost:6800/jsonrpc'
