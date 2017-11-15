@@ -16,7 +16,7 @@
 ## Install
 
 * Chrome : Click **Settings** -> **Extensions**, drag `BaiduExporter.crx` file to the page, install it, or check **Developer mode** -> **Load unpacked extension**, navigate to the `chrome/release` folder.
-
+* Firefox : Open **about:debugging** in Firefox, click "Load Temporary Add-on" and navigate to the `chrome/release` folder, select `manifest.json`, click OK.
 ## Contribution
 
 Please make sure to read the [Contributing Guide](https://github.com/acgotaku/BaiduExporter/blob/dev/.github/CONTRIBUTING.md) before making a pull request.
