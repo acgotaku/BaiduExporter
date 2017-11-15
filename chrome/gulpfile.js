@@ -18,6 +18,8 @@ const concat = require('gulp-concat')
 const cssmin = require('gulp-cssmin')
 
 const imagemin = require('gulp-imagemin')
+const mozjpeg = require('imagemin-mozjpeg')
+const pngquant = require('imagemin-pngquant')
 
 const plumber = require('gulp-plumber')
 const sourcemaps = require('gulp-sourcemaps')
@@ -85,7 +87,12 @@ gulp.task('css', function () {
 gulp.task('img', function () {
   return gulp.src(imageTargets)
     .pipe(plumber(config.plumberConfig))
-    .pipe(imagemin())
+    .pipe(imagemin([
+      pngquant(),
+      mozjpeg(),
+      imagemin.svgo()], {
+      verbose: true
+    }))
     .pipe(gulp.dest('dist/img/'))
 })
 gulp.task('copy', function () {

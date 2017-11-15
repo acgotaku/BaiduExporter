@@ -47,6 +47,8 @@
     "gulp-stylelint": "^5.0.0",
     "gulp-tap": "^1.0.1",
     "gulp-uglify": "^3.0.0",
+    "imagemin-mozjpeg": "^6.0.0",
+    "imagemin-pngquant": "^5.0.1",
     "run-sequence": "^2.2.0",
     "stylelint": "^8.1.1",
     "stylelint-config-sass-guidelines": "^3.1.0"
