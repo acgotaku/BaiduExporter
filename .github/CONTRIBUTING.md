@@ -1,6 +1,6 @@
 # BaiduExporter Contributing Guide
 
-Before contributing to BaiduExporter, lease make sure to take a moment and read through the following guidelines.
+Before contributing to BaiduExporter, please make sure to take a moment and read through the following guidelines.
 
 - [JavaScript Standard Style](https://standardjs.com/)
 - [Sass Guidelines](https://sass-guidelin.es/)

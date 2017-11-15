@@ -15,7 +15,7 @@
 
 ## Install
 
-* Chrome : Click **Settings** -> **Extensions**, drag `BaiduExporter.crx` file to the page, install it.
+* Chrome : Click **Settings** -> **Extensions**, drag `BaiduExporter.crx` file to the page, install it, or check **Developer mode** -> **Load unpacked extension**, navigate to the `chrome/release` folder.
 
 ## Contribution
 
