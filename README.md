@@ -1,4 +1,4 @@
-# BaiduExporter
+# BaiduExporter [![Build Status](https://img.shields.io/circleci/project/acgotaku/BaiduExporter/master.svg)](https://circleci.com/gh/acgotaku/BaiduExporter/tree/master)
 
 可以方便的把百度网盘的下载地址导出到 aria2/aria2-rpc，支持 YAAW。
 
@@ -19,7 +19,7 @@
 * Firefox : Open **about:debugging** in Firefox, click "Load Temporary Add-on" and navigate to the `chrome/release` folder, select `manifest.json`, click OK.
 ## Contribution
 
-Please make sure to read the [Contributing Guide](https://github.com/acgotaku/BaiduExporter/blob/dev/.github/CONTRIBUTING.md) before making a pull request.
+Please make sure to read the [Contributing Guide](https://github.com/acgotaku/BaiduExporter/blob/master/.github/CONTRIBUTING.md) before making a pull request.
 
 ## Issue 须知
 
