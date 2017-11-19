@@ -20,7 +20,7 @@ class Home extends Downloader {
     }
     super(listParameter)
     Config.init()
-    Core.requestCookies([{ url: 'http://pan.baidu.com/', name: 'BDUSS' }, { url: 'http://pcs.baidu.com/', name: 'pcsett' }])
+    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'pcsett' }])
     Core.addMenu(document.querySelectorAll('.g-dropdown-button')[3], 'afterend')
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
