@@ -1,4 +1,5 @@
 import Core from './core'
+
 class Downloader {
   constructor (listParameter) {
     this.listParameter = listParameter

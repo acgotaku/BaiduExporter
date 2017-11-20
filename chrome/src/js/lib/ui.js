@@ -1,11 +1,13 @@
 import Core from './core'
 import Store from './store'
-class Config {
+
+class UI {
   constructor () {
     this.version = '0.9.10'
     this.updateDate = '2017/10/02'
     Store.on('updateView', (configData) => {
       this.updateSetting(configData)
+      this.updateMenu(configData)
     })
   }
   init () {
@@ -13,7 +15,50 @@ class Config {
     this.addTextExport()
     Store.trigger('initConfigData')
   }
-
+  // z-index resolve share page show problem
+  addMenu (element, position) {
+    const menu = `
+      <div id="exportMenu" class="g-dropdown-button">
+        <a class="g-button">
+          <span class="g-button-right">
+            <em class="icon icon-download"></em>
+            <span class="text">导出下载</span>
+          </span>
+        </a>
+        <div id="aria2List" class="menu" style="z-index:50;">
+          <a class="g-button-menu" id="aria2Text" href="javascript:void(0);">文本导出</a>
+          <a class="g-button-menu" id="settingButton" href="javascript:void(0);">设置</a>
+        </div>
+      </div>`
+    element.insertAdjacentHTML(position, menu)
+    const exportMenu = document.querySelector('#exportMenu')
+    exportMenu.addEventListener('mouseenter', () => {
+      exportMenu.classList.add('button-open')
+    })
+    exportMenu.addEventListener('mouseleave', () => {
+      exportMenu.classList.remove('button-open')
+    })
+    const settingButton = document.querySelector('#settingButton')
+    const settingMenu = document.querySelector('#settingMenu')
+    settingButton.addEventListener('click', () => {
+      settingMenu.classList.add('open-o')
+    })
+  }
+  resetMenu () {
+    document.querySelectorAll('.rpc-button').forEach((rpc) => {
+      rpc.remove()
+    })
+  }
+  updateMenu (configData) {
+    this.resetMenu()
+    const { rpcList } = configData
+    let rpcDOMList = ''
+    rpcList.forEach((rpc) => {
+      const rpcDOM = `<a class="g-button-menu rpc-button" href="javascript:void(0);" data-url=${rpc.url}>${rpc.name}</a>`
+      rpcDOMList += rpcDOM
+    })
+    document.querySelector('#aria2List').insertAdjacentHTML('afterbegin', rpcDOMList)
+  }
   addTextExport () {
     const text = `
       <div id="textMenu" class="modal export-menu">
@@ -264,4 +309,4 @@ class Config {
   }
 }
 
-export default new Config()
+export default new UI()

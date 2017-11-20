@@ -1,5 +1,5 @@
 import Core from './lib/core'
-import Config from './lib/config'
+import UI from './lib/ui'
 import Downloader from './lib/downloader'
 
 class Share extends Downloader {
@@ -22,9 +22,9 @@ class Share extends Downloader {
       }
     }
     super(listParameter)
-    Config.init()
+    UI.init()
+    UI.addMenu(document.querySelector('a[data-button-id="b1"]'), 'beforebegin')
     Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'pcsett' }])
-    Core.addMenu(document.querySelector('a[data-button-id="b1"]'), 'beforebegin')
     // fix export button position
     document.querySelector('.bar').style.position = 'absolute'
     Core.showToast('初始化成功!', 'success')

@@ -3,9 +3,6 @@ import Store from './store'
 class Core {
   constructor () {
     this.cookies = {}
-    Store.on('updateView', (configData) => {
-      this.updateMenu(configData)
-    })
   }
   httpSend ({url, options}, resolve, reject) {
     fetch(url, options).then((response) => {
@@ -125,50 +122,6 @@ class Core {
         element.innerText = '错误,请查看是否开启Aria2'
       }
     })
-  }
-  // z-index resolve share page show problem
-  addMenu (element, position) {
-    const menu = `
-      <div id="exportMenu" class="g-dropdown-button">
-        <a class="g-button">
-          <span class="g-button-right">
-            <em class="icon icon-download"></em>
-            <span class="text">导出下载</span>
-          </span>
-        </a>
-        <div id="aria2List" class="menu" style="z-index:50;">
-          <a class="g-button-menu" id="aria2Text" href="javascript:void(0);">文本导出</a>
-          <a class="g-button-menu" id="settingButton" href="javascript:void(0);">设置</a>
-        </div>
-      </div>`
-    element.insertAdjacentHTML(position, menu)
-    const exportMenu = document.querySelector('#exportMenu')
-    exportMenu.addEventListener('mouseenter', () => {
-      exportMenu.classList.add('button-open')
-    })
-    exportMenu.addEventListener('mouseleave', () => {
-      exportMenu.classList.remove('button-open')
-    })
-    const settingButton = document.querySelector('#settingButton')
-    const settingMenu = document.querySelector('#settingMenu')
-    settingButton.addEventListener('click', () => {
-      settingMenu.classList.add('open-o')
-    })
-  }
-  resetMenu () {
-    document.querySelectorAll('.rpc-button').forEach((rpc) => {
-      rpc.remove()
-    })
-  }
-  updateMenu (configData) {
-    this.resetMenu()
-    const { rpcList } = configData
-    let rpcDOMList = ''
-    rpcList.forEach((rpc) => {
-      const rpcDOM = `<a class="g-button-menu rpc-button" href="javascript:void(0);" data-url=${rpc.url}>${rpc.name}</a>`
-      rpcDOMList += rpcDOM
-    })
-    document.querySelector('#aria2List').insertAdjacentHTML('afterbegin', rpcDOMList)
   }
   copyText (text) {
     const input = document.createElement('textarea')

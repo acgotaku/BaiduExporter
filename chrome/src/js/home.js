@@ -1,5 +1,5 @@
 import Core from './lib/core'
-import Config from './lib/config'
+import UI from './lib/ui'
 import Downloader from './lib/downloader'
 
 class Home extends Downloader {
@@ -19,9 +19,9 @@ class Home extends Downloader {
       }
     }
     super(listParameter)
-    Config.init()
+    UI.init()
+    UI.addMenu(document.querySelectorAll('.g-dropdown-button')[3], 'afterend')
     Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'pcsett' }])
-    Core.addMenu(document.querySelectorAll('.g-dropdown-button')[3], 'afterend')
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
     this.rpcURL = 'http://localhost:6800/jsonrpc'
