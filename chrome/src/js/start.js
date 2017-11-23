@@ -13,8 +13,6 @@ window.addEventListener('message', function (event) {
     window.yunData = event.data.data
     if (window.location.href.includes('/disk/home')) {
       requestAddScript('home')
-    } else if (window.location.href.includes('/pcloud/album/')) {
-      requestAddScript('album')
     } else {
       requestAddScript('share')
     }
@@ -28,7 +26,9 @@ function addBaiduJS () {
 }
 
 if (document.readyState === 'complete') {
+  // run on firefox
   addBaiduJS()
 } else {
+  // run on chrome
   window.addEventListener('load', addBaiduJS)
 }
