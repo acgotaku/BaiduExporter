@@ -201,7 +201,7 @@ class Core {
     })
     document.querySelector('#aria2CmdTxt').value = `${aria2CmdTxt.join('\n')}`
     document.querySelector('#aria2Txt').href = `${prefixTxt}${encodeURIComponent(aria2Txt.join('\n'))}`
-    document.querySelector('#idmTxt').href = `${prefixTxt}${encodeURIComponent(idmTxt.join('\r\n'))}`
+    document.querySelector('#idmTxt').href = `${prefixTxt}${encodeURIComponent(idmTxt.join('\r\n')+\r\n)}`
     document.querySelector('#downloadLinkTxt').href = `${prefixTxt}${encodeURIComponent(downloadLinkTxt.join('\n'))}`
     document.querySelector('#copyDownloadLinkTxt').dataset.link = downloadLinkTxt.join('\n')
   }
