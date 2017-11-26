@@ -195,7 +195,7 @@ class Core {
       }
       aria2CmdTxt.push(aria2CmdLine)
       aria2Txt.push(aria2Line)
-      const idmLine = ['<', file.link, this.getHeader('idm'), `out=${name}`, '>\r\n'].join('\r\n')
+      const idmLine = ['<', file.link, this.getHeader('idm'), `out=${name}`, '>'].join('\r\n')
       idmTxt.push(idmLine)
       downloadLinkTxt.push(file.link)
     })
