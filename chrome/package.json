@@ -1,6 +1,6 @@
 {
   "name": "baiduexporter",
-  "version": "0.9.10",
+  "version": "1.0.0",
   "description": "Assistant for Baidu to export download links to aria2/aria2-rpc",
   "main": "background.js",
   "scripts": {
