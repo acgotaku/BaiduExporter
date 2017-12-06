@@ -192,7 +192,7 @@ class Share extends Downloader {
     if (path !== window.yunData.PATH) {
       return window.yunData.PATH.slice(0, window.yunData.PATH.lastIndexOf('/')).length + 1
     } else {
-      return path.length === 1 ? path.length : path.length + 1
+      return path.length === 1 ? 1 : path.length + 1
     }
   }
   getFiles (files, captcha) {
