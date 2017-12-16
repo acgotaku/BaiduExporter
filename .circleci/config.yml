@@ -24,8 +24,6 @@ jobs:
             - chrome/node_modules/
       - persist_to_workspace:
           root: ~/BaiduExporter
-          paths:
-            - chrome
 
   build:
     <<: *defaults
