@@ -25,9 +25,6 @@ jobs:
 
   build:
     <<: *defaults
-    branches:
-      only:
-        - master
     steps:
       - attach_workspace:
           at: ~/BaiduExporter
@@ -64,6 +61,10 @@ workflows:
       - build:
           requires:
             - install
+          filters:
+            branches:
+              only:
+                - master
       - test:
           requires:
             - install
