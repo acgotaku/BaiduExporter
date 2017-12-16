@@ -1,7 +1,7 @@
 version: 2
 
 defaults: &defaults
-  working_directory: ~/BaiduExporter
+  working_directory: ~/project/BaiduExporter
   docker:
     - image: circleci/node:6-browsers
 
@@ -19,22 +19,22 @@ jobs:
           paths:
             - chrome/node_modules/
       - persist_to_workspace:
-          root: ~/BaiduExporter
+          root: ~/project
           paths:
-            - chrome
+            - BaiduExporter
 
   build:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/BaiduExporter
+          at: ~/project
       - run: sudo apt update
       # add xxd dependency
       - run: sudo apt-get install -y vim-common
       - run: sudo apt-get install -y libpng-dev
       - run: npm --prefix chrome/ run build
       - run: echo -e $KEY > /tmp/key.pem
-      - run: chrome/pack chrome/dist/ /tmp/key.pem
+      - run: .circleci/pack chrome/dist/ /tmp/key.pem
       - run: rm -rf chrome/release/
       - run: mv chrome/dist/ chrome/release/
       - run:
@@ -43,7 +43,7 @@ jobs:
       - run: |
           git config --global user.email "acgotaku311@gmail.com"
           git config --global user.name "acgotaku311"
-          git add chrome/BaiduExporter.crx
+          git add BaiduExporter.crx
           git add chrome/release/
           git commit -m "[ci skip] update chrome.crx and release"
           git push --set-upstream origin master
@@ -52,7 +52,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/BaiduExporter
+          at: ~/project
       - run:
          name: check PR
          command: |
@@ -66,12 +66,12 @@ workflows:
     jobs:
       - install
       - build:
+          requires:
+            - install
           filters:
             branches:
               only:
                 - master
-          requires:
-            - install
       - test:
           requires:
             - install
