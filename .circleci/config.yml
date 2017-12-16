@@ -9,10 +9,6 @@ jobs:
   install:
     <<: *defaults
     steps:
-      - run: sudo apt update
-      # add xxd dependency
-      - run: sudo apt-get install -y vim-common
-      - run: sudo apt-get install -y libpng-dev
       - checkout
       - restore_cache:
           keys:
@@ -32,6 +28,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
+      - run: sudo apt update
+      # add xxd dependency
+      - run: sudo apt-get install -y vim-common
+      - run: sudo apt-get install -y libpng-dev
       - run: npm --prefix chrome/ run build
       - run: echo -e $KEY > /tmp/key.pem
       - run: .circleci/pack chrome/dist/ /tmp/key.pem
