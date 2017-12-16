@@ -66,12 +66,12 @@ workflows:
     jobs:
       - install
       - build:
-          requires:
-            - install
           filters:
             branches:
               only:
                 - master
+          requires:
+            - install
       - test:
           requires:
             - install
