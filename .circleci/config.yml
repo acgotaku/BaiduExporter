@@ -45,12 +45,12 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/BaiduExporter/chrome
+          at: ~/BaiduExporter
       - run:
          name: check PR
          command: |
            if [[ -z $CI_PULL_REQUEST ]]; then
-             npm run test
+             npm --prefix chrome/ run test
            fi
 
 workflows:
