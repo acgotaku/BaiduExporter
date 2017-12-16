@@ -18,7 +18,7 @@ window.addEventListener('message', function (event) {
     }
   }
 })
-
+hello
 function addBaiduJS () {
   let script = document.createElement('script')
   script.src = chrome.runtime.getURL('js/baidu.js')
