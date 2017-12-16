@@ -22,6 +22,10 @@ jobs:
           key: node-chache-{{ .Branch }}-{{ checksum "chrome/package-lock.json" }}
           paths:
             - chrome/node_modules/
+      - persist_to_workspace:
+          root: ~/BaiduExporter
+          paths:
+            - chrome
 
   build:
     <<: *defaults
