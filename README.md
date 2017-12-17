@@ -34,6 +34,7 @@ Please make sure to read the [Contributing Guide](https://github.com/acgotaku/Ba
 不想每次开启Chrome都提示禁用请看这个帖子：[Guide on Packaging and Import Baidu Exporter to Chrome](https://hencolle.com/2016/10/16/baidu_exporter/)
 
 ## License
+23333
 
 ![GPLv3](https://www.gnu.org/graphics/gplv3-127x51.png)
 
