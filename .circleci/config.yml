@@ -28,10 +28,13 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - run: sudo apt update
-      # add xxd dependency
-      - run: sudo apt-get install -y vim-common
-      - run: sudo apt-get install -y libpng-dev
+
+      - run:
+          name: install dependency
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y vim-common
+            sudo apt-get install -y libpng-dev
       - run: npm --prefix chrome/ run build
       - run: echo -e $KEY > /tmp/key.pem
       - run: .circleci/pack chrome/dist/ /tmp/key.pem
