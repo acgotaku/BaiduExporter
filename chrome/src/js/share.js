@@ -11,7 +11,8 @@ class Share extends Downloader {
       shareid: window.yunData.SHARE_ID,
       channel: 'chunlei',
       clienttype: 0,
-      web: 1
+      web: 1,
+      page: 1
     }
     const listParameter = {
       search,

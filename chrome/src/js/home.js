@@ -8,7 +8,8 @@ class Home extends Downloader {
       dir: '',
       channel: 'chunlei',
       clienttype: 0,
-      web: 1
+      web: 1,
+      page: 1
     }
     const listParameter = {
       search,
