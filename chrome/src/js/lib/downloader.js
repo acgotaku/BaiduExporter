@@ -66,16 +66,16 @@ class Downloader {
               this.files[item.fs_id] = item
             }
           })
-          
+
           if (data.list.length < 100) {
-             setTimeout(() => this.getNextFile(taskId), this.interval)
-          }else {
-             this.listParameter.search.page++
-             this.fetchDir(dir, taskId)
+            setTimeout(() => this.getNextFile(taskId), this.interval)
+          } else {
+            this.listParameter.search.page++
+            this.fetchDir(dir, taskId)
           }
         })
       } else {
-          console.log(response)
+        console.log(response)
       }
     }).catch((err) => {
       Core.showToast('网络请求失败', 'failure')
