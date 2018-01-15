@@ -51,7 +51,9 @@ class Core {
     const headerOption = []
     headerOption.push(`User-Agent: ${this.getConfigData('userAgent')}`)
     headerOption.push(`Referer: ${this.getConfigData('referer')}`)
-    headerOption.push(`Cookie: ${this.formatCookies()}`)
+    if (Object.keys(this.cookies).length > 0) {
+      headerOption.push(`Cookie: ${this.formatCookies()}`)
+    }
     const headers = this.getConfigData('headers')
     if (headers) {
       headers.split('\n').forEach((item) => {
@@ -97,7 +99,9 @@ class Core {
       url: path,
       options: {
         method: 'POST',
-        headers: {},
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
         body: JSON.stringify(data)
       }
     }
