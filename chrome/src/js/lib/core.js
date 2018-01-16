@@ -51,7 +51,9 @@ class Core {
     const headerOption = []
     headerOption.push(`User-Agent: ${this.getConfigData('userAgent')}`)
     headerOption.push(`Referer: ${this.getConfigData('referer')}`)
-    headerOption.push(`Cookie: ${this.formatCookies()}`)
+    if (Object.keys(this.cookies).length > 0) {
+      headerOption.push(`Cookie: ${this.formatCookies()}`)
+    }
     const headers = this.getConfigData('headers')
     if (headers) {
       headers.split('\n').forEach((item) => {
@@ -97,7 +99,9 @@ class Core {
       url: path,
       options: {
         method: 'POST',
-        headers: {},
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
         body: JSON.stringify(data)
       }
     }
@@ -185,9 +189,8 @@ class Core {
     const downloadLinkTxt = []
     const prefixTxt = 'data:text/plain;charset=utf-8,'
     fileDownloadInfo.forEach((file) => {
-      const name = JSON.stringify(file.name)
-      let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${name} ${this.getHeader('aria2Cmd')} ${JSON.stringify(file.link)}`
-      let aria2Line = [file.link, this.getHeader('aria2c'), ` out=${name}`].join('\n')
+      let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${JSON.stringify(file.name)} ${this.getHeader('aria2Cmd')} ${JSON.stringify(file.link)}`
+      let aria2Line = [file.link, this.getHeader('aria2c'), ` out=${file.name}`].join('\n')
       const md5Check = this.getConfigData('md5Check')
       if (md5Check) {
         aria2CmdLine += ` --checksum=md5=${file.md5}`
@@ -195,7 +198,7 @@ class Core {
       }
       aria2CmdTxt.push(aria2CmdLine)
       aria2Txt.push(aria2Line)
-      const idmLine = ['<', file.link, this.getHeader('idm'), `out=${name}`, '>'].join('\r\n')
+      const idmLine = ['<', file.link, this.getHeader('idm'), '>'].join('\r\n')
       idmTxt.push(idmLine)
       downloadLinkTxt.push(file.link)
     })

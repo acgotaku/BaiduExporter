@@ -79,7 +79,7 @@ class Home extends Downloader {
   getPrefixLength () {
     const path = Core.getHashParameter('list/path') || Core.getHashParameter('path')
     const fold = Core.getConfigData('fold')
-    if (fold === -1) {
+    if (fold === -1 || path === '/') {
       return 1
     } else {
       const dir = path.split('/')
