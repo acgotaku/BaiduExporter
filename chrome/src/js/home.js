@@ -21,7 +21,7 @@ class Home extends Downloader {
     super(listParameter)
     UI.init()
     UI.addMenu(document.querySelectorAll('.g-dropdown-button')[3], 'afterend')
-    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'pcsett' }])
+    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'STOKEN' }])
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
     this.rpcURL = 'http://localhost:6800/jsonrpc'
