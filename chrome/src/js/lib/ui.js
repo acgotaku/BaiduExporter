@@ -45,7 +45,7 @@ class UI {
     })
   }
   resetMenu () {
-    document.querySelectorAll('.rpc-button').forEach((rpc) => {
+    Array.from(document.querySelectorAll('.rpc-button')).forEach((rpc) => {
       rpc.remove()
     })
   }
@@ -255,7 +255,7 @@ class UI {
   updateSetting (configData) {
     const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, headers } = configData
     // reset dom
-    document.querySelectorAll('.rpc-s').forEach((rpc, index) => {
+    Array.from(document.querySelectorAll('.rpc-s')).forEach((rpc, index) => {
       if (index !== 0) {
         rpc.remove()
       }
