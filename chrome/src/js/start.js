@@ -1,5 +1,5 @@
-if (typeof browser !== 'undefined') {
-  chrome = browser
+if (typeof global.browser !== 'undefined') {
+  global.chrome = global.browser
 }
 
 function requestAddScript (name) {

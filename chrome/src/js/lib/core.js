@@ -1,4 +1,6 @@
 import Store from './store'
+import parse from 'url-parse'
+import URLSearchParams from 'url-search-params'
 
 class Core {
   constructor () {
@@ -75,7 +77,7 @@ class Core {
   }
   // 解析 RPC地址 返回验证数据 和地址
   parseURL (url) {
-    const parseURL = new URL(url)
+    const parseURL = parse(url)
     let authStr = parseURL.username ? `${parseURL.username}:${decodeURI(parseURL.password)}` : null
     if (authStr) {
       if (!authStr.includes('token:')) {
