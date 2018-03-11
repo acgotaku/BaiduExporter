@@ -59,8 +59,5 @@
     "stylelint-order": "^0.8.0",
     "stylelint-scss": "^2.3.0"
   },
-  "dependencies": {
-    "url-parse": "^1.2.0",
-    "url-search-params": "^0.10.0"
-  }
+  "dependencies": {}
 }

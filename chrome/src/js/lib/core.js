@@ -1,6 +1,4 @@
 import Store from './store'
-import parse from 'url-parse'
-import URLSearchParams from 'url-search-params'
 
 class Core {
   constructor () {
@@ -39,7 +37,7 @@ class Core {
   getHashParameter (name) {
     const hash = window.location.hash
     const paramsString = hash.substr(1)
-    const searchParams = new URLSearchParams(paramsString)
+    const searchParams = this.parseSearchParams(paramsString)
     return searchParams.get(name)
   }
   formatCookies () {
@@ -75,9 +73,40 @@ class Core {
       }).join('\r\n')
     }
   }
+  parseSearchParams (paramsString) {
+    let params = new Map()
+
+    if (paramsString.length > 0) {
+      paramsString.split('&').forEach((v) => {
+        let [key, value] = v.split('=').map(decodeURIComponent)
+        params.set(key, value)
+      })
+    }
+    return params
+  }
+  parseURLPolyfill (url) {
+    const matched = /(\w+:)\/\/((.*?)(:(.*?))?@)?([\w.]*)(:(\d+))?((\/[^?#]*)(\?[^#]*)?(#.*)?)?/.exec(url)
+    if (!matched) {
+      throw new Error('Invalid URL: ' + url)
+    }
+    return {
+      hash: matched[12] || '',
+      host: matched[6] + (matched[7] || ''),
+      hostname: matched[6],
+      href: url,
+      origin: matched[1] + '//' + matched[6] + (matched[7] || ''),
+      password: matched[5] || '',
+      pathname: matched[10] || '/',
+      port: matched[8] || '',
+      protocol: matched[1],
+      search: matched[11] || '',
+      searchParams: this.parseSearchParams(matched[11] || ''),
+      username: matched[3] || ''
+    }
+  }
   // 解析 RPC地址 返回验证数据 和地址
   parseURL (url) {
-    const parseURL = parse(url)
+    const parseURL = this.parseURLPolyfill(url)
     let authStr = parseURL.username ? `${parseURL.username}:${decodeURI(parseURL.password)}` : null
     if (authStr) {
       if (!authStr.includes('token:')) {
@@ -86,7 +115,7 @@ class Core {
     }
     const paramsString = parseURL.hash.substr(1)
     let options = {}
-    const searchParams = new URLSearchParams(paramsString)
+    const searchParams = this.parseSearchParams(paramsString)
     for (let key of searchParams) {
       options[key[0]] = key.length === 2 ? key[1] : 'enabled'
     }
