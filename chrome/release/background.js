@@ -1,5 +1,5 @@
-if (typeof browser !== 'undefined') {
-  chrome = browser
+if (typeof window.browser !== 'undefined') {
+  window.chrome = window.browser
 }
 
 const httpSend = ({url, options}, resolve, reject) => {
