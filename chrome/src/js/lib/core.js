@@ -194,7 +194,7 @@ class Core {
       const md5Check = this.getConfigData('md5Check')
       if (md5Check) {
         aria2CmdLine += ` --checksum=md5=${file.md5}`
-        aria2Line += ` checksum=md5=${file.md5}`
+        aria2Line += `\n checksum=md5=${file.md5}`
       }
       aria2CmdTxt.push(aria2CmdLine)
       aria2Txt.push(aria2Line)
