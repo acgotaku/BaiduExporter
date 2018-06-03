@@ -34,7 +34,7 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install -y vim-common
-            sudo apt-get install -y libpng-dev
+            sudo apt-get install -y libpng16-16
       - run: npm --prefix chrome/ run build
       - run: echo -e $KEY > /tmp/key.pem
       - run: .circleci/pack chrome/dist/ /tmp/key.pem
