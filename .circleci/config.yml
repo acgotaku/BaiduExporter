@@ -3,7 +3,7 @@ version: 2
 defaults: &defaults
   working_directory: ~/project/BaiduExporter
   docker:
-    - image: circleci/node:6-browsers
+    - image: circleci/node:8-stretch-browsers
 
 jobs:
   install:
@@ -34,7 +34,7 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install -y vim-common
-            sudo apt-get install -y libpng16-16
+            sudo apt-get install -y libpng-dev
       - run: npm --prefix chrome/ run build
       - run: echo -e $KEY > /tmp/key.pem
       - run: .circleci/pack chrome/dist/ /tmp/key.pem
