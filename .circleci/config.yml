@@ -12,10 +12,10 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - node-chache-{{ .Branch }}-{{ checksum "chrome/package-lock.json" }}
+            - node-chache-{{ .Branch }}-{{ checksum "chrome/package-lock.json" }}-{{ checksum "package.json" }}
       - run: npm --prefix chrome/ install
       - save_cache:
-          key: node-chache-{{ .Branch }}-{{ checksum "chrome/package-lock.json" }}
+          key: node-chache-{{ .Branch }}-{{ checksum "chrome/package-lock.json" }}-{{ checksum "package.json" }}
           paths:
             - chrome/node_modules/
       - persist_to_workspace:
@@ -34,7 +34,6 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install -y vim-common
-            sudo apt-get install -y libpng-dev
       - run: npm --prefix chrome/ run build
       - run: echo -e $KEY > /tmp/key.pem
       - run: .circleci/pack chrome/dist/ /tmp/key.pem
