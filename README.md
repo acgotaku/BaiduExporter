@@ -1,17 +1,15 @@
 # BaiduExporter [![Build Status](https://img.shields.io/circleci/project/acgotaku/BaiduExporter/master.svg)](https://circleci.com/gh/acgotaku/BaiduExporter/tree/master)
 
-可以方便的把百度网盘的下载地址导出到 aria2/aria2-rpc，支持 YAAW。
+Export Baidu Cloud files address to aria2/aria2-rpc, support YAAW.
 
 ## Usage
 
-- 非SVIP用户下载分享文件须先将文件保存到自己网盘以获得较快的下载速度。
-- 插件的设置必须保存之后才会生效。
-- 推荐设置：
+- Please click save button when change config.
+- Recommended Settings:
     - Set `--rpc-secret=<secret>` if you are using aria2 1.18.4(or higher) with 'JSON-RPC PATH' like http://token:secret@hostname:port/jsonrpc
     - Set `--rpc-user=<username> --rpc-passwd=<passwd>` if you are using aria2 1.15.2(or higher) with 'JSON-RPC PATH' like http://username:passwd@hostname:port/jsonrpc
     - Use `http://localhost:6800/jsonrpc#max-connection-per-server=5&split=10` set download options for specific file.
-- 已上传 Aria2 配置文件方便大家使用：[aria2.conf](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/aria2c/aria2.conf)
-- Aria2 配置参考我的博客：[使用 Aria2 下载百度网盘和 115 的资源](https://blog.icehoney.me/posts/2015-01-31-Aria2-download)。
+- Aria2c config sample：[aria2.conf](https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/aria2c/aria2.conf)
 
 ## Install
 
@@ -21,9 +19,9 @@
 
 Please make sure to read the [Contributing Guide](https://github.com/acgotaku/BaiduExporter/blob/master/.github/CONTRIBUTING.md) before making a pull request.
 
-## Issue 须知
+## Issue Notice
 
-请先阅读[这里](https://github.com/acgotaku/BaiduExporter/issues/128)
+Please read [Issue Notice](https://github.com/acgotaku/BaiduExporter/issues/128)
 
 ## Thanks
 
@@ -31,7 +29,7 @@ Please make sure to read the [Contributing Guide](https://github.com/acgotaku/Ba
 
 ## Tips
 
-不想每次开启Chrome都提示禁用请看这个帖子：[Guide on Packaging and Import Baidu Exporter to Chrome](https://hencolle.com/2016/10/16/baidu_exporter/)
+If you don't want to show disable tips every time, please read the post：[Guide on Packaging and Import Baidu Exporter to Chrome](https://hencolle.com/2016/10/16/baidu_exporter/)
 
 ## License
 
