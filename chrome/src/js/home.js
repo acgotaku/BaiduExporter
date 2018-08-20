@@ -81,6 +81,8 @@ class Home extends Downloader {
     const fold = Core.getConfigData('fold')
     if (fold === -1 || path === '/') {
       return 1
+    } else if (Core.getHashParameter('/search?key')) {
+      return 1
     } else {
       const dir = path.split('/')
       let count = 0
