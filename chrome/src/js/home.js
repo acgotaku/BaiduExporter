@@ -94,14 +94,36 @@ class Home extends Downloader {
   }
   getFiles (files) {
     const prefix = this.getPrefixLength()
-    for (let key in files) {
-      this.fileDownloadInfo.push({
-        name: files[key].path.substr(prefix),
-        link: `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=250528&path=${encodeURIComponent(files[key].path)}`,
-        md5: files[key].md5
+    return new Promise(resolve => {
+      const list = []
+      for (let key in files) {
+        list.push(this.getFile(files[key]))
+      }
+      Promise.all(list).then(downloadResults => {
+        downloadResults.forEach(result => {
+          this.fileDownloadInfo.push({
+            name: result.file.path.substr(prefix),
+            link: result.data.urls[0].url,
+            md5: result.file.md5
+          })
+        })
+        resolve()
       })
-    }
-    return Promise.resolve()
+    })
+  }
+  getFile (file) {
+    return new Promise(resolve => {
+      const parameter = {
+        url: `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?app_id=250528&channel=00000000000000000000000000000000&clienttype=8&devuid=0&method=locatedownload&path=${encodeURIComponent(file.path)}&ver=4.0&version=6.0.0.12&vip=3`,
+        options: {
+          method: 'GET',
+          credentials: 'include'
+        }
+      }
+      Core.sendToBackground('sendRequest', parameter, (data) => {
+        resolve({file, data})
+      })
+    })
   }
 }
 

@@ -1,6 +1,12 @@
-if (typeof browser !== 'undefined') {
-  chrome = browser
-}
+chrome.webRequest.onBeforeSendHeaders.addListener(function (details) {
+  details.requestHeaders = details.requestHeaders.map(header => {
+    if (header.name === 'User-Agent') {
+      header.value = 'netdisk;6.0.0.12;PC;PC-Windows;10.0.16299;WindowsBaiduYunGuanJia'
+    }
+    return header
+  })
+  return {requestHeaders: details.requestHeaders}
+}, {urls: ['*://pcs.baidu.com/*']}, ['blocking', 'requestHeaders'])
 
 const httpSend = ({url, options}, resolve, reject) => {
   fetch(url, options).then((response) => {
@@ -27,6 +33,14 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       }, (err) => {
         console.log(err)
         sendResponse(false)
+      })
+      return true
+    case 'sendRequest':
+      httpSend(request.data, (data) => {
+        sendResponse(data)
+      }, (err) => {
+        console.log(err)
+        sendResponse(err)
       })
       return true
     case 'configData':
