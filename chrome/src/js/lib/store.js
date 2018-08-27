@@ -4,7 +4,7 @@ class Store extends EventEmitter {
   constructor () {
     super()
     this.defaultRPC = [{name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc'}]
-    this.defaultUserAgent = 'netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia'
+    this.defaultUserAgent = 'netdisk;6.0.0.12;PC;PC-Windows;10.0.16299;WindowsBaiduYunGuanJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
     this.defaultConfigData = {
       rpcList: this.defaultRPC,

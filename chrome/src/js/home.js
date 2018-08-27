@@ -21,7 +21,7 @@ class Home extends Downloader {
     super(listParameter)
     UI.init()
     UI.addMenu(document.querySelectorAll('.g-dropdown-button')[3], 'afterend')
-    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'STOKEN' }])
+    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'pcsett' }])
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
     this.rpcURL = 'http://localhost:6800/jsonrpc'
@@ -77,9 +77,11 @@ class Home extends Downloader {
     window.postMessage({ type: 'getSelected' }, location.origin)
   }
   getPrefixLength () {
-    const path = Core.getHashParameter('list/path') || Core.getHashParameter('path')
+    const path = Core.getHashParameter('/all?path') || Core.getHashParameter('path')
     const fold = Core.getConfigData('fold')
     if (fold === -1 || path === '/') {
+      return 1
+    } else if (Core.getHashParameter('/search?key')) {
       return 1
     } else {
       const dir = path.split('/')

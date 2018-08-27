@@ -24,6 +24,7 @@ class Share extends Downloader {
     super(listParameter)
     UI.init()
     UI.addMenu(document.querySelector('a[data-button-id="b1"]'), 'beforebegin')
+    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'pcsett' }])
     // fix export button position
     document.querySelector('.bar').style.position = 'absolute'
     Core.showToast('初始化成功!', 'success')
