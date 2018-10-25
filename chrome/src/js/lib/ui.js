@@ -3,8 +3,8 @@ import Store from './store'
 
 class UI {
   constructor () {
-    this.version = '1.0.0'
-    this.updateDate = '2017/11/27'
+    this.version = '1.0.2'
+    this.updateDate = '2017/12/30'
     Store.on('updateView', (configData) => {
       this.updateSetting(configData)
       this.updateMenu(configData)
@@ -45,7 +45,7 @@ class UI {
     })
   }
   resetMenu () {
-    document.querySelectorAll('.rpc-button').forEach((rpc) => {
+    Array.from(document.querySelectorAll('.rpc-button')).forEach((rpc) => {
       rpc.remove()
     })
   }
@@ -136,6 +136,15 @@ class UI {
               <div class="setting-menu-value">
                 <input type="checkbox" class="setting-menu-checkbox md5Check-s">
               </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+               <div class="setting-menu-name">
+                 <label class="setting-menu-label">文件夹层数</label>
+               </div>
+               <div class="setting-menu-value">
+                 <input class="setting-menu-input small-o fold-s" type="number" spellcheck="false">
+                 <label class="setting-menu-label">(默认0表示不保留,-1表示保留完整路径)</label>
+               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
               <div class="setting-menu-name">
@@ -244,9 +253,9 @@ class UI {
     testAria2.innerText = '测试连接，成功显示版本号'
   }
   updateSetting (configData) {
-    const { rpcList, configSync, md5Check, interval, downloadPath, userAgent, referer, headers } = configData
+    const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, headers } = configData
     // reset dom
-    document.querySelectorAll('.rpc-s').forEach((rpc, index) => {
+    Array.from(document.querySelectorAll('.rpc-s')).forEach((rpc, index) => {
       if (index !== 0) {
         rpc.remove()
       }
@@ -271,6 +280,7 @@ class UI {
     })
     document.querySelector('.configSync-s').checked = configSync
     document.querySelector('.md5Check-s').checked = md5Check
+    document.querySelector('.fold-s').value = fold
     document.querySelector('.interval-s').value = interval
     document.querySelector('.downloadPath-s').value = downloadPath
     document.querySelector('.userAgent-s').value = userAgent
@@ -289,6 +299,7 @@ class UI {
     }).filter(el => el)
     const configSync = document.querySelector('.configSync-s').checked
     const md5Check = document.querySelector('.md5Check-s').checked
+    const fold = Number.parseInt(document.querySelector('.fold-s').value)
     const interval = document.querySelector('.interval-s').value
     const downloadPath = document.querySelector('.downloadPath-s').value
     const userAgent = document.querySelector('.userAgent-s').value
@@ -299,6 +310,7 @@ class UI {
       rpcList,
       configSync,
       md5Check,
+      fold,
       interval,
       downloadPath,
       userAgent,

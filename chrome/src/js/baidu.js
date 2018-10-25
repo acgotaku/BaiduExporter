@@ -6,7 +6,7 @@ class Baidu {
   // 封装的百度的Toast提示消息
   // Type类型有
   // caution       警告  failure       失败  loading      加载 success      成功
-  showToast ({message, type}) {
+  showToast ({ message, type }) {
     this.context.ui.tip({
       mode: type,
       msg: message

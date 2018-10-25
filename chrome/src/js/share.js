@@ -192,7 +192,7 @@ class Share extends Downloader {
     if (path !== window.yunData.PATH) {
       return window.yunData.PATH.slice(0, window.yunData.PATH.lastIndexOf('/')).length + 1
     } else {
-      return path.length === 1 ? path.length : path.length + 1
+      return path.length === 1 ? 1 : path.length + 1
     }
   }
   getFiles (files, captcha) {
@@ -231,7 +231,10 @@ class Share extends Downloader {
       options: {
         body: Core.objectToQueryString(body),
         credentials: 'include',
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        }
       }
     }
     const prefix = this.getPrefixLength()
