@@ -1,1 +1,41 @@
-!function i(a,d,u){function c(t,e){if(!d[t]){if(!a[t]){var n="function"==typeof require&&require;if(!e&&n)return n(t,!0);if(s)return s(t,!0);var r=new Error("Cannot find module '"+t+"'");throw r.code="MODULE_NOT_FOUND",r}var o=d[t]={exports:{}};a[t][0].call(o.exports,function(e){return c(a[t][1][e]||e)},o,o.exports,i,a,d,u)}return d[t].exports}for(var s="function"==typeof require&&require,e=0;e<u.length;e++)c(u[e]);return c}({1:[function(e,t,n){"use strict";function r(e){chrome.runtime.sendMessage({method:"addScript",data:"js/".concat(e,".js")})}function o(){var e=document.createElement("script");e.src=chrome.runtime.getURL("js/baidu.js"),document.body.appendChild(e)}"undefined"!=typeof browser&&(chrome=browser),window.addEventListener("message",function(e){"yunData"===e.data.type&&(window.yunData=e.data.data,window.location.href.includes("/disk/home")?r("home"):r("share"))}),"complete"===document.readyState?o():window.addEventListener("load",o)},{}]},{},[1]);
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+
+if (typeof browser !== 'undefined') {
+  chrome = browser;
+}
+
+function requestAddScript(name) {
+  chrome.runtime.sendMessage({
+    method: 'addScript',
+    data: "js/".concat(name, ".js")
+  });
+}
+
+window.addEventListener('message', function (event) {
+  if (event.data.type === 'yunData') {
+    window.yunData = event.data.data;
+
+    if (window.location.href.includes('/disk/home')) {
+      requestAddScript('home');
+    } else {
+      requestAddScript('share');
+    }
+  }
+});
+
+function addBaiduJS() {
+  var script = document.createElement('script');
+  script.src = chrome.runtime.getURL('js/baidu.js');
+  document.body.appendChild(script);
+}
+
+if (document.readyState === 'complete') {
+  // run on firefox
+  addBaiduJS();
+} else {
+  // run on chrome
+  window.addEventListener('load', addBaiduJS);
+}
+
+},{}]},{},[1]);

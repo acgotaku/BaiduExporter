@@ -1,1 +1,77 @@
-!function i(r,s,u){function c(e,t){if(!s[e]){if(!r[e]){var n="function"==typeof require&&require;if(!t&&n)return n(e,!0);if(d)return d(e,!0);var a=new Error("Cannot find module '"+e+"'");throw a.code="MODULE_NOT_FOUND",a}var o=s[e]={exports:{}};r[e][0].call(o.exports,function(t){return c(r[e][1][t]||t)},o,o.exports,i,r,s,u)}return s[e].exports}for(var d="function"==typeof require&&require,t=0;t<u.length;t++)c(u[t]);return c}({1:[function(t,e,n){"use strict";function o(t,e){for(var n=0;n<e.length;n++){var a=e[n];a.enumerable=a.enumerable||!1,a.configurable=!0,"value"in a&&(a.writable=!0),Object.defineProperty(t,a.key,a)}}(new(function(){function t(){!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,t),this.context=window.require("system-core:context/context.js").instanceForSystem,this.context.log.send=function(){}}var e,n,a;return e=t,(n=[{key:"showToast",value:function(t){var e=t.message,n=t.type;this.context.ui.tip({mode:n,msg:e})}},{key:"startListen",value:function(){var e=this;if(window.addEventListener("message",function(t){t.data.type&&"getSelected"===t.data.type&&window.postMessage({type:"selected",data:e.context.list.getSelected()},location.origin),t.data.type&&"showToast"===t.data.type&&e.showToast(t.data.data)}),window.yunData)if(window.yunData.sign2){var t=window.require("disk-system:widget/data/yunData.js").get();window.postMessage({type:"yunData",data:t},location.origin)}else window.postMessage({type:"yunData",data:JSON.parse(JSON.stringify(window.yunData))},location.origin)}}])&&o(e.prototype,n),a&&o(e,a),t}())).startListen()},{}]},{},[1]);
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Baidu =
+/*#__PURE__*/
+function () {
+  function Baidu() {
+    _classCallCheck(this, Baidu);
+
+    this.context = window.require('system-core:context/context.js').instanceForSystem;
+
+    this.context.log.send = function () {};
+  } // 封装的百度的Toast提示消息
+  // Type类型有
+  // caution       警告  failure       失败  loading      加载 success      成功
+
+
+  _createClass(Baidu, [{
+    key: "showToast",
+    value: function showToast(_ref) {
+      var message = _ref.message,
+          type = _ref.type;
+      this.context.ui.tip({
+        mode: type,
+        msg: message
+      });
+    }
+  }, {
+    key: "startListen",
+    value: function startListen() {
+      var _this = this;
+
+      window.addEventListener('message', function (event) {
+        if (event.data.type && event.data.type === 'getSelected') {
+          window.postMessage({
+            type: 'selected',
+            data: _this.context.list.getSelected()
+          }, location.origin);
+        }
+
+        if (event.data.type && event.data.type === 'showToast') {
+          _this.showToast(event.data.data);
+        }
+      });
+
+      if (window.yunData) {
+        // TODO 分析效果
+        if (window.yunData.sign2) {
+          var yunData = window.require('disk-system:widget/data/yunData.js').get();
+
+          window.postMessage({
+            type: 'yunData',
+            data: yunData
+          }, location.origin);
+        } else {
+          window.postMessage({
+            type: 'yunData',
+            data: JSON.parse(JSON.stringify(window.yunData))
+          }, location.origin);
+        }
+      }
+    }
+  }]);
+
+  return Baidu;
+}();
+
+var baidu = new Baidu();
+baidu.startListen();
+
+},{}]},{},[1]);
