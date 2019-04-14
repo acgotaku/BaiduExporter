@@ -188,9 +188,17 @@ class Share extends Downloader {
   }
   getPrefixLength () {
     const path = Core.getHashParameter('list/path') || Core.getHashParameter('path') || ''
+    const parentPath = Core.getHashParameter('parentPath')
+    const rootPath = decodeURIComponent(window.yunData.FILEINFO[window.yunData.FILEINFO.length - 1].parent_path)
     // solution for example :链接:http://pan.baidu.com/s/1hqOIdUk 密码:qat2
-    if (path !== window.yunData.PATH) {
-      return window.yunData.PATH.slice(0, window.yunData.PATH.lastIndexOf('/')).length + 1
+
+    // 针对单文件夹的下载 保留所有路径
+    if (window.yunData.FILEINFO.length === 1) {
+      return 1
+    } else if (parentPath) {
+      return rootPath.length + path.slice(parentPath.length).length + 1
+    } else if (path !== rootPath) {
+      return rootPath.length + path.length
     } else {
       return path.length === 1 ? 1 : path.length + 1
     }
@@ -243,13 +251,21 @@ class Share extends Downloader {
         if (response.ok) {
           response.json().then((data) => {
             if (data.errno === 0) {
-              data.list.forEach((item) => {
+              if (window.yunData.SHAREPAGETYPE === 'single_file_page') {
                 this.fileDownloadInfo.push({
-                  name: item.path.substr(prefix),
-                  link: item.dlink,
-                  md5: item.md5
+                  name: data.list[0].server_filename,
+                  link: data.list[0].dlink,
+                  md5: data.list[0].md5
                 })
-              })
+              } else {
+                data.list.forEach((item) => {
+                  this.fileDownloadInfo.push({
+                    name: item.path.substr(prefix),
+                    link: item.dlink,
+                    md5: item.md5
+                  })
+                })
+              }
               resolve()
             } else if (data.errno === -20) {
               Core.showToast('请输入验证码以继续下载', 'caution')
@@ -258,6 +274,8 @@ class Share extends Downloader {
               } else {
                 this.getCaptcha(resolve, false)
               }
+            } else {
+              Core.showToast('出现未知错误，下载失败', 'failure')
             }
           })
         } else {
