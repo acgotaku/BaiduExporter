@@ -78,7 +78,6 @@ gulp.task('js', function () {
         format: 'iife'
       }
       ))
-    
     // write sourcemaps
     .pipe(gulpIf(config.env.dev, sourcemaps.write()))
     .pipe(gulpIf(config.env.prod, uglify()))

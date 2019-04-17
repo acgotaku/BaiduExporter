@@ -33,6 +33,7 @@
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
     "autoprefixer": "^9.1.5",
+    "del": "^4.1.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-node": "^7.0.1",
