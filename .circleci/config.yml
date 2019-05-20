@@ -33,10 +33,12 @@ jobs:
           name: install dependency
           command: |
             sudo apt-get update
-            sudo apt-get install -y vim-common
+            sudo apt-get install -y python python-pip vim-common
+            git clone https://github.com/pawliczka/CRX3-Creator.git /tmp/CRX3-Creator
+            sudo pip2 install -r /tmp/CRX3-Creator/requirements.txt
       - run: npm --prefix chrome/ run build
       - run: echo -e $KEY > /tmp/key.pem
-      - run: .circleci/pack chrome/dist/ /tmp/key.pem
+      - run: python /tmp/CRX3-Creator/main.py -o BaiduExporter.crx -pem /tmp/key.pem chrome/dist/
       - run: rm -rf chrome/release/
       - run: mv chrome/dist/ chrome/release/
       - run:
