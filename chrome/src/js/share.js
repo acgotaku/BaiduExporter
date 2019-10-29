@@ -228,7 +228,7 @@ class Share extends Downloader {
       timestamp: window.yunData.TIMESTAMP,
       sign: window.yunData.SIGN,
       bdstoken: window.yunData.MYBDSTOKEN,
-      app_id: 250528,
+      app_id: 624966,
       channel: 'chunlei',
       clienttype: 0,
       web: 1
