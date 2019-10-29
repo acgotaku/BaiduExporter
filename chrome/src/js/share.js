@@ -155,7 +155,7 @@ class Share extends Downloader {
     const search = {
       prod: 'share',
       bdstoken: window.yunData.MYBDSTOKEN,
-      app_id: 250528,
+      app_id: 624966,
       channel: 'chunlei',
       clienttype: 0,
       web: 1

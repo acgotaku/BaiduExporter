@@ -97,7 +97,7 @@ class Home extends Downloader {
     for (let key in files) {
       this.fileDownloadInfo.push({
         name: files[key].path.substr(prefix),
-        link: `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=250528&path=${encodeURIComponent(files[key].path)}`,
+        link: `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=624966&path=${encodeURIComponent(files[key].path)}`,
         md5: files[key].md5
       })
     }
