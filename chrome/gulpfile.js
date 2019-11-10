@@ -7,7 +7,6 @@ const rollupCommon = require('rollup-plugin-commonjs')
 
 const del = require('del')
 const gulpIf = require('gulp-if')
-const runSequence = require('run-sequence')
 
 const eslint = require('gulp-eslint')
 const stylelint = require('gulp-stylelint')
@@ -23,7 +22,7 @@ const mozjpeg = require('imagemin-mozjpeg')
 const pngquant = require('imagemin-pngquant')
 
 const plumber = require('gulp-plumber')
-const sourcemaps = require('gulp-sourcemaps')
+
 const uglify = require('gulp-uglify')
 const jsTargets = ['./src/js/**/*.js']
 const jsEntries = ['./src/js/*.js']
@@ -43,28 +42,27 @@ const config = {
   }
 }
 
-gulp.task('lint:js', function () {
+function lintJS () {
   return gulp.src(jsTargets)
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError())
-})
+}
 
-gulp.task('lint:css', function () {
+function lintCSS () {
   return gulp.src(cssTargets)
     .pipe(stylelint({
       reporters: [
         { formatter: 'string', console: true }
       ]
     }))
-})
+}
 
-gulp.task('js', function () {
+function js () {
   return gulp.src(jsEntries)
     .pipe(plumber(config.plumberConfig))
     .pipe(eslint())
     .pipe(eslint.format())
-    .pipe(gulpIf(config.env.dev, sourcemaps.init({ loadMaps: true })))
     .pipe(rollupEach({
       isCache: true,
       plugins: [
@@ -75,19 +73,16 @@ gulp.task('js', function () {
           browser: true
         }),
         rollupCommon()
-      ]},
-      {
-        format: 'iife'
-      }
-      ))
-    // write sourcemaps
-    .pipe(gulpIf(config.env.dev, sourcemaps.write()))
+      ] },
+    {
+      format: 'iife'
+    }
+    ))
     .pipe(gulpIf(config.env.prod, uglify()))
+    .pipe(gulp.dest('dist/js/'), { sourcemaps: config.env.dev })
+}
 
-    .pipe(gulp.dest('dist/js/'))
-})
-
-gulp.task('css', function () {
+function css () {
   return gulp.src(cssTargets)
     .pipe(plumber(config.plumberConfig))
     .pipe(stylelint({
@@ -95,24 +90,20 @@ gulp.task('css', function () {
         { formatter: 'string', console: true }
       ]
     }))
-    .pipe(gulpIf(config.env.dev, sourcemaps.init()))
     .pipe(sass({
       outputStyle: 'nested',
       precision: 3,
       includePaths: ['.']
     }))
     .pipe(postcss([
-      autoprefixer({
-        browsers: ['last 1 versions']
-      })
+      autoprefixer()
     ]))
     .pipe(concat('style.css'))
-    .pipe(gulpIf(config.env.dev, sourcemaps.write()))
     .pipe(gulpIf(config.env.prod, cleanCSS()))
-    .pipe(gulp.dest('dist/css/'))
-})
+    .pipe(gulp.dest('dist/css/'), { sourcemaps: config.env.dev })
+}
 
-gulp.task('img', function () {
+function img () {
   return gulp.src(imageTargets)
     .pipe(plumber(config.plumberConfig))
     .pipe(imagemin([
@@ -122,30 +113,32 @@ gulp.task('img', function () {
       verbose: true
     }))
     .pipe(gulp.dest('dist/img/'))
-})
-gulp.task('copy', function () {
+}
+
+function copy () {
   return gulp.src(copyTarget, { base: '.' })
     .pipe(gulp.dest('dist/'))
-})
-gulp.task('build', ['js', 'css', 'img', 'copy'])
+}
 
-gulp.task('clean', function () {
+function clean () {
   return del([
     'dist/**/*'
   ])
-})
-gulp.task('serve', ['clean'], function () {
-  runSequence(['build'], function () {
-    gulp.watch(copyTarget, ['copy'])
-    gulp.watch(jsTargets, ['js'])
-    gulp.watch(cssTargets, ['css'])
-  })
-})
+}
 
-gulp.task('public', ['clean'], function () {
-  runSequence(['build'])
-})
+function watch () {
+  gulp.watch(copyTarget, copy)
+  gulp.watch(jsTargets, js)
+  gulp.watch(cssTargets, css)
+}
 
-gulp.task('default', function () {
-  console.info('You should use npm run dev to start development mode.')
-})
+const build = gulp.parallel(js, css, img, copy)
+const serve = gulp.series(clean, build, watch)
+const publish = gulp.series(clean, build)
+
+exports.build = build
+exports.serve = serve
+exports.publish = publish
+exports.lintJS = lintJS
+exports.lintCSS = lintCSS
+exports.clean = clean
