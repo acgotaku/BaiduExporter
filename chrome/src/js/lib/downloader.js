@@ -9,12 +9,14 @@ class Downloader {
     this.folders = []
     this.files = {}
   }
+
   start (interval = 300, done) {
     this.interval = interval
     this.done = done
     this.currentTaskId = new Date().getTime()
     this.getNextFile(this.currentTaskId)
   }
+
   reset () {
     this.fileDownloadInfo = []
     this.currentTaskId = 0
@@ -22,12 +24,15 @@ class Downloader {
     this.files = {}
     this.completedCount = 0
   }
+
   addFolder (path) {
     this.folders.push(path)
   }
+
   addFile (file) {
     this.files[file.fs_id] = file
   }
+
   getNextFile (taskId) {
     if (taskId !== this.currentTaskId) {
       return

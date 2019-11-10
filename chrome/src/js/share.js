@@ -15,7 +15,7 @@ class Share extends Downloader {
     }
     const listParameter = {
       search,
-      url: `/share/list?`,
+      url: '/share/list?',
       options: {
         credentials: 'include',
         method: 'GET'
@@ -49,8 +49,9 @@ class Share extends Downloader {
   }
 
   requestCookies () {
-    Core.sendToBackground('getCookies', [{ url: 'http://pan.baidu.com/', name: 'BDCLND' }], (value) => { this.cookies = decodeURIComponent(value['BDCLND']) })
+    Core.sendToBackground('getCookies', [{ url: 'http://pan.baidu.com/', name: 'BDCLND' }], (value) => { this.cookies = decodeURIComponent(value.BDCLND) })
   }
+
   startListen () {
     window.addEventListener('message', (event) => {
       if (event.source !== window) {
@@ -101,6 +102,7 @@ class Share extends Downloader {
       window.postMessage({ type: 'getSelected' }, location.origin)
     }
   }
+
   showCaptcha (data, resolve, auth) {
     const captcha = `
       <div id="captchaMenu" class="modal captcha-menu open-o">
@@ -136,7 +138,7 @@ class Share extends Downloader {
     })
     const apply = captchaMenu.querySelector('#apply')
     apply.addEventListener('click', () => {
-      data['vcode_input'] = document.querySelector('#vcodeValue').value
+      data.vcode_input = document.querySelector('#vcodeValue').value
       this.getFiles(this.files, data).then(() => {
         resolve()
       })
@@ -151,6 +153,7 @@ class Share extends Downloader {
       captchaMenu.querySelector('#vcode').src = `//pan.baidu.com/genimage?${data.vcode_str}&${new Date().getTime()}`
     })
   }
+
   getCaptcha (resolve, auth) {
     const search = {
       prod: 'share',
@@ -162,7 +165,7 @@ class Share extends Downloader {
     }
     const parameter = {
       search,
-      url: `/api/getcaptcha?`,
+      url: '/api/getcaptcha?',
       options: {
         credentials: 'include',
         method: 'GET'
@@ -186,6 +189,7 @@ class Share extends Downloader {
       console.log(err)
     })
   }
+
   getPrefixLength () {
     const path = Core.getHashParameter('list/path') || Core.getHashParameter('path') || ''
     const parentPath = Core.getHashParameter('parentPath')
@@ -203,10 +207,11 @@ class Share extends Downloader {
       return path.length === 1 ? 1 : path.length + 1
     }
   }
+
   getFiles (files, captcha) {
     this.files = files
-    let list = []
-    for (let key in files) {
+    const list = []
+    for (const key in files) {
       list.push(files[key].fs_id)
     }
     const body = {
@@ -218,11 +223,11 @@ class Share extends Downloader {
     }
 
     if (!window.yunData.SHARE_PUBLIC) {
-      body['extra'] = JSON.stringify({ sekey: this.cookies })
+      body.extra = JSON.stringify({ sekey: this.cookies })
     }
     if (captcha) {
-      body['vcode_input'] = captcha['vcode_input']
-      body['vcode_str'] = captcha['vcode_str']
+      body.vcode_input = captcha.vcode_input
+      body.vcode_str = captcha.vcode_str
     }
     const search = {
       timestamp: window.yunData.TIMESTAMP,
@@ -235,7 +240,7 @@ class Share extends Downloader {
     }
     const parameter = {
       search,
-      url: `/api/sharedownload?`,
+      url: '/api/sharedownload?',
       options: {
         body: Core.objectToQueryString(body),
         credentials: 'include',
