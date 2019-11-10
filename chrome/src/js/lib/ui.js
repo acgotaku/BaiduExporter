@@ -10,11 +10,13 @@ class UI {
       this.updateMenu(configData)
     })
   }
+
   init () {
     this.addSettingUI()
     this.addTextExport()
     Store.trigger('initConfigData')
   }
+
   // z-index resolve share page show problem
   addMenu (element, position) {
     const menu = `
@@ -44,11 +46,13 @@ class UI {
       settingMenu.classList.add('open-o')
     })
   }
+
   resetMenu () {
     Array.from(document.querySelectorAll('.rpc-button')).forEach((rpc) => {
       rpc.remove()
     })
   }
+
   updateMenu (configData) {
     this.resetMenu()
     const { rpcList } = configData
@@ -59,6 +63,7 @@ class UI {
     })
     document.querySelector('#aria2List').insertAdjacentHTML('afterbegin', rpcDOMList)
   }
+
   addTextExport () {
     const text = `
       <div id="textMenu" class="modal export-menu">
@@ -92,6 +97,7 @@ class UI {
       this.resetTextExport()
     })
   }
+
   resetTextExport () {
     const textMenu = document.querySelector('#textMenu')
     textMenu.querySelector('#aria2Txt').href = ''
@@ -100,6 +106,7 @@ class UI {
     textMenu.querySelector('#aria2CmdTxt').value = ''
     textMenu.querySelector('#copyDownloadLinkTxt').dataset.link = ''
   }
+
   addSettingUI () {
     const setting = `
       <div id="settingMenu" class="modal setting-menu">
@@ -254,12 +261,14 @@ class UI {
       Core.getVersion(Store.getConfigData('rpcList')[0].url, testAria2)
     })
   }
+
   resetSetting () {
     const message = document.querySelector('#message')
     message.innerText = ''
     const testAria2 = document.querySelector('#testAria2')
     testAria2.innerText = '测试连接，成功显示版本号'
   }
+
   updateSetting (configData) {
     const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, appId, headers } = configData
     // reset dom

@@ -24,11 +24,26 @@ const pngquant = require('imagemin-pngquant')
 const plumber = require('gulp-plumber')
 
 const uglify = require('gulp-uglify')
-const jsTargets = ['./src/js/**/*.js']
-const jsEntries = ['./src/js/*.js']
-const cssTargets = ['./src/css/**/*.scss']
-const imageTargets = ['./src/img/**/*']
-const copyTarget = ['./_locales/**/*', 'background.js', 'manifest.json']
+
+const paths = {
+  scripts: {
+    src: 'src/js/**/*.js',
+    dest: 'dist/js/'
+  },
+  styles: {
+    src: 'src/css/**/*.scss',
+    dest: 'dist/css/'
+  },
+  images: {
+    src: 'src/img/**/*',
+    dest: 'dist/img/'
+  },
+  copys: {
+    src: ['_locales/**/*', 'background.js', 'manifest.json'],
+    dest: 'dist/'
+  }
+}
+
 const config = {
   plumberConfig: {
     errorHandler: function (err) {
@@ -43,14 +58,14 @@ const config = {
 }
 
 function lintJS () {
-  return gulp.src(jsTargets)
+  return gulp.src(paths.scripts.src)
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError())
 }
 
 function lintCSS () {
-  return gulp.src(cssTargets)
+  return gulp.src(paths.styles.src)
     .pipe(stylelint({
       reporters: [
         { formatter: 'string', console: true }
@@ -58,8 +73,8 @@ function lintCSS () {
     }))
 }
 
-function js () {
-  return gulp.src(jsEntries)
+function scripts () {
+  return gulp.src(paths.scripts.src)
     .pipe(plumber(config.plumberConfig))
     .pipe(eslint())
     .pipe(eslint.format())
@@ -79,11 +94,11 @@ function js () {
     }
     ))
     .pipe(gulpIf(config.env.prod, uglify()))
-    .pipe(gulp.dest('dist/js/'), { sourcemaps: config.env.dev })
+    .pipe(gulp.dest(paths.scripts.dest), { sourcemaps: config.env.dev })
 }
 
-function css () {
-  return gulp.src(cssTargets)
+function styles () {
+  return gulp.src(paths.styles.src)
     .pipe(plumber(config.plumberConfig))
     .pipe(stylelint({
       reporters: [
@@ -100,11 +115,11 @@ function css () {
     ]))
     .pipe(concat('style.css'))
     .pipe(gulpIf(config.env.prod, cleanCSS()))
-    .pipe(gulp.dest('dist/css/'), { sourcemaps: config.env.dev })
+    .pipe(gulp.dest(paths.styles.dest), { sourcemaps: config.env.dev })
 }
 
-function img () {
-  return gulp.src(imageTargets)
+function images () {
+  return gulp.src(paths.images.src)
     .pipe(plumber(config.plumberConfig))
     .pipe(imagemin([
       pngquant(),
@@ -112,27 +127,25 @@ function img () {
       imagemin.svgo()], {
       verbose: true
     }))
-    .pipe(gulp.dest('dist/img/'))
+    .pipe(gulp.dest(paths.images.dest))
 }
 
-function copy () {
-  return gulp.src(copyTarget, { base: '.' })
-    .pipe(gulp.dest('dist/'))
+function copys () {
+  return gulp.src(paths.copys.src, { base: '.' })
+    .pipe(gulp.dest(paths.copys.dest))
 }
 
 function clean () {
-  return del([
-    'dist/**/*'
-  ])
+  return del([ 'dist' ])
 }
 
 function watch () {
-  gulp.watch(copyTarget, copy)
-  gulp.watch(jsTargets, js)
-  gulp.watch(cssTargets, css)
+  gulp.watch(paths.copys.src, copys)
+  gulp.watch(paths.scripts.src, scripts)
+  gulp.watch(paths.styles.src, styles)
 }
 
-const build = gulp.parallel(js, css, img, copy)
+const build = gulp.parallel(scripts, styles, images, copys)
 const serve = gulp.series(clean, build, watch)
 const publish = gulp.series(clean, build)
 

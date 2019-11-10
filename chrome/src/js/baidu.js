@@ -3,6 +3,7 @@ class Baidu {
     this.context = window.require('system-core:context/context.js').instanceForSystem
     this.context.log.send = function () {}
   }
+
   // 封装的百度的Toast提示消息
   // Type类型有
   // caution       警告  failure       失败  loading      加载 success      成功
@@ -12,6 +13,7 @@ class Baidu {
       msg: message
     })
   }
+
   startListen () {
     window.addEventListener('message', (event) => {
       if (event.data.type && event.data.type === 'getSelected') {

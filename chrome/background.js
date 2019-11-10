@@ -2,7 +2,7 @@ if (typeof browser !== 'undefined') {
   chrome = browser
 }
 
-const httpSend = ({url, options}, resolve, reject) => {
+const httpSend = ({ url, options }, resolve, reject) => {
   fetch(url, options).then((response) => {
     if (response.ok) {
       response.json().then((data) => {
