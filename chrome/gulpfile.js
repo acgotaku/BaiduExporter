@@ -28,6 +28,7 @@ const uglify = require('gulp-uglify')
 const paths = {
   scripts: {
     src: 'src/js/**/*.js',
+    entry: 'src/js/*.js',
     dest: 'dist/js/'
   },
   styles: {
@@ -74,7 +75,7 @@ function lintCSS () {
 }
 
 function scripts () {
-  return gulp.src(paths.scripts.src)
+  return gulp.src(paths.scripts.entry)
     .pipe(plumber(config.plumberConfig))
     .pipe(eslint())
     .pipe(eslint.format())
