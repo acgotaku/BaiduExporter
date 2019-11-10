@@ -182,6 +182,14 @@ class UI {
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
               <div class="setting-menu-name">
+                <label class="setting-menu-label">AppId</label>
+              </div>
+              <div class="setting-menu-value">
+                <input class="setting-menu-input app_id-s" spellcheck="false">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
+              <div class="setting-menu-name">
                 <label class="setting-menu-label">Headers</label>
               </div>
               <div class="setting-menu-value">
@@ -253,7 +261,7 @@ class UI {
     testAria2.innerText = '测试连接，成功显示版本号'
   }
   updateSetting (configData) {
-    const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, headers } = configData
+    const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, appId, headers } = configData
     // reset dom
     Array.from(document.querySelectorAll('.rpc-s')).forEach((rpc, index) => {
       if (index !== 0) {
@@ -285,6 +293,7 @@ class UI {
     document.querySelector('.downloadPath-s').value = downloadPath
     document.querySelector('.userAgent-s').value = userAgent
     document.querySelector('.referer-s').value = referer
+    document.querySelector('.app_id-s').value = appId
     document.querySelector('.headers-s').value = headers
   }
 
@@ -304,6 +313,7 @@ class UI {
     const downloadPath = document.querySelector('.downloadPath-s').value
     const userAgent = document.querySelector('.userAgent-s').value
     const referer = document.querySelector('.referer-s').value
+    const appId = document.querySelector('.app_id-s').value
     const headers = document.querySelector('.headers-s').value
 
     const configData = {
@@ -315,6 +325,7 @@ class UI {
       downloadPath,
       userAgent,
       referer,
+      appId,
       headers
     }
     Store.trigger('setConfigData', configData)

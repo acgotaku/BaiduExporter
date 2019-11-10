@@ -6,6 +6,7 @@ class Store extends EventEmitter {
     this.defaultRPC = [{ name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc' }]
     this.defaultUserAgent = 'netdisk;6.0.0.12;PC;PC-Windows;10.0.16299;WindowsBaiduYunGuanJia'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
+    this.defaultAppId = 250528
     this.defaultConfigData = {
       rpcList: this.defaultRPC,
       configSync: false,
@@ -15,6 +16,7 @@ class Store extends EventEmitter {
       downloadPath: '',
       userAgent: this.defaultUserAgent,
       referer: this.defaultReferer,
+      appId: this.defaultAppId,
       headers: ''
     }
     this.configData = {}
