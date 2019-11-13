@@ -13,7 +13,7 @@ jobs:
       - restore_cache:
           keys:
             - node-chache-{{ .Branch }}-{{ checksum "chrome/yarn.lock" }}-{{ checksum "chrome/package.json" }}
-      - run: npm --prefix chrome/ install
+      - run: yarn --cwd chrome/ install
       - save_cache:
           key: node-chache-{{ .Branch }}-{{ checksum "chrome/yarn.lock" }}-{{ checksum "chrome/package.json" }}
           paths:
