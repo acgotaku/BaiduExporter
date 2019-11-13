@@ -137,7 +137,7 @@ function copys () {
 }
 
 function clean () {
-  return del([ 'dist' ])
+  return del(['dist'])
 }
 
 function watch () {

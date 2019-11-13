@@ -57,7 +57,6 @@
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "run-sequence": "^2.2.1",
     "stylefmt": "^6.0.3",
     "stylelint": "^11.1.1",
     "stylelint-config-sass-guidelines": "^6.1.0",
