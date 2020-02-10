@@ -50,7 +50,7 @@
     "gulp-postcss": "^8.0.0",
     "gulp-rollup-each": "^3.0.1",
     "gulp-sass": "^4.0.2",
-    "gulp-stylelint": "^11.0.0",
+    "gulp-stylelint": "^13.0.0",
     "gulp-uglify": "^3.0.2",
     "imagemin-mozjpeg": "^8.0.0",
     "imagemin-pngquant": "^8.0.0",
@@ -58,8 +58,8 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "stylefmt": "^6.0.3",
-    "stylelint": "^12.0.0",
-    "stylelint-config-sass-guidelines": "^6.1.0",
+    "stylelint": "^13.1.0",
+    "stylelint-config-sass-guidelines": "^7.0.0",
     "stylelint-order": "^4.0.0",
     "stylelint-scss": "^3.12.1"
   }
