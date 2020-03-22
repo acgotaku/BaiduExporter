@@ -1,9 +1,9 @@
 const gulp = require('gulp')
 
 const rollupEach = require('gulp-rollup-each')
-const rollupBabel = require('rollup-plugin-babel')
-const rollupResolve = require('rollup-plugin-node-resolve')
-const rollupCommon = require('rollup-plugin-commonjs')
+const rollupCommon = require('@rollup/plugin-commonjs')
+const rollupResolve = require('@rollup/plugin-node-resolve')
+const rollupBuble = require('@rollup/plugin-buble')
 
 const del = require('del')
 const gulpIf = require('gulp-if')
@@ -23,7 +23,9 @@ const pngquant = require('imagemin-pngquant')
 
 const plumber = require('gulp-plumber')
 
-const uglify = require('gulp-uglify')
+const terser = require('gulp-terser')
+
+const sourcemaps = require('gulp-sourcemaps')
 
 const paths = {
   scripts: {
@@ -79,23 +81,25 @@ function scripts () {
     .pipe(plumber(config.plumberConfig))
     .pipe(eslint())
     .pipe(eslint.format())
+    .pipe(gulpIf(config.env.dev, sourcemaps.init()))
     .pipe(rollupEach({
       isCache: true,
       plugins: [
-        rollupBabel({
-          presets: ['@babel/preset-env']
-        }),
+        rollupCommon(),
         rollupResolve({
           browser: true
         }),
-        rollupCommon()
+        rollupBuble({
+          transforms: { forOf: false, asyncAwait: false }
+        })
       ] },
     {
       format: 'iife'
     }
     ))
-    .pipe(gulpIf(config.env.prod, uglify()))
-    .pipe(gulp.dest(paths.scripts.dest), { sourcemaps: config.env.dev })
+    .pipe(gulpIf(config.env.prod, terser()))
+    .pipe(gulpIf(config.env.dev, sourcemaps.write()))
+    .pipe(gulp.dest(paths.scripts.dest))
 }
 
 function styles () {
