@@ -2,7 +2,7 @@ const gulp = require('gulp')
 
 const rollupEach = require('gulp-rollup-each')
 const rollupCommon = require('@rollup/plugin-commonjs')
-const rollupResolve = require('@rollup/plugin-node-resolve')
+const rollupResolve = require('@rollup/plugin-node-resolve').default
 const rollupBuble = require('@rollup/plugin-buble')
 
 const del = require('del')
