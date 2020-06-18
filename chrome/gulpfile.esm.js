@@ -1,31 +1,33 @@
-const gulp = require('gulp')
 
-const rollupEach = require('gulp-rollup-each')
-const rollupCommon = require('@rollup/plugin-commonjs')
-const rollupResolve = require('@rollup/plugin-node-resolve').default
-const rollupBuble = require('@rollup/plugin-buble')
+import gulp from 'gulp'
 
-const del = require('del')
-const gulpIf = require('gulp-if')
+import rollupEach from 'gulp-rollup-each'
+import rollupCommon from '@rollup/plugin-commonjs'
+import rollupResolve from '@rollup/plugin-node-resolve'
+import rollupBuble from '@rollup/plugin-buble'
 
-const eslint = require('gulp-eslint')
-const stylelint = require('gulp-stylelint')
+import del from 'del'
+import gulpIf from 'gulp-if'
 
-const postcss = require('gulp-postcss')
-const sass = require('gulp-sass')
-const autoprefixer = require('autoprefixer')
-const concat = require('gulp-concat')
-const cleanCSS = require('gulp-clean-css')
+import eslint from 'gulp-eslint'
+import stylelint from 'gulp-stylelint'
 
-const imagemin = require('gulp-imagemin')
-const mozjpeg = require('imagemin-mozjpeg')
-const pngquant = require('imagemin-pngquant')
+import postcss from 'gulp-postcss'
+import sass from 'gulp-sass'
+import autoprefixer from 'autoprefixer'
+import concat from 'gulp-concat'
+import cleanCSS from 'gulp-clean-css'
 
-const plumber = require('gulp-plumber')
+import imagemin from 'gulp-imagemin'
+import mozjpeg from 'imagemin-mozjpeg'
+import pngquant from 'imagemin-pngquant'
 
-const terser = require('gulp-terser')
+import plumber from 'gulp-plumber'
 
-const sourcemaps = require('gulp-sourcemaps')
+import terser from 'gulp-terser'
+
+import sourcemaps from 'gulp-sourcemaps'
+
 
 const paths = {
   scripts: {
