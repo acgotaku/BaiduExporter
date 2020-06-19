@@ -59,14 +59,14 @@ const config = {
   }
 }
 
-function lintJS() {
+function lintJS () {
   return gulp.src(paths.scripts.src)
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError())
 }
 
-function lintCSS() {
+function lintCSS () {
   return gulp.src(paths.styles.src)
     .pipe(stylelint({
       reporters: [
@@ -75,7 +75,7 @@ function lintCSS() {
     }))
 }
 
-function scripts() {
+function scripts () {
   return gulp.src(paths.scripts.entry, { sourcemaps: config.env.dev })
     .pipe(plumber(config.plumberConfig))
     .pipe(eslint())
@@ -92,15 +92,15 @@ function scripts() {
         })
       ]
     },
-      {
-        format: 'iife'
-      }
+    {
+      format: 'iife'
+    }
     ))
     .pipe(gulpIf(config.env.prod, terser()))
     .pipe(gulp.dest(paths.scripts.dest, { sourcemaps: config.env.dev }))
 }
 
-function styles() {
+function styles () {
   return gulp.src(paths.styles.src)
     .pipe(plumber(config.plumberConfig))
     .pipe(stylelint({
@@ -121,7 +121,7 @@ function styles() {
     .pipe(gulp.dest(paths.styles.dest), { sourcemaps: config.env.dev })
 }
 
-function images() {
+function images () {
   return gulp.src(paths.images.src)
     .pipe(plumber(config.plumberConfig))
     .pipe(imagemin([
@@ -133,16 +133,16 @@ function images() {
     .pipe(gulp.dest(paths.images.dest))
 }
 
-function copys() {
+function copys () {
   return gulp.src(paths.copys.src, { base: '.' })
     .pipe(gulp.dest(paths.copys.dest))
 }
 
-function clean() {
+function clean () {
   return del(['dist'])
 }
 
-function watch() {
+function watch () {
   gulp.watch(paths.copys.src, copys)
   gulp.watch(paths.scripts.src, scripts)
   gulp.watch(paths.styles.src, styles)
