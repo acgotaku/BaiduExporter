@@ -57,7 +57,7 @@
     "gulp-terser": "^1.2.0",
     "gulp-uglify": "^3.0.2",
     "imagemin-mozjpeg": "^9.0.0",
-    "imagemin-pngquant": "^8.0.0",
+    "imagemin-pngquant": "^9.0.0",
     "rollup": "^2.1.0",
     "stylefmt": "^6.0.3",
     "stylelint": "^13.2.1",
