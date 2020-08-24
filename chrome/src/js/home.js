@@ -1,6 +1,13 @@
 import Core from './lib/core'
 import UI from './lib/ui'
 import Downloader from './lib/downloader'
+import sha1 from 'crypto-js/sha1'
+import md5 from 'crypto-js/md5'
+
+const options = {
+  credentials: 'include',
+  method: 'GET'
+}
 
 class Home extends Downloader {
   constructor () {
@@ -21,7 +28,13 @@ class Home extends Downloader {
     super(listParameter)
     UI.init()
     UI.addMenu(document.querySelectorAll('.g-dropdown-button')[3], 'afterend')
-    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'pcsett' }])
+    Core.requestCookies([{ url: 'https://pan.baidu.com/', name: 'BDUSS' }, { url: 'https://pcs.baidu.com/', name: 'STOKEN' }])
+    Core.sendToBackground('fetch', {
+      url: `${location.protocol}//tieba.baidu.com`,
+      options
+    }, (data) => {
+      this.uid = data.match(/(?<=uid=)\d+/)[0]
+    })
     Core.showToast('初始化成功!', 'success')
     this.mode = 'RPC'
     this.rpcURL = 'http://localhost:6800/jsonrpc'
@@ -94,17 +107,58 @@ class Home extends Downloader {
     }
   }
 
-  getFiles (files) {
+  async getFiles (files) {
     const prefix = this.getPrefixLength()
     const appId = Core.getConfigData('appId')
-    for (const key in files) {
-      this.fileDownloadInfo.push({
-        name: files[key].path.substr(prefix),
-        link: `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=${appId}&path=${encodeURIComponent(files[key].path)}`,
-        md5: files[key].md5
-      })
+    const svip = Core.getConfigData('svip')
+    const BDUSS = Core.cookies.BDUSS
+    const time = Number.parseInt(Date.now() / 1000, 10)
+
+    if (BDUSS && this.uid) {
+      const devuid = this.getDevUID()
+      const rand = this.sign(time, devuid, this.uid, BDUSS)
+      for (const key in files) {
+        let links = ''
+        if (svip) {
+          const prelink = `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=locatedownload&ver=2&time=${time}&rand=${rand}&devuid=${devuid}&app_id=${appId}&path=${encodeURIComponent(files[key].path)}`
+          links = await this.getFileLink(prelink)
+        } else {
+          links = `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=${appId}&path=${encodeURIComponent(files[key].path)}`
+        }
+        this.fileDownloadInfo.push({
+          name: files[key].path.substr(prefix),
+          link: links,
+          md5: files[key].md5
+        })
+      }
+    } else {
+      Core.showToast('还没获取到cookies哦，请稍等', 'failure')
     }
     return Promise.resolve()
+  }
+
+  getFileLink (prelink) {
+    return new Promise((resolve, reject) => {
+      Core.sendToBackground('fetch', {
+        url: prelink,
+        options
+      }, (data) => {
+        const urls = data.urls.map(item => {
+          return item.url
+        })
+        resolve(urls)
+      })
+    })
+  }
+
+  sign (time, devuid, uid, bduss) {
+    const bdussSha1 = sha1(bduss)
+    const rand = bdussSha1 + uid + 'ebrcUYiuxaZv2XGu7KIYKxUrqfnOfpDF' + time + devuid
+    return sha1(rand).toString()
+  }
+
+  getDevUID (bduss) {
+    return '0|' + md5(bduss).toString()
   }
 }
 

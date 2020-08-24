@@ -82,18 +82,22 @@ function scripts () {
     .pipe(eslint.format())
     .pipe(rollupEach({
       isCache: true,
+      external: ['crypto'],
       plugins: [
-        rollupCommon(),
         rollupResolve({
           browser: true
         }),
+        rollupCommon(),
         rollupBuble({
           transforms: { forOf: false, asyncAwait: false }
         })
       ]
     },
     {
-      format: 'iife'
+      format: 'iife',
+      globals: {
+        crypto: 'crypto'
+      }
     }
     ))
     .pipe(gulpIf(config.env.prod, terser()))

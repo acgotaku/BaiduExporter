@@ -162,12 +162,18 @@ class Core {
   aria2RPCMode (rpcPath, fileDownloadInfo) {
     const { authStr, path, options } = this.parseURL(rpcPath)
     fileDownloadInfo.forEach((file) => {
+      let link = []
+      if (Array.isArray(file.link)) {
+        link = file.link
+      } else {
+        link = [file.link]
+      }
       const rpcData = {
         jsonrpc: '2.0',
         method: 'aria2.addUri',
         id: new Date().getTime(),
         params: [
-          [file.link], {
+          link, {
             out: file.name,
             header: this.getHeader()
           }
@@ -204,8 +210,14 @@ class Core {
     const downloadLinkTxt = []
     const prefixTxt = 'data:text/plain;charset=utf-8,'
     fileDownloadInfo.forEach((file) => {
-      let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${JSON.stringify(file.name)} ${this.getHeader('aria2Cmd')} ${JSON.stringify(file.link)}`
-      let aria2Line = [file.link, this.getHeader('aria2c'), ` out=${file.name}`].join('\n')
+      let linkStr = ''
+      if (Array.isArray(file.link)) {
+        linkStr = file.link.join(' ')
+      } else {
+        linkStr = file.link
+      }
+      let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${JSON.stringify(file.name)} ${this.getHeader('aria2Cmd')} ${JSON.stringify(linkStr)}`
+      let aria2Line = [linkStr, this.getHeader('aria2c'), ` out=${file.name}`].join('\n')
       const md5Check = this.getConfigData('md5Check')
       if (md5Check) {
         aria2CmdLine += ` --checksum=md5=${file.md5}`
@@ -213,9 +225,9 @@ class Core {
       }
       aria2CmdTxt.push(aria2CmdLine)
       aria2Txt.push(aria2Line)
-      const idmLine = ['<', file.link, this.getHeader('idm'), '>'].join('\r\n')
+      const idmLine = ['<', linkStr, this.getHeader('idm'), '>'].join('\r\n')
       idmTxt.push(idmLine)
-      downloadLinkTxt.push(file.link)
+      downloadLinkTxt.push(linkStr)
     })
     document.querySelector('#aria2CmdTxt').value = `${aria2CmdTxt.join('\n')}`
     document.querySelector('#aria2Txt').href = `${prefixTxt}${encodeURIComponent(aria2Txt.join('\n'))}`

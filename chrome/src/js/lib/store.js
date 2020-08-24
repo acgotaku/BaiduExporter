@@ -4,13 +4,14 @@ class Store extends EventEmitter {
   constructor () {
     super()
     this.defaultRPC = [{ name: 'ARIA2 RPC', url: 'http://localhost:6800/jsonrpc' }]
-    this.defaultUserAgent = 'netdisk;6.0.0.12;PC;PC-Windows;10.0.16299;WindowsBaiduYunGuanJia'
+    this.defaultUserAgent = 'netdisk;2.2.51.6;netdisk;10.0.63;PC;android-android'
     this.defaultReferer = 'https://pan.baidu.com/disk/home'
     this.defaultAppId = 250528
     this.defaultConfigData = {
       rpcList: this.defaultRPC,
       configSync: false,
       md5Check: false,
+      svip: false,
       fold: 0,
       interval: 300,
       downloadPath: '',
