@@ -1,7 +1,7 @@
 {
   "background": {
     "scripts": [ "background.js" ],
-    "persistent": false
+    "persistent": true
   },
   "content_scripts": [
     {
@@ -21,7 +21,7 @@
   },
   "web_accessible_resources": [ "js/baidu.js" ],
   "manifest_version": 2,
-  "permissions": [ "cookies", "notifications", "*://pan.baidu.com/", "*://yun.baidu.com/", "*://pcs.baidu.com/", "activeTab", "contextMenus", "storage" ],
+  "permissions": [ "cookies", "notifications", "*://pan.baidu.com/", "*://yun.baidu.com/", "*://pcs.baidu.com/", "*://tieba.baidu.com/", "activeTab", "contextMenus", "storage", "webRequest", "webRequestBlocking" ],
   "name": "__MSG_appName__",
   "update_url": "https://raw.githubusercontent.com/acgotaku/BaiduExporter/master/chrome/updates.xml",
   "author": "acgotaku",

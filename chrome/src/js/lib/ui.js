@@ -145,6 +145,14 @@ class UI {
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
+              <div class="setting-menu-name">
+                <label class="setting-menu-label">我是SVIP</label>
+              </div>
+              <div class="setting-menu-value">
+                <input type="checkbox" class="setting-menu-checkbox svip-s">
+              </div>
+            </div><!-- /.setting-menu-row -->
+            <div class="setting-menu-row">
                <div class="setting-menu-name">
                  <label class="setting-menu-label">文件夹层数</label>
                </div>
@@ -270,7 +278,7 @@ class UI {
   }
 
   updateSetting (configData) {
-    const { rpcList, configSync, md5Check, fold, interval, downloadPath, userAgent, referer, appId, headers } = configData
+    const { rpcList, configSync, md5Check, svip, fold, interval, downloadPath, userAgent, referer, appId, headers } = configData
     // reset dom
     Array.from(document.querySelectorAll('.rpc-s')).forEach((rpc, index) => {
       if (index !== 0) {
@@ -297,6 +305,7 @@ class UI {
     })
     document.querySelector('.configSync-s').checked = configSync
     document.querySelector('.md5Check-s').checked = md5Check
+    document.querySelector('.svip-s').checked = svip
     document.querySelector('.fold-s').value = fold
     document.querySelector('.interval-s').value = interval
     document.querySelector('.downloadPath-s').value = downloadPath
@@ -317,6 +326,7 @@ class UI {
     }).filter(el => el)
     const configSync = document.querySelector('.configSync-s').checked
     const md5Check = document.querySelector('.md5Check-s').checked
+    const svip = document.querySelector('.svip-s').checked
     const fold = Number.parseInt(document.querySelector('.fold-s').value)
     const interval = document.querySelector('.interval-s').value
     const downloadPath = document.querySelector('.downloadPath-s').value
@@ -329,6 +339,7 @@ class UI {
       rpcList,
       configSync,
       md5Check,
+      svip,
       fold,
       interval,
       downloadPath,
