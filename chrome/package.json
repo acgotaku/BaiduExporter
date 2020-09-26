@@ -35,7 +35,7 @@
     "@rollup/plugin-commonjs": "^15.0.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "autoprefixer": "^9.7.1",
-    "del": "^5.1.0",
+    "del": "^6.0.0",
     "eslint": "^7.3.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.18.2",
