@@ -20,8 +20,7 @@ const httpSend = ({ url, options }, resolve, reject) => {
         try {
           const json = JSON.parse(data)
           resolve(json)
-        }
-        catch {
+        } catch {
           resolve(data)
         }
       })
@@ -47,7 +46,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       })
       return true
     case 'configData':
-      for (let key in request.data) {
+      for (const key in request.data) {
         localStorage.setItem(key, request.data[key])
       }
       break
@@ -84,8 +83,8 @@ const getCookies = (details) => {
   return new Promise(function (resolve) {
     const list = details.map(item => getCookie(item))
     Promise.all(list).then(function (cookies) {
-      let obj = {}
-      for (let item of cookies) {
+      const obj = {}
+      for (const item of cookies) {
         if (item !== null) {
           obj[item.name] = item.value
         }
