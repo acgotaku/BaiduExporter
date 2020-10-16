@@ -114,22 +114,28 @@ class Home extends Downloader {
     const BDUSS = Core.cookies.BDUSS
     const time = Number.parseInt(Date.now() / 1000, 10)
 
-    if (BDUSS && this.uid) {
-      const devuid = this.getDevUID()
-      const rand = this.sign(time, devuid, this.uid, BDUSS)
-      for (const key in files) {
-        let links = ''
-        if (svip) {
+    if (BDUSS) {
+      if (svip && this.uid) {
+        const devuid = this.getDevUID()
+        const rand = this.sign(time, devuid, this.uid, BDUSS)
+        for (const key in files) {
           const prelink = `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=locatedownload&ver=2&time=${time}&rand=${rand}&devuid=${devuid}&app_id=${appId}&path=${encodeURIComponent(files[key].path)}`
-          links = await this.getFileLink(prelink)
-        } else {
-          links = `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=${appId}&path=${encodeURIComponent(files[key].path)}`
+          const links = await this.getFileLink(prelink)
+          this.fileDownloadInfo.push({
+            name: files[key].path.substr(prefix),
+            link: links,
+            md5: files[key].md5
+          })
         }
-        this.fileDownloadInfo.push({
-          name: files[key].path.substr(prefix),
-          link: links,
-          md5: files[key].md5
-        })
+      } else {
+        for (const key in files) {
+          const links = `${location.protocol}//pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id=${appId}&path=${encodeURIComponent(files[key].path)}`
+          this.fileDownloadInfo.push({
+            name: files[key].path.substr(prefix),
+            link: links,
+            md5: files[key].md5
+          })
+        }
       }
     } else {
       Core.showToast('还没获取到cookies哦，请稍等', 'failure')
