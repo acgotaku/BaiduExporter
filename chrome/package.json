@@ -33,7 +33,7 @@
   "devDependencies": {
     "@rollup/plugin-buble": "^0.21.0",
     "@rollup/plugin-commonjs": "^15.0.0",
-    "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-node-resolve": "^11.1.0",
     "autoprefixer": "^9.7.1",
     "del": "^6.0.0",
     "eslint": "^7.3.0",
